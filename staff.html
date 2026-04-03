@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>湯娘 | 嘿月湯宿 HEYOTSUKI YADO</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;400;700&amp;family=Noto+Sans+TC:wght@300;400&amp;family=Manrope:wght@200;400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary": "#5f5e58",
+                        "outline-variant": "#cfc4bd",
+                        "on-surface": "#1e1b17",
+                        "primary-fixed-dim": "#cdc5c0",
+                        "surface-container": "#f5ece5",
+                        "on-secondary-container": "#65645e",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#f8efe8",
+                        "on-background": "#1e1b17",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#fbf2eb",
+                        "on-secondary-fixed": "#1c1c17",
+                        "primary": "#181512",
+                        "inverse-surface": "#34302b",
+                        "on-surface-variant": "#4d4540",
+                        "surface-tint": "#635d5a",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed-variant": "#4b4642",
+                        "tertiary": "#350002",
+                        "surface": "#fff8f3",
+                        "inverse-primary": "#cdc5c0",
+                        "surface-variant": "#e9e1da",
+                        "surface-dim": "#e1d9d2",
+                        "on-secondary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#c9c6bf",
+                        "outline": "#7e756f",
+                        "secondary-fixed": "#e5e2da",
+                        "on-secondary-fixed-variant": "#474741",
+                        "on-primary-container": "#96908b",
+                        "on-tertiary-container": "#f1625c",
+                        "tertiary-container": "#5c0007",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed": "#e9e1dc",
+                        "tertiary-fixed": "#ffdad7",
+                        "tertiary-fixed-dim": "#ffb3ad",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed": "#410004",
+                        "surface-container-highest": "#e9e1da",
+                        "background": "#fff8f3",
+                        "secondary-container": "#e5e2da",
+                        "primary-container": "#2d2926",
+                        "on-primary-fixed": "#1e1b18",
+                        "on-tertiary-fixed-variant": "#8b181b",
+                        "surface-container-high": "#efe7e0",
+                        "surface-bright": "#fff8f3"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif TC", "serif"],
+                        "body": ["Noto Serif TC", "serif"],
+                        "label": ["Manrope", "Noto Sans TC", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+        }
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        /* Book Flip Custom Styles */
+        .book-card:hover .book-inner {
+            transform: rotateY(-180deg);
+        }
+        .washi-grain {
+            background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuBCzxeu9DqhJgbbyUL_2EI3PR4IXgI2SAsZlfiVwYHpuufZG-d0U7Co3uHD4jgB8d0We9W9jO5mDQoDMAPhdDYgKoG-fiFNZXvBctddOjjz9ueUGAv0QUkIpQueKG3IlUmHXlfMXGSahDftUGcIhZpwCt8-e-ByQDoIP5dODtOwsOoi-D01yvKzfS3c5_EyOI_cRAIl6b5NWeEL3buwsklz3WYZcPCDiHEgt8ynPlXwoC2Q95FDkto1HuhWYk5gN0A5Shul7NpvSEfO);
+            opacity: 0.05;
+        }
+        .yubaku-spacing {
+            letter-spacing: 0.15em;
+        }
+        .yubaku-wide {
+            letter-spacing: 0.3em;
+        }
+
+        /* Page Entrance Animation */
+        @keyframes revealUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-reveal {
+            animation: revealUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+
+        body {
+            opacity: 0;
+            animation: fadeInBody 0.8s ease-out forwards;
+        }
+        @keyframes fadeInBody {
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-tertiary-fixed-dim selection:text-tertiary">
+<!-- Top Navigation Bar -->
+<header class="fixed w-full z-50 bg-white/40 backdrop-blur-md top-0 border-b border-stone-200/30">
+<nav class="flex justify-between items-center w-full px-8 md:px-16 py-8 max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-4">
+<img alt="Logo" class="h-12 w-12 object-contain filter grayscale" src="https://lh3.googleusercontent.com/aida/ADBb0uj_9c4g0iXUhfDCy_a7A7dPmMNdmN8PaZXqQb5-KGiDCN6ic1T8HYlY1GXcyrD3AJsjZB21aAFjgKzO5nYXafQtubfzqVX2-EJbbsSIjYljMr6f-rNP0mvdFafO9Wpp6QC7HUFnaNlAuRMZxywRBvsdjYAcYqc69nQ1qyJzG2XqK7YLejB9C_nv5z_3egr3ulcv8UJck0xzE0DIMQ3AUdLe8QjXJOHn-BUifmiMGqwsf5k6PWFf12lcLLRnVd3_dnZ4owFUxngl5GE"/>
+<div class="flex flex-col">
+<span class="font-headline font-bold tracking-[0.4em] text-primary text-xl">嘿月湯宿</span>
+<span class="font-label text-[9px] tracking-[0.5em] uppercase text-[#2D2926]">HEYOTSUKI YADO</span>
+</div>
+</div>
+<div class="hidden md:flex items-center gap-10 font-headline tracking-[0.3em] text-xs uppercase">
+<a class="text-stone-800 hover:text-primary hover:bg-stone-800/5 px-4 py-2 transition-all duration-300 rounded-sm" href="index.html">首頁</a>
+<a class="text-stone-800 hover:text-primary hover:bg-stone-800/5 px-4 py-2 transition-all duration-300 rounded-sm" href="rules.html">入場規範</a>
+<a class="text-primary border-b-2 border-red-800 px-2 py-1" href="staff.html">湯娘</a>
+<a class="text-stone-800 hover:text-primary hover:bg-stone-800/5 px-4 py-2 transition-all duration-300 rounded-sm" href="menu.html">菜單</a>
+</div>
+<!-- Space holder for alignment -->
+<div class="w-10 h-10 hidden md:block"></div>
+</nav>
+</header>
+<main class="relative pt-48 pb-32 overflow-hidden">
+<div class="absolute inset-0 washi-grain pointer-events-none"></div>
+<!-- Hero Header -->
+<div class="mb-24 flex flex-col items-center text-center px-6 animate-reveal">
+<div class="flex items-center gap-4 mb-6">
+<div class="w-10 h-[1px] bg-red-800"></div>
+<span class="font-label text-red-800 uppercase tracking-[0.5em] text-[10px]">嘿月湯娘 儀式守護</span>
+<div class="w-10 h-[1px] bg-red-800"></div>
+</div>
+<h2 class="font-headline text-5xl md:text-7xl font-bold mb-8 tracking-[0.3em] text-primary">湯娘</h2>
+<p class="max-w-2xl text-lg text-stone-500 leading-loose yubaku-spacing">
+                溫柔體貼的湯娘。微笑接待的月娘。演奏樂器的琴娘。<br/>每一位湯娘都將畢生的溫柔與體體，帶入您的月下湯泉之旅。
+            </p>
+<div class="mt-12 w-[1px] h-20 bg-primary/20"></div>
+</div>
+<!-- Staff Grid -->
+<div class="max-w-screen-2xl mx-auto px-8 md:px-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12 lg:gap-16">
+<!-- Member 1 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-1">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center transition-all duration-1000" style='background-image: url("https://lh3.googleusercontent.com/aida/ADBb0uhk3q_wtf-IAzJox72M_bNaeN5ueYBDS5lz9n-3wasdtLanO3efTB5LzEbr1gPmHowZg-Cdn4KKd6Pl9fgAoxQD_jQscCNfKwyNygMI03gWImr569JiabALWHJx7VmKWb2VaaL4rknY59s-HmDELoWAn8mW8dX4j_M2JDGIdzQNKLYxwfkYXOIxECQtY9falZ1nmuksVSigTZpJ29WMWzkCszQZiPnjRV2qfZf5tIW7yNs4w3oGlVgUAdpIHTuAV-gtgPPABoM1YU4");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">古嘿嘿</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">毒舌系 / SS </p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 flex flex-col justify-between text-stone-200 border-r-8 border-red-900">
+<div class="relative z-10 space-y-8">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed tracking-wider italic">「嘿月湯宿闆娘，惡毒系。平常是喜歡到處拍照的新手攝影師，只想追尋我夢寐以求的光影。」</p>
+</div>
+</div>
+<div class="mt-8 border-t border-stone-800 pt-6 text-[10px] tracking-[0.4em] text-stone-500 font-headline uppercase">老闆娘</div>
+</div>
+</div>
+</div>
+<!-- Member 2 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-2">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida/ADBb0uiKbTuSLECIqxk3tv8GtNKWbysm-DqnWfXLukrQ0E6a5YPMNjPKZUB5B1KQ1Wt_GvmvELM096hQjXrFwa0D97NTRl69aVVae6iypzt_b5FmGKCQw6j2PWG0i9bJT0k6ApG7cC4Us2zqxbm2G--y2gFZGWM5bkLUsSBr_7cdFnDgTUcZhvZydLDnZkdYjOO1QmBUSOYwnyXCk5jS0qNe0D-gboyePurKoz0FTy9IosM0NbrzF66wGwLr-x1pkfz4ZXkLFs2NuYUR43c");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">芝麻渣渣</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">我推的芝麻 / 人氣偶像</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 flex flex-col justify-between text-stone-200 border-r-8 border-red-900">
+<div class="relative z-10 space-y-8">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed tracking-wider italic">「生活充滿著各種情緒，好的壞的都歡迎與我分享，保持快樂心情迎接好事，煩惱化作渣渣隨風而散。」</p>
+</div>
+</div>
+<div class="mt-8 border-t border-stone-800 pt-6 text-[10px] tracking-[0.4em] text-stone-500 font-headline uppercase">湯娘</div>
+</div>
+</div>
+</div>
+<!-- Member 3 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-3">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida/ADBb0ugzI6evJUff___B1MaiFIv-B_dhBr4A-lMwJEwH38mcZ85Dg1rLC_QnJOIYDB0gC6GvzsYspqPaEBEC3Hw1QEPJPJo27vdFS070P86N8v-jUVmOIJdiNCDLD7laLi_6ho7a10OSYHf6CMtC3w6EcJoFllI4_3NJKZEPYbXqEh7Y71oHcqKsw5MnrmprfHyPaZ5Qp_3CiQRIvm2qZFs3pnOLS2FEJmHxQG4d5mmd8ErPqf-GrDUz2AZiFFzqMU7vD67WMcD1alSO-EA");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">澪月 小百合</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">可愛擔當 / 最活潑的那隻貓</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 flex flex-col justify-between text-stone-200 border-r-8 border-red-900">
+<div class="relative z-10 space-y-8">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed tracking-wider italic">「我是這裡的可愛擔當，澪月小百合 ! 你可以直接叫我小百合或者直接叫我 ''店裡那隻最活蹦亂跳的貓娘'' 也可以喔 ! 」</p>
+</div>
+</div>
+<div class="mt-8 border-t border-stone-800 pt-6 text-[10px] tracking-[0.4em] text-stone-500 font-headline uppercase">湯娘</div>
+</div>
+</div>
+</div>
+<!-- Member 4 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-4">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida/ADBb0ujmhcZo7XTltoEh3EZTVJ4kFXp7ybOVegwV7wmfv5l73lvZj8JQmRevIKPyqTZvlmI-jDpmVu94ezCEk5VAqrSy8VP0ewbUgzJA8tGFAftdGUKnXnjjrhaSrKyP-VziooADWvmru0jqMPb8wr3FrEIu9IR13MrgM46Itt3Syf2vJz-pC3-Ir3ZCoajfXJlZdX_sM61DhBmFefhwAhF4gJuQTwJjsl-gbJ3Fv9E86afIYHsvev-ytCFE7z7W0bpEcq3RbUQ5Ut48o1w");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">萊可</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">天真認真 / 極度樂觀</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 flex flex-col justify-between text-stone-200 border-r-8 border-red-900">
+<div class="relative z-10 space-y-8">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed tracking-wider italic">「時而天真，時而認真，用樂觀詼諧的文字為您帶來些許正能量。願在此為您洗滌身心的疲憊。」</p>
+</div>
+</div>
+<div class="mt-8 border-t border-stone-800 pt-6 text-[10px] tracking-[0.4em] text-stone-500 font-headline uppercase">湯娘</div>
+</div>
+</div>
+</div>
+<!-- Member 5 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-1">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida/ADBb0uhaCjaHj9mfhEPuaMZjuqW3QbYoCDp6Y1_Pkrdd57bZQvQnWlWR-SjRr9QvJI77ZFzHWkbZlMmuEiabHMcE_DiQgigDSrHnpqHkMCXFJE3YKSqNO8kkuiERqV1LfN182c5Lq1NWbqwXCeWyejEaY5p-pHSGQC759I0KszPSPMlLHDH2ZG83tT_KdtRiM5Tj8UnmpHIROIiIolIcKokOGsf1InlCCKRWenHj8TUByRM1TkU75EKfzYPC35Ob8mXSNmG0jKG_K7yHP2A");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">阿祐</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">高端攝影 / 限定攝影師</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「小本經營，請勿那個。」</p>
+</div>
+<button class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6">限定攝影 未開放指名</button>
+</div>
+</div>
+</div>
+<!-- Member 6 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-2">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida/ADBb0ugckOIS7D2Omcu_6QhLoNIEKCYky8HLlfP02Z3NHphNH9NMWrE1OIdtpesnDMn1nedx2sR824O_XzEslMZWWOgqczaep0Ut0fjQXIXSh7NkkuYEEops2QqixH7YXsCV4NlmhPyG5FLX2Ei7U5-aDCsVXu7JYvJZK4IQ-WSNIe18txNY4un5NUmLGMD-D0ETAhX9RGPFZJcKEF1Pv1f3mJRekmDXMncm1LrUbD6pKwAndx6r2cnr1dJJetGHyWAec1_V9ULlZ2fUvjk");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">小優</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">優雅擔當 / 幻化穿搭</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「據說是優雅擔當的優子，喜歡研究幻化穿搭。享受寧靜的休息時光，我很樂意陪伴您一起度過。」</p>
+</div>
+<button class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6">未開放指名</button>
+</div>
+</div>
+</div>
+<!-- Member 7 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-3">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida/ADBb0uhk0PwQnOUxA4IXGQQ2fJhRwzj-o-4p6Ci7e5nbSd061zXz239-93hzt48url3OtzJ81aymmylGs87ztpfJipG59S0uBjtkmJ-zN7SXSQcShI0-MhIsGGVxhEyVbyvPfUqYRaJLSeaVLKN0YiMkQlG3DMf3xcdFP0AV2uGtTMcqhTdnftlwPmln9vgi7EVXaRYQC5VVhozQWc_npr_A1gTtnA9G79pHrIAJ9IoTAeW2i_lonuXp7S8jybk1X-nk3Rjx8MT4CXoHegk");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">桃桃亞</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">可愛就是正義</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div class="relative z-10 space-y-8">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed tracking-wider italic">「有點小任性，又超愛灑嬌，泡湯的時候桃桃是全心全力地幫客人服務的 ! 敬請享受桃桃的陪伴吧。」</p>
+</div>
+</div>
+<div class="mt-8 border-t border-stone-800 pt-6 text-[10px] tracking-[0.4em] text-stone-500 font-headline uppercase">湯娘</div>
+</div>
+</div>
+</div>
+<!-- Member 8 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-4">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida/ADBb0uiZQGyELUke-6pIUiNJ_H7tnyJUIfZQJbXimOkdjzQkx6leBt00mCcQgcbFIs9bDLJJy0LDFwOdPCKr-YYhF438dHmsek0dK5tPm8gGZwpsgGnHZp2ceeGde_ZFa64E4h1waCGd-DiImBM_fMxH7kYkEF5yXH3D_XQ8NI6wrUZ8hfL0NltfYtTwNZil0gupJEXkp7HGl-KEFcjv5_9bjNZAjjCKDOah4aQ4kMcp5sB5_dfvDq2mYEhskQ3UevWcYNZd-8FOrq9nVAA");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">阿BO</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">未定 / 未定</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「未補完。」</p>
+</div>
+<button class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6">未開放指名</button>
+</div>
+</div>
+</div>
+<!-- Member 9 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-1">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida/ADBb0ui6qejXnoNjXLKKAZsevtwzkxQdXsQcyaIJhUN5gcIEJk4pA4L0ZnV-KWOZocf8WEUtAawFyDnLz9uy9ng_0WGU6R_KkP40mut6gTf-bFcb3nyE-n752C6c52uWMVKCm-NwPv9n_yg2cz8I2LBugb_2svWciDOBWQye9m4vLKp3dlOejHFSBDpOz8oSE5cNHySXyh5Ozgt84hi_-b1XNgVlL1n_JF9mb4wL8EAuZhZf2FX6ZUv3km7BK7R8AiwFytrXIT_y_RvzFfo");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">烏蘭</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">未定 / 未定</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「未補完。」</p>
+</div>
+<button class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6">不接受指名</button>
+</div>
+</div>
+</div>
+<!-- Member 10 (Placeholders to reach 11) -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-2">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-stone-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-stone-300 text-6xl">person_search</span>
+</div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">準備中</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">新進湯娘 / 儀式修業中</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「正在努力精進服務，期待不久後能與您見面。」</p>
+</div>
+<button class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6">招募中</button>
+</div>
+</div>
+</div>
+<!-- Member 11 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-3">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-stone-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-stone-300 text-6xl">person_search</span>
+</div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">準備中</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">新進湯娘 / 儀式修業中</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「正在努力精進服務，期待不久後能與您見面。」</p>
+</div>
+<button class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6">招募中</button>
+</div>
+</div>
+</div>
+</div>
+<!-- CTA Section -->
+<div class="mt-32 max-w-screen-xl mx-auto p-16 bg-[#1e1b17] relative overflow-hidden flex flex-col items-center text-center animate-reveal stagger-4">
+<div class="absolute inset-0 washi-grain opacity-20 pointer-events-none"></div>
+<div class="relative z-10">
+<h3 class="font-headline text-3xl font-bold mb-6 text-white tracking-[0.3em]">您也是嘿月的追求者嗎？</h3>
+<p class="text-stone-400 mb-10 max-w-lg mx-auto font-body leading-loose tracking-wider">月色之下，我們正在尋找願意一起陪伴客人一起完成溫柔接待的人。</p>
+<a class="px-14 py-5 bg-red-900 text-white font-label text-[10px] tracking-[0.5em] hover:bg-red-800 transition-all duration-500 uppercase border border-red-900 inline-block" href="https://discord.gg/pDKa9kgn6" target="_blank">洽詢加入</a>
+</div>
+</div>
+</main>
+<!-- Footer Section -->
+<footer class="bg-white border-t border-stone-100 relative">
+<div class="grid grid-cols-1 md:grid-cols-3 items-start gap-20 px-8 md:px-16 py-32 max-w-screen-2xl mx-auto">
+<!-- Brand -->
+<div class="flex flex-col gap-6">
+<span class="text-xl font-headline font-bold tracking-[0.4em] text-primary">嘿月湯宿</span>
+<p class="font-body text-[13px] leading-loose tracking-[0.2em] text-stone-500">
+                    利維坦 白銀鄉 15區7號<br/>
+                    一個遠離塵囂的都市綠洲
+                </p>
+</div>
+<!-- Links -->
+<div class="flex flex-col gap-8">
+<span class="font-label text-[10px] tracking-[0.5em] text-stone-300 uppercase">Contact</span>
+<div class="flex flex-col gap-4 font-headline text-sm tracking-[0.2em]">
+<a class="text-red-800 hover:tracking-[0.4em] transition-all duration-700" href="https://docs.google.com/forms/d/1tPjUMj8SYrpL-SLS9J1HDXt9ULUopc909JMGAoh328A/edit?hl=zh-tw" target="_blank">預約表單</a>
+<a class="text-stone-500 hover:text-primary transition-all duration-500" href="https://www.threads.net/@kuhehe0627" target="_blank">Threads 專頁</a>
+</div>
+</div>
+<!-- Info -->
+<div class="md:text-right flex flex-col md:items-end gap-8">
+<span class="font-label text-[10px] tracking-[0.5em] text-stone-300 uppercase">Opening Hours</span>
+<div class="font-headline text-[13px] tracking-[0.2em] text-stone-700 leading-relaxed">
+                    週五 至 週日<br/>
+                    PM 21:00 — 24:00
+                </div>
+<div class="flex md:justify-end gap-3 mt-4">
+<span class="w-1.5 h-1.5 rounded-full bg-red-800/10"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-red-800/30"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-red-800/50"></span>
+</div>
+</div>
+</div>
+<div class="max-w-screen-2xl mx-auto px-8 md:px-16 py-10 border-t border-stone-50 text-center">
+<p class="font-label text-[9px] tracking-[0.4em] text-stone-300 uppercase">© 2026 HEYOTSUKI YADO. ALL RIGHTS RESERVED.</p>
+</div>
+</footer>
+<!-- Floating Action Button -->
+<a class="fixed bottom-10 right-8 md:bottom-16 md:right-16 z-40 bg-red-900 text-white w-14 h-14 flex items-center justify-center shadow-xl hover:bg-red-800 transition-all duration-300" href="https://docs.google.com/forms/d/1tPjUMj8SYrpL-SLS9J1HDXt9ULUopc909JMGAoh328A/edit?hl=zh-tw" target="_blank">
+<span class="material-symbols-outlined text-xl">event_available</span>
+</a>
+</body></html>
