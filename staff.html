@@ -1,0 +1,533 @@
+<html class="scroll-smooth" lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>湯娘 | 嘿月湯宿 HEYOTSUKI YADO</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;400;700&amp;family=Noto+Sans+TC:wght@300;400&amp;family=Manrope:wght@200;400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary": "#5f5e58",
+                        "outline-variant": "#cfc4bd",
+                        "on-surface": "#1e1b17",
+                        "primary-fixed-dim": "#cdc5c0",
+                        "surface-container": "#f5ece5",
+                        "on-secondary-container": "#65645e",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#f8efe8",
+                        "on-background": "#1e1b17",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#fbf2eb",
+                        "on-secondary-fixed": "#1c1c17",
+                        "primary": "#181512",
+                        "inverse-surface": "#34302b",
+                        "on-surface-variant": "#4d4540",
+                        "surface-tint": "#635d5a",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed-variant": "#4b4642",
+                        "tertiary": "#350002",
+                        "surface": "#fff8f3",
+                        "inverse-primary": "#cdc5c0",
+                        "surface-variant": "#e9e1da",
+                        "surface-dim": "#e1d9d2",
+                        "on-secondary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#c9c6bf",
+                        "outline": "#7e756f",
+                        "secondary-fixed": "#e5e2da",
+                        "on-secondary-fixed-variant": "#474741",
+                        "on-primary-container": "#96908b",
+                        "on-tertiary-container": "#f1625c",
+                        "tertiary-container": "#5c0007",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed": "#e9e1dc",
+                        "tertiary-fixed": "#ffdad7",
+                        "tertiary-fixed-dim": "#ffb3ad",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed": "#410004",
+                        "surface-container-highest": "#e9e1da",
+                        "background": "#fff8f3",
+                        "secondary-container": "#e5e2da",
+                        "primary-container": "#2d2926",
+                        "on-primary-fixed": "#1e1b18",
+                        "on-tertiary-fixed-variant": "#8b181b",
+                        "surface-container-high": "#efe7e0",
+                        "surface-bright": "#fff8f3"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif TC", "serif"],
+                        "body": ["Noto Serif TC", "serif"],
+                        "label": ["Manrope", "Noto Sans TC", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+        }
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        /* Book Flip Custom Styles */
+        .book-card:hover .book-inner {
+            transform: rotateY(-180deg);
+        }
+        .washi-grain {
+            background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuBCzxeu9DqhJgbbyUL_2EI3PR4IXgI2SAsZlfiVwYHpuufZG-d0U7Co3uHD4jgB8d0We9W9jO5mDQoDMAPhdDYgKoG-fiFNZXvBctddOjjz9ueUGAv0QUkIpQueKG3IlUmHXlfMXGSahDftUGcIhZpwCt8-e-ByQDoIP5dODtOwsOoi-D01yvKzfS3c5_EyOI_cRAIl6b5NWeEL3buwsklz3WYZcPCDiHEgt8ynPlXwoC2Q95FDkto1HuhWYk5gN0A5Shul7NpvSEfO);
+            opacity: 0.05;
+        }
+        .yubaku-spacing {
+            letter-spacing: 0.15em;
+        }
+        .yubaku-wide {
+            letter-spacing: 0.3em;
+        }
+
+        /* Page Entrance Animation */
+        @keyframes revealUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-reveal {
+            animation: revealUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+
+        body {
+            opacity: 0;
+            animation: fadeInBody 0.8s ease-out forwards;
+        }
+        @keyframes fadeInBody {
+            to { opacity: 1; }
+        }
+
+        /* Vertical Booking Sidebar */
+        .vertical-sidebar {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+    </style>
+</head><body class="bg-surface text-on-surface font-body selection:bg-tertiary-fixed-dim selection:text-tertiary">
+<!-- Floating Booking Sidebar -->
+<a class="fixed right-0 top-1/2 -translate-y-1/2 z-[60] group" href="https://forms.gle/jB7BiMt7krT9eHKj9" target="_blank">
+<div class="vertical-sidebar bg-primary text-white py-8 px-4 flex items-center gap-4 border-l border-white/10 hover:bg-red-950 transition-all duration-500 shadow-2xl">
+<span class="font-label text-[9px] tracking-[0.5em] text-white/40 uppercase mb-2">Reservation</span>
+<span class="font-headline text-lg font-bold tracking-[0.4em] py-2">立即預約</span>
+<div class="h-12 w-[1px] bg-white/20 mt-4 group-hover:h-16 transition-all duration-500"></div>
+</div>
+</a>
+<!-- Top Navigation Bar -->
+<header class="fixed w-full z-50 bg-white/40 backdrop-blur-md top-0 border-b border-stone-200/30">
+<nav class="flex justify-between items-center w-full px-8 md:px-16 py-8 max-w-screen-2xl mx-auto">
+<a class="flex items-center gap-4 group cursor-pointer" href="index.html">
+<img alt="Logo" class="h-12 w-12 object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300" src="https://lh3.googleusercontent.com/aida/ADBb0uiHHaGngaG1dgML3UbB6ANY_ma4bygPPHu4hpiaKC6VxjjL_GKsqKjl_4XI5Cm3kB4eVpD6FLLD1wvsoC0OuNgUSaQbuG9axLyQjgIFZj_nbJtOPQ5so6muvEKd6Gjh5DB_bM1ELEz8W0wnY5SLAOa-eodj9nhsThI4GUTAy5Eh5WWeF6s0QW8VKAIrnWpiOnRNQpCaD7DU8C46hVSLtKg-VyGQgHvmyezSLY5iKY2n-bdXReJl_DC2-E41ZlLVmUJk8nxpaTpgKQ"/>
+<div class="flex flex-col">
+<span class="font-headline font-bold tracking-[0.4em] text-primary text-xl">嘿月湯宿</span>
+<span class="font-label text-[9px] tracking-[0.5em] uppercase text-[#2D2926]">HEYOTSUKI YADO</span>
+</div>
+</a>
+<div class="hidden md:flex items-center gap-10 font-headline tracking-[0.3em] text-xs uppercase">
+<a class="text-stone-800 hover:text-primary hover:bg-stone-800/5 px-4 py-2 transition-all duration-300 rounded-sm" href="index.html">首頁</a>
+<a class="text-stone-800 hover:text-primary hover:bg-stone-800/5 px-4 py-2 transition-all duration-300 rounded-sm" href="rules.html">入場規範</a>
+<a class="text-primary border-b-2 border-red-800 px-2 py-1" href="staff.html">湯娘</a>
+<a class="text-stone-800 hover:text-primary hover:bg-stone-800/5 px-4 py-2 transition-all duration-300 rounded-sm" href="menu.html">菜單</a>
+</div>
+<div class="w-10 h-10 hidden md:block"></div>
+</nav>
+</header>
+<main class="relative pt-48 pb-32 overflow-hidden">
+<div class="absolute inset-0 washi-grain pointer-events-none"></div>
+<!-- Hero Header -->
+<div class="mb-24 flex flex-col items-center text-center px-6 animate-reveal">
+<div class="flex items-center gap-4 mb-6">
+<div class="w-10 h-[1px] bg-red-800"></div>
+<span class="font-label text-red-800 uppercase tracking-[0.5em] text-[10px]">嘿月湯娘 儀式守護</span>
+<div class="w-10 h-[1px] bg-red-800"></div>
+</div>
+<h2 class="font-headline text-5xl md:text-7xl font-bold mb-8 tracking-[0.3em] text-primary">湯娘</h2>
+<p class="max-w-2xl text-lg text-stone-500 leading-loose yubaku-spacing">
+            溫柔體貼的湯娘。微笑接待的月娘。演奏樂器的琴娘。<br/>每一位夥伴都將畢生的體貼與溫柔，帶入您的月下湯泉之旅。
+        </p>
+<div class="mt-12 w-[1px] h-20 bg-primary/20"></div>
+</div>
+<!-- Staff Grid -->
+<div class="max-w-screen-2xl mx-auto px-8 md:px-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12 lg:gap-16">
+<!-- Member 1 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-1">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDXXDUo80G3rrzrWxu2CVrThb2Y93dE3nxuok-k86zqPxLNukpwqUpttGyPSCwhx14cbn-XdXEZyTwRIdXT0NaDEQlaoxJCWof57C43hZvwkWPqXOMYTcTf4cTWVUFccduWgQwB97g36g_4t0MCkB4bvWvCEiL9oaC2Qw2s1tfLiUV6hx6xt-t_JRX-8bC69LjdC42xIH0Inx9iAcCb3Q2uj_lD0fsc8mK58CNVVKuql-sMp36jj1zFaq7BqGm9tAqWMQ3g3GscBJx8");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">古嘿嘿</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">老闆娘 / 毒舌系</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 flex flex-col justify-between text-stone-200 border-r-8 border-red-900">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed tracking-wider italic">「嘿月湯宿闆娘，惡毒系。平常是喜歡到處拍照的新手攝影師，只想追尋我夢寐以求的光影。」</p>
+</div>
+<div class="mt-8 border-t border-stone-800 pt-6 text-[10px] tracking-[0.4em] text-stone-500 font-headline uppercase">Owner / Staff 1</div>
+</div>
+</div>
+</div>
+<!-- Member 2 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-2">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBs27HiPjOJJyOhkg2gVBPq_4xu0IaYiYRoEQdIZrvsieIClsh3IfGfD5Ds1X3axv7mlFfu6grpPbZvnuMkvYgBq2zaYclA_yk2SiuGL34_OFlE2DRwmP9a-DJueHBtVQQSDFeqkMUtts8ZnWJ4OF5iSLFTc6NjtvJP3OtCC7qezi3Fn8VUCHDj_5GQPknZ0TR0_Pxs2u5FThq8yPduk6JsOYBB8U-AdvDx6ZMlrBoTrIoqTliVQFwUuFjnBNyF3soZDsAXGHdqd7cU");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">芝麻渣渣</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">人氣偶像 / 我推的芝麻</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 flex flex-col justify-between text-stone-200 border-r-8 border-red-900">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed tracking-wider italic">「生活充滿各種情緒，好的壞的都歡迎與我分享，煩惱化作渣渣隨風而散。」</p>
+</div>
+<div class="mt-8 border-t border-stone-800 pt-6 text-[10px] tracking-[0.4em] text-stone-500 font-headline uppercase">Idol / Staff 2</div>
+</div>
+</div>
+</div>
+<!-- Member 3 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-3">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBlhrpy9nJKvFVk26gSne5u6zaDoP4N4xPrsG-y-E3yBWh7pjo3Yo3I0-sXbscI1T3V-DujTNRD5ol0p7bZSh7of5OJP8h1guaTkCrOyslWyzPbjTM4jtpCu0UdYeB_wt7XxmQZNSV3cUVieCqrslM71S3_gPDi4S3DIfRxNGAMXXQAzGS3jW4FLM-LQamAbAxjWkxVjgq_mbYMZlLrKDfyAmMdLEn_QpSDWkIo6RgAzRjVNr1ZdLr_YtlNpsVb37E0nifaPv0Z9eNA");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">澪月 小百合</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">可愛擔當 / 活潑貓娘</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 flex flex-col justify-between text-stone-200 border-r-8 border-red-900">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed tracking-wider italic">「我是這裡最活蹦亂跳的貓娘小百合，期待與您的互動喔！」</p>
+</div>
+<div class="mt-8 border-t border-stone-800 pt-6 text-[10px] tracking-[0.4em] text-stone-500 font-headline uppercase">Cat Girl / Staff 3</div>
+</div>
+</div>
+</div>
+<!-- Member 4 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-4">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAk8HAEcgWD7FcB32hlgrgEXRy9enngqaSQVtKAAVbSppGQviM4_iAb8VfjHvCT3vCG0DFjNxiGxYfaQOpc-OqXWmez_ez6EpgX8bjQObAGSSoucITwNGzS5uX9HWsqjlKtiCgDsxDrgFY5LTlzwQGax8XOaOMk5DK5rbHTyx2RIlipDnilDubxmDlrESX-lMx4_qICbs3Pjl3znImMtatI99teeelyFBC1uck2qzloNSPMXUFRoAdAO69BhY3FkGaB6SGPQj5_2Pq_");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">萊可</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">正能量 / 天真認真</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 flex flex-col justify-between text-stone-200 border-r-8 border-red-900">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed tracking-wider italic">「用樂觀的文字為您帶來些許正能量。願在此為您洗滌身心的疲憊。」</p>
+</div>
+<div class="mt-8 border-t border-stone-800 pt-6 text-[10px] tracking-[0.4em] text-stone-500 font-headline uppercase">Optimist / Staff 4</div>
+</div>
+</div>
+</div>
+<!-- Member 5 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-1">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAhCGroH4RhJV6vb3cBemgjgGKyrph0gpV9tE22Rka8pUpaeTCN8uFID0EIIPouIAvrd8PvKM93AROEEj0EBa-S99IeYhrG4YSLWoDPz9tiUQsw538rFEyYkyqrNtPo__HesmGcF6Z-ljdfV30R6_xg2sMAPuswlwnMtvM8QMAeauBSuVCWJkFXJM-nlLo4Hn960cpEjjVZWnT-WY-A-FuZhSjl4cYsVZiR10KSYhXK8q9j16peY3eqZKlOHz37tZwFkkNA1eGbioJh");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">阿祐</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">高端攝影 / 調皮攝影師</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「小本經營，請勿那個。專注於捕捉每一瞬的和風之美。」</p>
+</div>
+<div class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6 uppercase">Photographer / Staff 5</div>
+</div>
+</div>
+</div>
+<!-- Member 6 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-2">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAddq68caRxCYxH7zYWlDuQOd6dhwqZINWfEssv9LhUhic3T5wmFwQ7HE6iogdkdXl-N8bu-BmSDfawqzl1bwUW1RBiVAxy8si3J9IEowGdydu1AIgR4iqvITSWmrnp7dcTj6_F27s0hqmo345mFDNCjpNhc1fug6S6D_y5o8ag0H5PsifeXDDhvno7uSIy_kHipWXST_T0Yr8WjXUzM3pfQQZsIwOyxpRMPTZ6dpHbAVT7EjHAfpSzbWTWXebIdSg9StXrIZIzf2o3");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">小優</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">優雅擔當 / 穿搭達人</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「喜歡研究幻化穿搭。享受寧靜的休息時光，我很樂意陪伴您一起度過。」</p>
+</div>
+<div class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6 uppercase">Fashion / Staff 6</div>
+</div>
+</div>
+</div>
+<!-- Member 7 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-3">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAhPhWzEtBSvpZlzNHbR1kI-Rn9sOFZHGVWXTCan55PckA8CIpE1OlOlqTuV3UTrmABN59stlPTBiulHOO2SD19wC6j_1yRn8N1QuLy5ZHwcjabNtCE74V5zV5THMwgSHtLtC8FYDzoLb0LMO1NKC8wCyRbxSA4zNAlHiJjn8XCsB_1C-m8m_-QRng7th9MZdygz-aUvUvrRn4e7wvYl8azd7jfgXpw1YL7jiZcSKCU_0f8GQDwYrqUF9u_r4hUykuiOKnXY1PBR4HQ");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">桃桃亞</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">撒嬌正義 / 活潑月娘</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed tracking-wider italic">「有點小任性，又超愛灑嬌，敬請享受桃桃全心全力的陪伴吧。」</p>
+</div>
+<div class="mt-8 border-t border-stone-800 pt-6 text-[10px] tracking-[0.4em] text-stone-500 font-headline uppercase">Playful / Staff 7</div>
+</div>
+</div>
+</div>
+<!-- Member 8 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-4">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBAlJVcsXNXP8LJbpaZHNwMDl8jooLhzGxOB7V4ZHWiloDEUq1482T-be_rg9KdnbPb5CiTUjHgQt7dgVUxpDAyAQoWedxKlJKUmX9wNF4K_Ai5WPg9YauDgLaqnWKISMytFZVtefFX_NF0iX-4QK0FZA3wo-wnV3s4AJqkekdtv6dWGq9JO61iYiEujrRXFynqlxiCq2k7uI2UNXv7SJTHKUZyKAfEkREwqUn9ytRadhdOZ6s_2IDmaf6Av8HiNBbYD52-8Op18IKL");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">BO堤</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">新進夥伴 / 儀式修業中</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「正在努力學習湯宿的各項禮儀，希望能早日為您服務。」</p>
+</div>
+<div class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6 uppercase">Apprentice / Staff 8</div>
+</div>
+</div>
+</div>
+<!-- Member 9 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-1">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDBr_OYsAvkw3CCxKL2Ld-Vjp8xg63WfGmQ1-bJ3xGvrZ1QQnaX7NKtBPjxy6ibZLaw7b7oimaCUb2CXmHoBxBGh0VyT6oGkbCpKyDJvc9W81XFn9S7v0LV66xd4hOCGYo3-MHnP-Jt1n_y_KQWnE224wHA7t2dc72_gDgZP1DcptsL7T0zk9svZr-5g1rCmCOJ7-z-WrPOtXaHAZCczJQHysHiokW9ImXAD28o1AKdrcFLfY_1W3kq4jCOWUYPD_7t_r69ZWTwkyT1");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">烏蘭</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">新進夥伴 / 修業實習中</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「對和風文化充滿熱情，希望能將這份溫暖帶給每一位客人。」</p>
+</div>
+<div class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6 uppercase">Trainee / Staff 9</div>
+</div>
+</div>
+</div>
+<!-- Member 10 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-2">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB1S2K54VwL6U0dvMXDTqwTkdl1z7OHzHCNTwo8gpG3_stmXt4GxXiPfHnTQNZGirQCwoBYUW0wecewp3oFDOfy2Kf02mQdq6O0HqQye1v2tnKVT-CvMIEWZUZpWGTCoK0PBUvuztxyEY45NUcY2B6gXCZCW_vm76odLyBU8Mnjs8xME-LyCz6SHNDVLm76wVJ6oPXDAQaMdx9Fi1_aC11uYWMfLey83WUzEqIujypIfybPZFWcCb3v-_ibxrZzz8us-Q_QDLYQ0mCJ");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">蒼月 蓮</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">庭園造景 / 枯山水大師</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「一石一沙皆是宇宙。我致力於在湯宿角落，為您勾勒心靈的寧靜。」</p>
+</div>
+<div class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6 uppercase">Landscaper / Staff 10</div>
+</div>
+</div>
+</div>
+<!-- Member 11 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-3">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBAIjfyuYi9TUIVEwp43BrQ5_OSnALlpnU380VB_6SZIh1P17JTggpPW8kOH_S2q3Pz0NUKkKuX-KrgeeoZcOCVMhrC9H8c0oCuAmPZVGfjFZH_9K-y-B_P4dtK7-Oj7Hp45nGr_SyusLZ95jjTNsRWwmiIPP11TZWjYHTLCmeXn14a386D2oGfbUJRUPpMWH0M-SZ88DwyhWARaAWQq_bPFEJe_Tl-lsO859hCTPI3TtD2muZdfrXYtqIJDu4kD338lzsOCfgcRcs8");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">霧島 楓</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">指壓大師 / 身心療癒</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「指尖傳遞的不只是力道，更是靈魂的撫慰。讓經絡流動洗去都市的沉重。」</p>
+</div>
+<div class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6 uppercase">Masseuse / Staff 11</div>
+</div>
+</div>
+</div>
+<!-- Member 12 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-4">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDJqwLiL1Sb2B-MYayheyufpo4i7_bAghIHPDMDjwsHXrWebuHgpywyZWY4f6irRfGy0-b_jsEIMQrU6SPFD4Ah6yFlowkSJOTI6iappVxjUUstTgVsR5POSZdVHO5H42k97iniANO8LQ4EltzQdfug5qpvMnuRVw08-o2j3GbIUBlzIREy_emY236ION_xw5MqcC-RLx2jMVVIWXuCsKEVHxZ6h_0UB65tUMBhZi1kPV7nSlVmaLnVjf4wajdFK-AT8CnTZ6J-yUDH");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">花宮 紫</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">華道家 / 四季之呼吸</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「生花是有生命的時間藝術。我將季節流轉凝縮，靜候您的到訪。」</p>
+</div>
+<div class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6 uppercase">Florist / Staff 12</div>
+</div>
+</div>
+</div>
+<!-- Member 13 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-1">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBOMF8He2lV7Jz75GswhhZWqFImdUYVPDu5Oth7YLV-KedKPxeMntHrdvC-l2g9iiYc1bsdXa1Ck8btMkpn-rCUDghsL0yk7Gb-pA_AZ3blqLgtVDV7EzDuepYPjPJyvDtBDMIx8W5q8iJug8KUfh9cKo_-ZsxjC6OfifDSr_f5to4CoobPL7Eg-sGonVnQUqFjDB7KVyN8VLmccI6_2DFdzgwOIiKUqFuR1RF9siAWAOkUb0CHfdtYjX9qtUA_EoVgcMfNKZ0N1yDW");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">橘 遙香</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">唎酒師 / 米與水之美</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「每一滴清酒都飽含大地的恩澤。讓我為您挑選最契合的醇香。」</p>
+</div>
+<div class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6 uppercase">Sommelier / Staff 13</div>
+</div>
+</div>
+</div>
+<!-- Member 14 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-2">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDbQGQvaqupIT-uferE4UtCvll6N4jGSamMKBcVYeYCJtiPPtzdHaPMBnVrQLLituFVYhTzS4T_da42gG5N8HgUOIdowfu4m0bmQK3gwHlE-VgP9vKxsM2LJiZWRO7W88FTRALPPGst8sGhjt_loUCC-6v6NEAFsjURUJoZAWV8SK6JlhlqBbe-4_RL-yEj6ufG80SpvTQlgFsWUYs7vDFoM7_RsrSbRjYbarpuR6LPGi7j3DDXpeBFIOdnI7U-IIBOozqBiptFdVFM");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">琴羽 詩織</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">箏奏者 / 弦上月光</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「琴聲如水，洗滌凡塵。讓古老旋律引領您進入夢幻境界。」</p>
+</div>
+<div class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6 uppercase">Musician / Staff 14</div>
+</div>
+</div>
+</div>
+<!-- Member 15 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-3">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBGsYuzKiqOUMKwE3dOxW4jYuS-xifI1wgSJa7mb7g8cuztN49aAe_uLhQE4yXFym-lasBcUsS_24OwmUM9d0U4aDzc3RvrRjuBvhWT5nYYhBv0o9mf0ZumuyII84Dwjfqk04m9ic34-rRRWM-mpW5DIj8FCVRl1avNxRgd5VfOP6r3z_EAhAlN1b1a3_pHIqui7FN06hnWQZZMvmKeyrwI6xpn4oN5WY97Ln30Gq-6kNITC0MO77GyWkTh-yxY7lMC36MQt-Dy7QWC");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">白石 結衣</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">茶道家 / 禪之一味</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「一期一會。在一杯抹茶的時間裡，找回與自己對話的片刻。」</p>
+</div>
+<div class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6 uppercase">Tea Master / Staff 15</div>
+</div>
+</div>
+</div>
+<!-- Member 16 -->
+<div class="book-card perspective-1000 h-[520px] group cursor-pointer opacity-0 animate-reveal stagger-4">
+<div class="book-inner relative w-full h-full transition-transform duration-1000 transform-style-3d shadow-sm group-hover:shadow-xl">
+<div class="absolute inset-0 w-full h-full backface-hidden bg-white overflow-hidden flex flex-col border border-stone-100">
+<div class="h-[75%] w-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCkPAQZUwkB8ahKxF4fPlXDj8uoWA4VZIwzLBg68YAzOK2WRfUFMq7JwEOqi0-2FOubRxJc7ZAqKGvBXNd9KclO5Wl-dEJ0eePAQJtuFkzZkxb186QmCzeZkfoy3KjpczAgi-YMLHmZkQV8SQ83MHjdTHftw-xrP1Lw99gy9JMA068Rfh33p9qbvTphD5hVky_vh_skzOl6RmZ4hWDWH4O7XhssgH6ui0F8wrDmVMpL4-wLdZHdmC88KQJ_lYfoxzHA3Q6YaWggBoEq");'></div>
+<div class="flex-1 p-8 flex flex-col justify-center border-l-4 border-red-900">
+<h3 class="font-headline text-xl font-bold text-primary tracking-widest">神樂 舞</h3>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-stone-400 mt-2">舞姬 / 儀式領航員</p>
+</div>
+</div>
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-stone-900 p-10 border-r-8 border-red-900 flex flex-col justify-between text-stone-200">
+<div>
+<span class="text-[9px] uppercase tracking-[0.4em] text-red-800 font-bold block mb-4">湯語</span>
+<p class="font-headline text-lg leading-relaxed italic">「用舞蹈祭祀月光，用儀式守護湯宿。願您在嘿月找到靈魂的歸宿。」</p>
+</div>
+<div class="text-[10px] tracking-[0.4em] text-stone-500 border-t border-stone-800 pt-6 uppercase">Dancer / Staff 16</div>
+</div>
+</div>
+</div>
+</div>
+<!-- CTA Section -->
+<div class="mt-32 max-w-screen-xl mx-auto p-16 bg-[#1e1b17] relative overflow-hidden flex flex-col items-center text-center animate-reveal stagger-4">
+<div class="absolute inset-0 washi-grain opacity-20 pointer-events-none"></div>
+<div class="relative z-10">
+<h3 class="font-headline text-3xl font-bold mb-6 text-white tracking-[0.3em]">您也是嘿月的追求者嗎？</h3>
+<p class="text-stone-400 mb-10 max-w-lg mx-auto font-body leading-loose tracking-wider">月色之下，我們正在尋找願意一起陪伴客人一起完成溫柔接待的人。</p>
+<a class="px-14 py-5 bg-red-900 text-white font-label text-[10px] tracking-[0.5em] hover:bg-red-800 transition-all duration-500 uppercase border border-red-900 inline-block" href="https://discord.gg/AxDQSmwc8j" target="_blank">洽詢加入 / DC群組</a>
+</div>
+</div>
+</main>
+<!-- Footer Section -->
+<footer class="bg-white border-t border-stone-100 relative">
+<div class="grid grid-cols-1 md:grid-cols-3 items-start gap-20 px-8 md:px-16 py-32 max-w-screen-2xl mx-auto">
+<!-- Brand -->
+<div class="flex flex-col gap-6">
+<a class="text-xl font-headline font-bold tracking-[0.4em] text-primary hover:text-red-900 transition-colors duration-300" href="index.html">嘿月湯宿</a>
+<p class="font-body text-[13px] leading-loose tracking-[0.2em] text-stone-500">
+                利維坦 白銀鄉 15區7號<br/>
+                一個遠離塵囂的都市綠洲
+            </p>
+</div>
+<!-- Links -->
+<div class="flex flex-col gap-8">
+<span class="font-label text-[10px] tracking-[0.5em] text-stone-300 uppercase">Contact</span>
+<div class="flex flex-col gap-4 font-headline text-sm tracking-[0.2em]">
+<a class="text-red-800 hover:tracking-[0.4em] transition-all duration-700" href="https://forms.gle/jB7BiMt7krT9eHKj9" target="_blank">預約表單</a>
+<a class="text-stone-500 hover:text-primary transition-all duration-500" href="https://www.threads.com/@kuhehe0627" target="_blank">Threads 專頁</a>
+<a class="text-stone-500 hover:text-primary transition-all duration-500" href="https://discord.gg/AxDQSmwc8j" target="_blank">Discord 群組</a>
+</div>
+</div>
+<!-- Info -->
+<div class="md:text-right flex flex-col md:items-end gap-8">
+<span class="font-label text-[10px] tracking-[0.5em] text-stone-300 uppercase">Opening Hours</span>
+<div class="font-headline text-[13px] tracking-[0.2em] text-stone-700 leading-relaxed">
+                週五 至 週日<br/>
+                PM 21:00 — 24:00
+            </div>
+<div class="flex md:justify-end gap-3 mt-4">
+<span class="w-1.5 h-1.5 rounded-full bg-red-800/10"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-red-800/30"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-red-800/50"></span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>湯之御品書 | 嘿月湯宿 HEYOTSUKI YADO</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;400;700&amp;family=Noto+Sans+TC:wght@300;400&amp;family=Manrope:wght@200;400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary": "#5f5e58",
+              "outline-variant": "#cfc4bd",
+              "on-surface": "#1e1b17",
+              "primary-fixed-dim": "#cdc5c0",
+              "surface-container": "#f5ece5",
+              "on-secondary-container": "#65645e",
+              "on-error-container": "#93000a",
+              "inverse-on-surface": "#f8efe8",
+              "on-background": "#1e1b17",
+              "error-container": "#ffdad6",
+              "surface-container-low": "#fbf2eb",
+              "on-secondary-fixed": "#1c1c17",
+              "primary": "#181512",
+              "inverse-surface": "#34302b",
+              "on-surface-variant": "#4d4540",
+              "surface-tint": "#635d5a",
+              "error": "#ba1a1a",
+              "on-primary-fixed-variant": "#4b4642",
+              "tertiary": "#350002",
+              "surface": "#fff8f3",
+              "inverse-primary": "#cdc5c0",
+              "surface-variant": "#e9e1da",
+              "surface-dim": "#e1d9d2",
+              "on-secondary": "#ffffff",
+              "on-error": "#ffffff",
+              "secondary-fixed-dim": "#c9c6bf",
+              "outline": "#7e756f",
+              "secondary-fixed": "#e5e2da",
+              "on-secondary-fixed-variant": "#474741",
+              "on-primary-container": "#96908b",
+              "on-tertiary-container": "#f1625c",
+              "tertiary-container": "#5c0007",
+              "on-tertiary": "#ffffff",
+              "primary-fixed": "#e9e1dc",
+              "tertiary-fixed": "#ffdad7",
+              "tertiary-fixed-dim": "#ffb3ad",
+              "surface-container-lowest": "#ffffff",
+              "on-primary": "#ffffff",
+              "on-tertiary-fixed": "#410004",
+              "surface-container-highest": "#e9e1da",
+              "background": "#fff8f3",
+              "secondary-container": "#e5e2da",
+              "primary-container": "#2d2926",
+              "on-primary-fixed": "#1e1b18",
+              "on-tertiary-fixed-variant": "#8b181b",
+              "surface-container-high": "#efe7e0",
+              "surface-bright": "#fff8f3"
+            },
+            fontFamily: {
+              "headline": ["Noto Serif TC", "serif"],
+              "body": ["Noto Serif TC", "serif"],
+              "label": ["Manrope", "Noto Sans TC", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: "FILL" 0, "wght" 200, "GRAD" 0, "opsz" 24
+        }
+        .washi-grain {
+            background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuBCzxeu9DqhJgbbyUL_2EI3PR4IXgI2SAsZlfiVwYHpuufZG-d0U7Co3uHD4jgB8d0We9W9jO5mDQoDMAPhdDYgKoG-fiFNZXvBctddOjjz9ueUGAv0QUkIpQueKG3IlUmHXlfMXGSahDftUGcIhZpwCt8-e-ByQDoIP5dODtOwsOoi-D01yvKzfS3c5_EyOI_cRAIl6b5NWeEL3buwsklz3WYZcPCDiHEgt8ynPlXwoC2Q95FDkto1HuhWYk5gN0A5Shul7NpvSEfO);
+            opacity: 0.05
+        }
+        .yubaku-spacing {
+            letter-spacing: 0.15em;
+        }
+        .noise-texture::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuCGz61XV7PMrzsKrvgLNWDbv0iEoeW5kdxlqiPphOElMBz932jnVFEClHwSqDxiXAG834LvyWQTyyLj3a3TOXXfzcBMkcsYmYKVCG9F5M7-Mk2jIbPxJaXngWreE_gzY-VkczgYnQTFHzRdfr16jocaIQUhKcZq_Ke89pngyE4GRDQ4Nz-fY5-BZO0rfGvYXpWjXVu6i7DWm9nu3KWGbjxo3UyIWvgVXgKLaN_fpd_VW5ddYn6MT4kXsh1ijVckY7qkzNW8gDfVK655);
+            opacity: 0.05;
+            pointer-events: none
+        }
+
+        @keyframes revealUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-reveal {
+            animation: revealUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+
+        body {
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased selection:bg-tertiary-fixed-dim selection:text-tertiary transition-colors duration-700">
+<!-- Top Navigation Bar -->
+<header class="fixed w-full z-50 bg-white/40 backdrop-blur-md top-0 border-b border-stone-200/30">
+<nav class="flex justify-between items-center w-full px-8 md:px-16 py-8 max-w-screen-2xl mx-auto">
+<a class="flex items-center gap-4 group hover:opacity-80 transition-opacity duration-300" href="index.html">
+<img alt="Logo" class="h-12 w-12 object-contain filter grayscale" src="https://lh3.googleusercontent.com/aida/ADBb0uiHHaGngaG1dgML3UbB6ANY_ma4bygPPHu4hpiaKC6VxjjL_GKsqKjl_4XI5Cm3kB4eVpD6FLLD1wvsoC0OuNgUSaQbuG9axLyQjgIFZj_nbJtOPQ5so6muvEKd6Gjh5DB_bM1ELEz8W0wnY5SLAOa-eodj9nhsThI4GUTAy5Eh5WWeF6s0QW8VKAIrnWpiOnRNQpCaD7DU8C46hVSLtKg-VyGQgHvmyezSLY5iKY2n-bdXReJl_DC2-E41ZlLVmUJk8nxpaTpgKQ"/>
+<div class="flex flex-col">
+<span class="font-headline font-bold tracking-[0.4em] text-primary text-xl">嘿月湯宿</span>
+<span class="font-label text-[9px] tracking-[0.5em] uppercase text-[#2D2926]">HEYOTSUKI YADO</span>
+</div>
+</a>
+<div class="hidden md:flex items-center gap-10 font-headline tracking-[0.3em] text-xs uppercase">
+<a class="text-stone-800 hover:text-primary hover:bg-stone-800/5 px-4 py-2 transition-all duration-300 rounded-sm" href="index.html">首頁</a>
+<a class="text-stone-800 hover:text-primary hover:bg-stone-800/5 px-4 py-2 transition-all duration-300 rounded-sm" href="rules.html">入場規範</a>
+<a class="text-stone-800 hover:text-primary hover:bg-stone-800/5 px-4 py-2 transition-all duration-300 rounded-sm" href="staff.html">湯娘</a>
+<a class="text-primary border-b-2 border-red-800 px-2 py-1" href="menu.html">菜單</a>
+</div>
+<div class="w-10 h-10 hidden md:block"></div>
+</nav>
+</header>
+<main class="pt-48 pb-56">
+<div class="max-w-4xl mx-auto px-8 md:px-0">
+<!-- Menu Header -->
+<div class="text-center mb-24 flex flex-col items-center animate-reveal">
+<div class="mb-12">
+<h1 class="font-headline text-6xl font-bold tracking-[0.5em] text-primary mb-4">湯之御品書</h1>
+<span class="font-label text-xs tracking-[0.8em] text-stone-400 uppercase">HEYOTSUKI YADO</span>
+</div>
+<div class="w-full h-[1px] bg-outline-variant/30 relative flex justify-center items-center">
+<div class="w-2 h-2 rounded-full bg-stone-300 absolute"></div>
+</div>
+</div>
+<!-- Content Container -->
+<div class="relative p-12 md:p-24 bg-white/60 shadow-sm border border-stone-100 noise-texture animate-reveal stagger-1">
+<div class="absolute inset-0 washi-grain pointer-events-none"></div>
+<!-- Section 1: Bath Experience -->
+<section class="mb-32">
+<div class="flex items-center gap-4 mb-16 border-b border-stone-200 pb-4">
+<h2 class="font-headline text-3xl font-bold tracking-[0.2em] text-primary">月湯體驗 <span class="text-lg font-light tracking-normal">(僅限2人以下體驗)</span></h2>
+</div>
+<div class="space-y-12">
+<div class="group">
+<div class="flex justify-between items-baseline mb-3">
+<h3 class="font-bold text-2xl tracking-[0.1em] text-primary">月影套餐 (大約45分鐘)</h3>
+<span class="font-headline text-2xl text-primary">150000 Gil</span>
+</div>
+<p class="text-stone-400 text-sm tracking-widest yubaku-spacing">湯浴 × 茶點 × 靜夜時光</p>
+</div>
+<div class="group">
+<div class="flex justify-between items-baseline mb-3">
+<h3 class="font-bold text-2xl tracking-[0.1em] text-primary">夜月尊享</h3>
+<span class="font-headline text-2xl text-primary">+100000 Gil</span>
+</div>
+<p class="text-stone-400 text-sm tracking-widest yubaku-spacing">雙湯娘的帝王級享受？</p>
+</div>
+<div class="group">
+<div class="flex justify-between items-baseline mb-3">
+<h3 class="font-bold text-2xl tracking-[0.1em] text-primary">精美相片</h3>
+<span class="font-headline text-2xl text-primary">30000 Gil</span>
+</div>
+<p class="text-stone-400 text-sm tracking-widest yubaku-spacing">由本店攝影師親自操刀 讓您留下最好的紀念品</p>
+</div>
+<div class="group">
+<div class="flex justify-between items-baseline mb-3">
+<h3 class="font-bold text-2xl tracking-[0.1em] text-primary">拍立得簽名 <span class="text-sm font-light">(簽繪版本+10000Gil)</span></h3>
+<span class="font-headline text-2xl text-primary">30000 Gil</span>
+</div>
+<p class="text-stone-400 text-sm tracking-widest yubaku-spacing">偶像風格拍立得 必須珍藏 (部分湯娘限定)</p>
+</div>
+</div>
+</section>
+<!-- Section 2: Cuisine -->
+<section class="mb-32">
+<div class="flex items-center gap-4 mb-16 border-b border-stone-200 pb-4">
+<h2 class="font-headline text-3xl font-bold tracking-[0.2em] text-primary">湯宿美食</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-24 gap-y-12">
+<div class="flex justify-between items-center group">
+<h3 class="text-xl tracking-[0.2em] text-primary">茶碗蒸</h3>
+<div class="flex-grow mx-4 border-b border-dotted border-stone-300"></div>
+<span class="font-headline text-xl text-primary">5000 Gil</span>
+</div>
+<div class="flex justify-between items-center group">
+<h3 class="text-xl tracking-[0.2em] text-primary">散壽司</h3>
+<div class="flex-grow mx-4 border-b border-dotted border-stone-300"></div>
+<span class="font-headline text-xl text-primary">5000 Gil</span>
+</div>
+<div class="flex justify-between items-center group">
+<h3 class="text-xl tracking-[0.2em] text-primary">章魚燒</h3>
+<div class="flex-grow mx-4 border-b border-dotted border-stone-300"></div>
+<span class="font-headline text-xl text-primary">5000 Gil</span>
+</div>
+<div class="flex justify-between items-center group">
+<h3 class="text-xl tracking-[0.2em] text-primary">什錦壽司卷</h3>
+<div class="flex-grow mx-4 border-b border-dotted border-stone-300"></div>
+<span class="font-headline text-xl text-primary">5000 Gil</span>
+</div>
+<div class="flex justify-between items-center group">
+<h3 class="text-xl tracking-[0.2em] text-primary">關東煮</h3>
+<div class="flex-grow mx-4 border-b border-dotted border-stone-300"></div>
+<span class="font-headline text-xl text-primary">5000 Gil</span>
+</div>
+<div class="flex justify-between items-center group">
+<h3 class="text-xl tracking-[0.2em] text-primary">湯娘隱藏版</h3>
+<div class="flex-grow mx-4 border-b border-dotted border-stone-300"></div>
+<span class="font-headline text-xl text-primary font-bold">10000 Gil</span>
+</div>
+</div>
+</section>
+<!-- Section 3: Drinks -->
+<section>
+<div class="flex items-center gap-4 mb-16 border-b border-stone-200 pb-4">
+<h2 class="font-headline text-3xl font-bold tracking-[0.2em] text-primary">湯宿飲品</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-24 gap-y-12">
+<div class="flex justify-between items-center group">
+<h3 class="text-xl tracking-[0.2em] text-primary">牛奶</h3>
+<div class="flex-grow mx-4 border-b border-dotted border-stone-300"></div>
+<span class="font-headline text-xl text-primary">1000 Gil</span>
+</div>
+<div class="flex justify-between items-center group">
+<h3 class="text-xl tracking-[0.2em] text-primary">抹茶</h3>
+<div class="flex-grow mx-4 border-b border-dotted border-stone-300"></div>
+<span class="font-headline text-xl text-primary">1000 Gil</span>
+</div>
+</div>
+</section>
+<div class="mt-32 text-center">
+<p class="font-headline text-stone-400 tracking-[1em] text-sm italic">一 湯 映 月 ・ 靜 入 心 宿</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Section -->
+<footer class="bg-white border-t border-stone-100 relative animate-reveal stagger-2">
+<div class="grid grid-cols-1 md:grid-cols-3 items-start gap-20 px-8 md:px-16 py-32 max-w-screen-2xl mx-auto">
+<!-- Brand -->
+<div class="flex flex-col gap-6">
+<span class="text-xl font-headline font-bold tracking-[0.4em] text-primary">嘿月湯宿</span>
+<p class="font-body text-[13px] leading-loose tracking-[0.2em] text-stone-500">
+                利維坦 白銀鄉 15區7號<br/>
+                一個遠離塵囂的都市綠洲
+            </p>
+</div>
+<!-- Links -->
+<div class="flex flex-col gap-8">
+<span class="font-label text-[10px] tracking-[0.5em] text-stone-300 uppercase">Contact</span>
+<div class="flex flex-col gap-4 font-headline text-sm tracking-[0.2em]">
+<a class="text-red-800 hover:tracking-[0.4em] transition-all duration-700" href="https://forms.gle/jB7BiMt7krT9eHKj9" target="_blank">預約表單</a>
+<a class="text-stone-500 hover:text-primary transition-all duration-500" href="https://www.threads.com/@kuhehe0627" target="_blank">Threads 專頁</a>
+<a class="text-stone-500 hover:text-primary transition-all duration-500" href="https://discord.gg/AxDQSmwc8j" target="_blank">Discord 群組</a>
+</div>
+</div>
+<!-- Info -->
+<div class="md:text-right flex flex-col md:items-end gap-8">
+<span class="font-label text-[10px] tracking-[0.5em] text-stone-300 uppercase">Opening Hours</span>
+<div class="font-headline text-[13px] tracking-[0.2em] text-stone-700 leading-relaxed">
+                週五 至 週日<br/>
+                PM 21:00 — 24:00
+            </div>
+<div class="flex md:justify-end gap-3 mt-4">
+<span class="w-1.5 h-1.5 rounded-full bg-red-800/10"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-red-800/30"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-red-800/50"></span>
+</div>
+</div>
+</div>
+<div class="max-w-screen-2xl mx-auto px-8 md:px-16 py-10 border-t border-stone-50 text-center">
+<p class="font-label text-[9px] tracking-[0.4em] text-stone-300 uppercase">© 2026 HEYOTSUKI YADO. All Rights Reserved.</p>
+</div>
+</footer>
+<!-- Unified Booking Sidebar -->
+<div class="fixed right-0 top-1/2 -translate-y-1/2 z-50 animate-reveal stagger-3">
+<a class="group relative flex flex-col items-center bg-primary hover:bg-stone-800 text-white py-8 px-3 border-l border-white/10 transition-all duration-500" href="https://forms.gle/jB7BiMt7krT9eHKj9" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined mb-4 text-xl group-hover:scale-110 transition-transform duration-300">event_available</span>
+<span class="vertical-text font-headline text-sm tracking-[0.5em] font-medium">立即預約</span>
+<div class="absolute inset-0 washi-grain pointer-events-none opacity-20"></div>
+</a>
+</div>
+</body></html>
