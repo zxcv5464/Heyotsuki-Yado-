@@ -1,0 +1,341 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Heyue Tea House - Menu</title>
+<!-- Google Fonts: Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts: Typography -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&amp;family=Noto+Serif+JP:wght@600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Design System Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#6b2c2c",
+                    "surface-container-low": "#f7f4e9",
+                    "error": "#ba1a1a",
+                    "secondary-fixed": "#ccead3",
+                    "on-primary-container": "#ec9492",
+                    "on-surface": "#1c1c15",
+                    "error-container": "#ffdad6",
+                    "surface-tint": "#904948",
+                    "secondary-fixed-dim": "#b1cdb8",
+                    "on-secondary-fixed": "#072013",
+                    "surface-container": "#f1eee3",
+                    "inverse-on-surface": "#f4f1e6",
+                    "on-error-container": "#93000a",
+                    "secondary-container": "#ccead3",
+                    "on-secondary": "#ffffff",
+                    "surface-dim": "#dddacf",
+                    "secondary": "#4a6453",
+                    "primary-fixed": "#ffdad8",
+                    "surface": "#fcf9ee",
+                    "tertiary-container": "#553c00",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#ffb3b0",
+                    "surface-container-highest": "#e5e2d8",
+                    "surface-container-high": "#ebe8dd",
+                    "outline": "#867371",
+                    "on-tertiary-fixed-variant": "#5d4201",
+                    "surface-bright": "#fcf9ee",
+                    "on-tertiary-fixed": "#261900",
+                    "tertiary-fixed": "#ffdea5",
+                    "on-error": "#ffffff",
+                    "background": "#fcf9ee",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#534342",
+                    "on-secondary-fixed-variant": "#334c3c",
+                    "on-secondary-container": "#506a59",
+                    "on-primary-fixed": "#3b080b",
+                    "primary-fixed-dim": "#ffb3b0",
+                    "on-tertiary-container": "#cca75f",
+                    "tertiary": "#392700",
+                    "outline-variant": "#d9c1c0",
+                    "on-primary-fixed-variant": "#733332",
+                    "primary": "#4f1718",
+                    "on-primary": "#ffffff",
+                    "inverse-surface": "#31312a",
+                    "on-background": "#1c1c15",
+                    "tertiary-fixed-dim": "#e9c176",
+                    "surface-variant": "#e5e2d8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin": "32px",
+                    "ornament-gap": "48px",
+                    "unit": "8px",
+                    "gutter": "24px",
+                    "container-max": "1200px"
+            },
+            "fontFamily": {
+                    "body-md": [
+                            "newsreader"
+                    ],
+                    "label-sm": [
+                            "epilogue"
+                    ],
+                    "body-lg": [
+                            "newsreader"
+                    ],
+                    "headline-md": [
+                            "Noto Serif JP", "serif"
+                    ],
+                    "headline-lg": [
+                            "Noto Serif JP", "serif"
+                    ]
+            },
+            "fontSize": {
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "1.6",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-sm": [
+                            "12px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "letterSpacing": "0.1em",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "body-lg": [
+                            "20px",
+                            {
+                                    "lineHeight": "1.6",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-md": [
+                            "32px",
+                            {
+                                    "lineHeight": "1.3",
+                                    "letterSpacing": "0.02em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-lg": [
+                            "48px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "700"
+                            }
+                    ]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .vertical-rl {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+        }
+        /* Paper Texture Gradient overlay */
+        .paper-texture {
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(134, 115, 113, 0.03) 2px, rgba(134, 115, 113, 0.03) 4px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen overflow-x-hidden selection:bg-tertiary-container selection:text-on-tertiary-container">
+<!-- Main Content Area (The Menu Canvas) -->
+<main class="w-full min-h-screen bg-surface-container-low paper-texture relative py-8 px-4 md:py-16 md:px-12">
+<!-- Outer Framed Border (Art Deco influence) -->
+<div class="relative min-h-full max-w-6xl mx-auto bg-surface border-[3px] border-double border-outline/40 shadow-[0_20px_50px_rgba(0,0,0,0.05),inset_0_0_40px_rgba(0,0,0,0.02)] p-6 md:p-16 flex flex-col md:flex-row gap-8 md:gap-16">
+<!-- Corner Ornaments -->
+<div class="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-tertiary-container/60"></div>
+<div class="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-tertiary-container/60"></div>
+<div class="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-tertiary-container/60"></div>
+<div class="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-tertiary-container/60"></div>
+<!-- Right Column: Vertical Title Anchor (Traditional Japanese layout) -->
+<div class="hidden lg:flex flex-col items-center justify-start border-l border-outline/20 pl-12 order-last shrink-0">
+<h2 class="vertical-rl font-headline-lg text-primary tracking-[0.3em] text-[2.5rem] leading-none mb-12" style="">
+                嘿月喫茶
+            </h2>
+<div class="w-px h-24 bg-tertiary-container/40 my-6"></div>
+<h3 class="vertical-rl font-headline-md text-on-surface-variant tracking-[0.2em] opacity-80" style="">
+                御品書
+            </h3>
+</div>
+<!-- Left Column: The Menu Sections -->
+<div class="flex-1 flex flex-col gap-12 md:gap-16">
+<!-- Mobile/Header Title (Centered for top alignment) -->
+<div class="lg:hidden text-center mb-8 pb-8 border-b border-outline/20">
+<h2 class="font-headline-lg text-primary tracking-widest mb-2" style="">嘿月喫茶</h2>
+<p class="font-label-sm text-tertiary-container tracking-[0.2em]" style="">MENU • 御品書</p>
+</div>
+<!-- Top Header for Desktop layout when sidebar is removed -->
+<div class="hidden lg:flex justify-between items-end mb-4 border-b border-outline/20 pb-8">
+<div>
+<h1 class="text-4xl font-bold text-primary font-headline-lg mb-2" style="">The Menu</h1>
+<p class="text-sm text-on-surface-variant tracking-[0.3em] opacity-70 uppercase" style="">Taisho Roman Flavors •&nbsp;<div>大正浪漫の味</div></p>
+</div>
+<div class="flex gap-8 font-label-sm text-tertiary-container tracking-widest uppercase">
+<span class="" style="">經典茶葉</span>
+<span class="" style="">•</span>
+<span class="" style="">手沖咖啡</span>
+<span class="" style="">•</span>
+<span class="" style="">甜點菓子</span>
+</div>
+</div>
+<!-- Category: 銘茶 (Signature Tea) -->
+<section>
+<div class="flex items-center gap-4 mb-8">
+<h3 class="font-headline-md text-primary text-3xl" style="">銘茶</h3>
+<span class="font-label-sm text-tertiary-container tracking-[0.15em] uppercase mt-2" style="">Signature Tea</span>
+<div class="flex-1 h-px bg-outline/30 mt-2"></div>
+</div>
+<div class="flex flex-col gap-6">
+<!-- Item -->
+<div class="group">
+<div class="flex items-baseline w-full gap-4">
+<span class="font-body-lg font-bold text-on-surface group-hover:text-primary transition-colors" style="">手沖高山茶</span>
+<div class="flex-1 border-b-[1.5px] border-dotted border-outline/40 mx-2"></div>
+<span class="font-body-lg text-primary whitespace-nowrap" style="">15000 Gil</span>
+</div>
+<p class="font-body-md text-on-surface-variant italic mt-1 md:pr-16 text-sm" style="">擷取山間雲霧，一盞澄澈回甘的清幽</p>
+</div>
+<!-- Item -->
+<div class="group">
+<div class="flex items-baseline w-full gap-4">
+<span class="font-body-lg font-bold text-on-surface group-hover:text-primary transition-colors" style="">經典抹茶</span>
+<div class="flex-1 border-b-[1.5px] border-dotted border-outline/40 mx-2"></div>
+<span class="font-body-lg text-primary whitespace-nowrap" style="">15000 Gil</span>
+</div>
+<p class="font-body-md text-on-surface-variant italic mt-1 md:pr-16 text-sm" style="">碧色茶湯中的石磨餘韻，品味純粹的和式禪意</p>
+</div>
+<!-- Item -->
+<div class="group">
+<div class="flex items-baseline w-full gap-4">
+<span class="font-body-lg font-bold text-on-surface group-hover:text-primary transition-colors" style="">仙子莓茶</span>
+<div class="flex-1 border-b-[1.5px] border-dotted border-outline/40 mx-2"></div>
+<span class="font-body-lg text-primary whitespace-nowrap" style="">15000 Gil</span>
+</div>
+<p class="font-body-md text-on-surface-variant italic mt-1 md:pr-16 text-sm" style=""> 森林漿果的微酸華爾滋，編織紅寶石色的夢幻</p>
+</div>
+</div>
+</section>
+<!-- Decorative Divider -->
+<div class="flex items-center justify-center py-4 opacity-50">
+<div class="h-px bg-primary w-24"></div>
+<div class="w-2 h-2 rotate-45 border border-primary mx-4"></div>
+<div class="h-px bg-primary w-24"></div>
+</div>
+<!-- Category: 咖啡 (Specialty Coffee) -->
+<section>
+<div class="flex items-center gap-4 mb-8">
+<h3 class="font-headline-md text-primary text-3xl" style="">咖啡</h3>
+<span class="font-label-sm text-tertiary-container tracking-[0.15em] uppercase mt-2" style="">Specialty Coffee</span>
+<div class="flex-1 h-px bg-outline/30 mt-2"></div>
+</div>
+<div class="flex flex-col gap-6">
+<!-- Item -->
+<div class="group">
+<div class="flex items-baseline w-full gap-4">
+<span class="font-body-lg font-bold text-on-surface group-hover:text-primary transition-colors" style="">鮮奶油咖啡</span>
+<div class="flex-1 border-b-[1.5px] border-dotted border-outline/40 mx-2"></div>
+<span class="font-body-lg text-primary whitespace-nowrap" style="">18000 Gil</span>
+</div>
+<p class="font-body-md text-on-surface-variant italic mt-1 md:pr-16 text-sm" style="">琥珀色深焙與雪白鮮奶油，交織出苦甜參半的優雅</p>
+</div>
+<!-- Item -->
+<div class="group">
+<div class="flex items-baseline w-full gap-4">
+<span class="font-body-lg font-bold text-on-surface group-hover:text-primary transition-colors" style="">奶泡奶油肉桂咖啡</span>
+<div class="flex-1 border-b-[1.5px] border-dotted border-outline/40 mx-2"></div>
+<span class="font-body-lg text-primary whitespace-nowrap" style="">20000 Gil</span>
+</div>
+<p class="font-body-md text-on-surface-variant italic mt-1 md:pr-16 text-sm" style="">辛香肉桂揉入絲滑奶泡，冬日暖陽般的濃郁治癒</p>
+</div>
+</div>
+</section>
+<!-- Decorative Divider -->
+<div class="flex items-center justify-center py-4 opacity-50">
+<div class="h-px bg-primary w-24"></div>
+<div class="w-2 h-2 rotate-45 border border-primary mx-4"></div>
+<div class="h-px bg-primary w-24"></div>
+</div>
+<!-- Grid for remaining two categories -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-16">
+<!-- Category: 洋食 (Western Cuisine) -->
+<section>
+<div class="flex items-center gap-4 mb-8">
+<h3 class="font-headline-md text-primary text-3xl" style="">洋食</h3>
+<span class="font-label-sm text-tertiary-container tracking-[0.15em] uppercase mt-2" style="">Western Cuisine</span>
+<div class="flex-1 h-px bg-outline/30 mt-2"></div>
+</div>
+<div class="flex flex-col gap-6">
+<!-- Item -->
+<div class="group">
+<div class="flex items-baseline w-full gap-4">
+<span class="font-body-lg font-bold text-on-surface group-hover:text-primary transition-colors" style="">手作蛋包飯</span>
+<div class="flex-1 border-b-[1.5px] border-dotted border-outline/40 mx-2"></div>
+<span class="font-body-lg text-primary whitespace-nowrap" style="">25000 Gil</span>
+</div>
+<p class="font-body-md text-on-surface-variant italic mt-1 text-sm" style="">金黃滑嫩的蛋皮包覆，重現昭和年代的純樸溫度</p>
+</div>
+<!-- Item -->
+<div class="group">
+<div class="flex items-baseline w-full gap-4">
+<span class="font-body-lg font-bold text-on-surface group-hover:text-primary transition-colors" style="">起司焗洋蔥湯</span>
+<div class="flex-1 border-b-[1.5px] border-dotted border-outline/40 mx-2"></div>
+<span class="font-body-lg text-primary whitespace-nowrap" style="">25000 Gil</span>
+</div>
+<p class="font-body-md text-on-surface-variant italic mt-1 text-sm" style="">慢火焦糖化的洋蔥精華，與拉絲起司的醇厚共舞</p>
+</div>
+</div>
+</section>
+<!-- Category: 和菓子 (Wagashi) -->
+<section>
+<div class="flex items-center gap-4 mb-8">
+<h3 class="font-headline-md text-primary text-3xl" style="">和菓子</h3>
+<span class="font-label-sm text-tertiary-container tracking-[0.15em] uppercase mt-2" style="">Wagashi</span>
+<div class="flex-1 h-px bg-outline/30 mt-2"></div>
+</div>
+<div class="flex flex-col gap-6">
+<!-- Item -->
+<div class="group">
+<div class="flex items-baseline w-full gap-4">
+<span class="font-body-lg font-bold text-on-surface group-hover:text-primary transition-colors" style="">金平糖</span>
+<div class="flex-1 border-b-[1.5px] border-dotted border-outline/40 mx-2"></div>
+<span class="font-body-lg text-primary whitespace-nowrap" style="">10000 Gil</span>
+</div>
+<p class="font-body-md text-on-surface-variant italic mt-1 text-sm" style="">掌心裡的星辰碎片，清脆封存了童年的甜蜜記憶</p>
+</div>
+<!-- Item -->
+<div class="group">
+<div class="flex items-baseline w-full gap-4">
+<span class="font-body-lg font-bold text-on-surface group-hover:text-primary transition-colors" style="">乳酪甜甜圈</span>
+<div class="flex-1 border-b-[1.5px] border-dotted border-outline/40 mx-2"></div>
+<span class="font-body-lg text-primary whitespace-nowrap" style="">10000 Gil</span>
+</div>
+<p class="font-body-md text-on-surface-variant italic mt-1 text-sm" style="">濃郁乳酪與鬆軟麵芯，鹹甜之間演繹的午茶浪漫</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer Note -->
+<div class="mt-8 text-center border-t border-outline/20 pt-8 flex flex-col items-center gap-4">
+<div class="w-12 h-12 border border-outline/30 rotate-45 flex items-center justify-center mb-2">
+<div class="w-6 h-6 bg-primary-container/10 border border-primary/20"></div>
+</div>
+<p class="font-label-sm text-on-surface-variant tracking-[0.2em] uppercase" style="">無論是獨自閱讀的午後，還是與摯友的低聲細語，《嘿月喫茶》都為您留了一盞燈。</p>
+<p class="font-body-md text-on-surface-variant opacity-60 text-xs max-w-md" style="">時間彷彿凝固在那個和洋並蓄、自由奔放的黃金年代。推開沉重的檜木大門，撲面而來的是深色磨砂木質與現磨咖啡交織的沉穩香氣。&nbsp; &nbsp; &nbsp;</p>
+</div>
+</div>
+</div>
+</main>
+</body></html>
