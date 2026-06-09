@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport">
+<title>菜單總覽 | 嘿月湯宿 HEYOTSUKI YADO</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;400;700&amp;family=Noto+Sans+TC:wght@300;400&amp;family=Manrope:wght@200;400&amp;display=swap" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+<script src="js/tailwind-config.js"></script>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased selection:bg-tertiary-fixed-dim selection:text-tertiary transition-colors duration-700 page-menu" data-page="menus">
+<div data-site-header></div>
+<main class="relative pt-48 pb-40 md:pb-56 overflow-hidden">
+<div class="absolute inset-0 washi-grain pointer-events-none"></div>
+<section class="relative z-10 max-w-screen-xl mx-auto px-6 sm:px-8 md:px-16">
+<div class="text-center mb-16 md:mb-24 animate-reveal">
+<div class="flex items-center justify-center gap-4 mb-6">
+<div class="w-10 h-px bg-red-800"></div>
+<span class="font-label text-red-800 uppercase tracking-[0.5em] text-[10px]">Two Tables, One Moon</span>
+<div class="w-10 h-px bg-red-800"></div>
+</div>
+<h1 class="font-headline text-4xl sm:text-5xl md:text-7xl font-bold tracking-[0.3em] text-primary">菜單總覽</h1>
+<p class="mt-8 text-stone-500 leading-loose tracking-[0.15em]">循著此刻的心情，選擇今晚的一席款待。</p>
+</div>
+<div id="menu-choice-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 animate-reveal stagger-1"></div>
+</section>
+</main>
+<div data-site-footer></div>
+<div data-mobile-nav></div>
+<div data-booking-sidebar></div>
+<script src="js/site-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/data-provider.js"></script>
+<script src="js/site.js"></script>
+<script src="js/menus.js"></script>
+</body>
+</html>

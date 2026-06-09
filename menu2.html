@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport">
+<title>嘿月喫茶 | 嘿月湯宿 HEYOTSUKI YADO</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;400;700&amp;family=Noto+Sans+TC:wght@300;400&amp;family=Manrope:wght@200;400&amp;display=swap" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+<script src="js/tailwind-config.js"></script>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased selection:bg-tertiary-fixed-dim selection:text-tertiary transition-colors duration-700 page-menu" data-page="menu2" data-menu-key="menu2">
+<div data-site-header></div>
+<main class="pt-48 pb-56">
+<div class="max-w-4xl mx-auto px-8 md:px-0">
+<div class="text-center mb-24 flex flex-col items-center animate-reveal">
+<div class="mb-12">
+<h1 id="menu-title" class="font-headline text-4xl sm:text-5xl md:text-6xl font-bold tracking-[0.35em] sm:tracking-[0.5em] text-primary mb-4">嘿月喫茶</h1>
+<span id="menu-subtitle" class="font-label text-xs tracking-[0.8em] text-stone-400 uppercase">HEYOTSUKI YADO</span>
+</div>
+<div class="w-full h-[1px] bg-outline-variant/30 relative flex justify-center items-center">
+<div class="w-2 h-2 rounded-full bg-stone-300 absolute"></div>
+</div>
+</div>
+<div class="relative p-7 sm:p-10 md:p-24 bg-white/60 shadow-sm border border-stone-100 noise-texture animate-reveal stagger-1">
+<div class="absolute inset-0 washi-grain pointer-events-none"></div>
+<div id="menu-sections"></div>
+<div id="menu-footer" class="mt-32 text-center"></div>
+</div>
+</div>
+</main>
+<div data-site-footer></div>
+<div data-mobile-nav></div>
+<div data-booking-sidebar></div>
+<script src="js/site-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/data-menu2.js"></script>
+<script src="js/data-provider.js"></script>
+<script src="js/site.js"></script>
+<script src="js/menu-renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+window.SITE_CONFIG = {
+  siteName: "嘿月湯宿",
+  subtitle: "HEYOTSUKI YADO",
+  address: "利維坦 白銀鄉 15區7號",
+  openingDays: "週五 至 週日",
+  openingHours: "PM 21:00 — 24:00",
+  status: "目前休業中",
+  bookingUrl: "https://forms.gle/jB7BiMt7krT9eHKj9",
+  threadsUrl: "https://www.threads.com/@heyotsuki_ffxiv",
+  discordUrl: "https://discord.gg/AxDQSmwc8j",
+  taglines: {
+    index: "隱沒在白銀山中的神祕湯宿",
+    default: "一個遠離塵囂的都市綠洲",
+  },
+  menus: [
+    {
+      key: "menu",
+      title: "湯宿菜單",
+      shortTitle: "湯宿菜單",
+      englishTitle: "YADO MENU",
+      description: "溫泉、服務、套餐、茶席",
+      href: "menu.html",
+      theme: "light",
+    },
+    {
+      key: "menu2",
+      title: "喫茶菜單",
+      shortTitle: "喫茶菜單",
+      englishTitle: "KISSA MENU",
+      description: "茶飲、甜點、輕食",
+      href: "menu2.html",
+      theme: "dark",
+    },
+  ],
+};

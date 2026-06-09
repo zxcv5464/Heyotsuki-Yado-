@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>菜單管理 | 嘿月湯宿後台</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&amp;family=Noto+Sans+TC:wght@400;500;700&amp;display=swap" rel="stylesheet">
+  <link href="../css/admin.css" rel="stylesheet">
+</head>
+<body class="dashboard-page" data-admin-page="menu">
+  <div class="dashboard-content">
+    <header class="dashboard-header">
+      <div class="admin-shell dashboard-header-inner">
+        <a class="dashboard-brand dashboard-brand-link" href="index.html">嘿月湯宿後台</a>
+        <div class="dashboard-actions">
+          <a class="admin-button admin-button-secondary admin-button-link" href="index.html">返回首頁</a>
+          <button class="admin-button admin-button-secondary" data-sign-out type="button">登出</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-shell dashboard-main">
+      <section class="settings-panel">
+        <div class="admin-section-heading">
+          <div>
+            <p class="admin-eyebrow">Menu Management</p>
+            <h1 class="admin-title">菜單管理</h1>
+            <p class="admin-description">
+              登入者：<strong data-admin-name>讀取中</strong>　
+              角色：<strong data-admin-role>讀取中</strong>
+            </p>
+          </div>
+        </div>
+
+        <p class="permission-message" data-menu-denied hidden>
+          此帳號沒有菜單管理權限。
+        </p>
+        <p class="auth-message settings-message" data-auth-message data-menu-message role="status" hidden></p>
+
+        <div data-menu-workspace hidden>
+          <nav class="menu-admin-tabs" aria-label="菜單切換">
+            <button class="menu-admin-tab is-active" data-menu-key="menu" type="button">湯宿菜單</button>
+            <button class="menu-admin-tab" data-menu-key="menu2" type="button">喫茶菜單</button>
+          </nav>
+
+          <section class="staff-editor menu-basic-panel" aria-labelledby="menu-basic-title">
+            <div class="staff-editor-heading">
+              <h2 id="menu-basic-title">菜單基本資料</h2>
+              <span class="status-badge" data-current-menu-key>menu</span>
+            </div>
+            <form class="settings-form" data-menu-form>
+              <div class="settings-grid">
+                <div class="field">
+                  <label for="menu-title-field">標題</label>
+                  <input id="menu-title-field" name="title" type="text" required>
+                </div>
+                <div class="field">
+                  <label for="menu-short-title">導覽短標題</label>
+                  <input id="menu-short-title" name="short_title" type="text" required>
+                </div>
+                <div class="field">
+                  <label for="menu-english-title">英文標題</label>
+                  <input id="menu-english-title" name="english_title" type="text">
+                </div>
+                <div class="field">
+                  <label for="menu-sort-order">排序</label>
+                  <input id="menu-sort-order" name="sort_order" type="number" step="1" min="0">
+                </div>
+                <div class="field settings-grid-full">
+                  <label for="menu-description">說明</label>
+                  <textarea id="menu-description" name="description" rows="3"></textarea>
+                </div>
+                <div class="field">
+                  <label for="menu-href">頁面路徑（唯讀）</label>
+                  <input id="menu-href" name="href" type="text" readonly>
+                </div>
+                <div class="field">
+                  <label class="checkbox-field">
+                    <input name="is_visible" type="checkbox">
+                    <span>前台顯示</span>
+                  </label>
+                </div>
+              </div>
+              <div class="settings-form-actions">
+                <button class="admin-button" type="submit">儲存菜單資料</button>
+              </div>
+            </form>
+          </section>
+
+          <div class="menu-management-grid">
+            <section class="menu-admin-column">
+              <div class="staff-list-heading">
+                <div>
+                  <h2>分類</h2>
+                  <p class="field-help">巢狀分類會掛在排序中上一個一般分類底下。</p>
+                </div>
+                <button class="admin-button admin-button-small" data-new-section type="button">新增分類</button>
+              </div>
+              <div class="menu-admin-list" data-section-list></div>
+            </section>
+
+            <section class="menu-admin-column">
+              <div class="staff-list-heading">
+                <div>
+                  <h2>品項</h2>
+                  <p class="field-help" data-item-section-label>請先選擇分類。</p>
+                </div>
+                <button class="admin-button admin-button-small" data-new-item type="button" disabled>新增品項</button>
+              </div>
+              <div class="menu-admin-list" data-item-list>
+                <p class="empty-state">請從左側選擇一個分類。</p>
+              </div>
+            </section>
+          </div>
+
+          <section class="staff-editor" data-section-editor hidden aria-labelledby="section-form-title">
+            <div class="staff-editor-heading">
+              <h2 id="section-form-title">新增分類</h2>
+              <button class="text-button" data-cancel-section type="button">取消</button>
+            </div>
+            <form class="settings-form" data-section-form>
+              <input name="id" type="hidden">
+              <div class="settings-grid">
+                <div class="field">
+                  <label for="section-title">分類名稱</label>
+                  <input id="section-title" name="title" type="text" required>
+                </div>
+                <div class="field">
+                  <label for="section-subtitle">副標題</label>
+                  <input id="section-subtitle" name="subtitle" type="text">
+                </div>
+                <div class="field settings-grid-full">
+                  <label for="section-notice">備註</label>
+                  <textarea id="section-notice" name="notice" rows="3"></textarea>
+                </div>
+                <div class="field">
+                  <label for="section-layout">排版類型</label>
+                  <select id="section-layout" name="layout_type">
+                    <option value="detailed">詳細排版</option>
+                    <option value="compact">精簡排版</option>
+                    <option value="nested_detailed">巢狀詳細排版</option>
+                    <option value="nested_compact">巢狀精簡排版</option>
+                  </select>
+                  <p class="field-help">巢狀分類會掛在排序中上一個一般分類底下。</p>
+                </div>
+                <div class="field">
+                  <label for="section-sort-order">排序</label>
+                  <input id="section-sort-order" name="sort_order" type="number" step="1" min="0" placeholder="未填時自動加 10">
+                </div>
+                <div class="field">
+                  <label class="checkbox-field">
+                    <input name="is_visible" type="checkbox" checked>
+                    <span>前台顯示</span>
+                  </label>
+                </div>
+              </div>
+              <div class="settings-form-actions">
+                <button class="admin-button" type="submit">儲存分類</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="staff-editor" data-item-editor hidden aria-labelledby="item-form-title">
+            <div class="staff-editor-heading">
+              <h2 id="item-form-title">新增品項</h2>
+              <button class="text-button" data-cancel-item type="button">取消</button>
+            </div>
+            <form class="settings-form" data-item-form>
+              <input name="id" type="hidden">
+              <div class="settings-grid">
+                <div class="field">
+                  <label for="item-section">所屬分類</label>
+                  <select id="item-section" name="section_id" required></select>
+                </div>
+                <div class="field">
+                  <label for="item-name">品項名稱</label>
+                  <input id="item-name" name="name" type="text" required>
+                </div>
+                <div class="field settings-grid-full">
+                  <label for="item-description">描述</label>
+                  <textarea id="item-description" name="description" rows="4"></textarea>
+                </div>
+                <div class="field">
+                  <label for="item-price">價格</label>
+                  <input id="item-price" name="price" type="text" required placeholder="+100,000 Gil">
+                </div>
+                <div class="field">
+                  <label for="item-sort-order">排序</label>
+                  <input id="item-sort-order" name="sort_order" type="number" step="1" min="0" placeholder="未填時自動加 10">
+                </div>
+                <div class="field">
+                  <label class="checkbox-field">
+                    <input name="featured" type="checkbox">
+                    <span>強調品項</span>
+                  </label>
+                </div>
+                <div class="field">
+                  <label class="checkbox-field">
+                    <input name="is_visible" type="checkbox" checked>
+                    <span>前台顯示</span>
+                  </label>
+                </div>
+              </div>
+              <div class="settings-form-actions">
+                <button class="admin-button" type="submit">儲存品項</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/admin-auth.js"></script>
+  <script src="../js/admin-menu.js"></script>
+</body>
+</html>
