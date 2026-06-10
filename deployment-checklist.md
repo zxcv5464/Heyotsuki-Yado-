@@ -21,6 +21,11 @@
 - [ ] 確認菜單總覽 `menus.html` 可正常開啟。
 - [ ] 確認湯宿菜單 `menu.html` 可正常開啟。
 - [ ] 確認喫茶菜單 `menu2.html` 可正常開啟。
+- [ ] 確認線上預約 `reservation.html` 可正常載入表單並送出測試資料。
+- [ ] 確認已執行 `supabase/reservation-availability-migration.sql`。
+- [ ] 確認預約日期只列出仍有可用時段的日期，切換日期後時段會同步更新。
+- [ ] 確認第一位與第二位指定湯娘不可選擇同一人。
+- [ ] 確認 `pending` / `confirmed` 的同日期同時段無法建立重複預約。
 - [ ] 確認所有圖片皆能載入，且路徑指向 `assets/images/` 下的正式分類資料夾。
 - [ ] 確認 HTML、CSS、JavaScript 未引用 `_image_backup` 或 `assets/images/originals`。
 
@@ -28,7 +33,8 @@
 
 - [ ] 確認每個頁面的手機底部導覽皆正常顯示與切換。
 - [ ] 確認手機底部「菜單」連到 `menus.html`。
-- [ ] 確認手機底部「預約」使用 `SITE_CONFIG.bookingUrl`。
+- [ ] 確認 `SITE_CONFIG.bookingUrl` 僅保留為站內預約表無法載入時的舊表單 fallback。
+- [ ] 確認手機底部、footer 與桌機右側「預約」皆連到 `reservation.html`。
 - [ ] 確認桌機版「菜單」下拉選單可用。
 - [ ] 確認下拉選單包含「湯宿菜單」與「喫茶菜單」。
 - [ ] 確認 `menus.html` 顯示兩張菜單卡片。
@@ -40,6 +46,8 @@
 
 - [ ] 確認所有 `target="_blank"` 的外部連結皆包含 `rel="noopener noreferrer"`。
 - [ ] 確認預約表單、Threads 與 Discord 連結可正常開啟。
+- [ ] 確認 `supabase/.temp/` 未被 Git 追蹤；此目錄是 Supabase CLI
+      暫存連線資訊，不可部署或提交到 GitHub。
 
 ## Staff 圖片 fallback
 

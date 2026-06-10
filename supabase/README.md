@@ -148,6 +148,24 @@ from public.admin_profiles;
 
 詳細測試請參考 `docs/staff-admin-test.md`。
 
+## 11. 預約管理
+
+Phase 2-A 需要在完成 `supabase/schema.sql` 後，於 SQL Editor 執行：
+
+```text
+supabase/reservations.sql
+```
+
+此檔案會建立預約資料表、表單模板、預約時段、例外日期、預設欄位與 RLS policies。執行後請確認 Table Editor 中可看到 `reservations`、`reservation_form_settings`、`reservation_time_slots`、`reservation_date_overrides`、`reservation_form_fields` 與 `reservation_form_options`。
+
+若 Phase 2-A 基礎表已經建立，再執行：
+
+```text
+supabase/reservation-availability-migration.sql
+```
+
+此 migration 會加入可預約湯娘、第二位指定湯娘、預約日期窗口、公開 availability RPC 與有效時段唯一索引，不會刪除既有預約資料。若既有資料中已存在同日期、同時段且狀態為 `pending` / `confirmed` 的重複預約，請先人工處理衝突資料，再建立唯一索引。
+
 ## 官方文件
 
 - [API keys](https://supabase.com/docs/guides/api/api-keys)

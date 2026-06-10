@@ -5,7 +5,14 @@
 
   window.addEventListener("pageshow", (event) => {
     if (
-      ["dashboard", "settings", "staff", "menu"].includes(page) &&
+      [
+        "dashboard",
+        "settings",
+        "staff",
+        "menu",
+        "reservations",
+        "reservation-form",
+      ].includes(page) &&
       event.persisted
     ) {
       window.location.reload();
@@ -143,7 +150,16 @@
 
   if (page === "login") {
     initLogin();
-  } else if (["dashboard", "settings", "staff", "menu"].includes(page)) {
+  } else if (
+    [
+      "dashboard",
+      "settings",
+      "staff",
+      "menu",
+      "reservations",
+      "reservation-form",
+    ].includes(page)
+  ) {
     initProtectedPage();
   }
 })();

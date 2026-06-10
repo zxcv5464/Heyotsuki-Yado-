@@ -247,6 +247,7 @@
     form.reset();
     form.elements.id.value = "";
     form.elements.is_visible.checked = true;
+    form.elements.is_reservable.checked = true;
     pendingImage = null;
     fileInput.value = "";
     uploadButton.disabled = true;
@@ -269,6 +270,7 @@
       form.elements.role.value = member.role || "";
       form.elements.image_url.value = member.image_url || "";
       form.elements.is_visible.checked = Boolean(member.is_visible);
+      form.elements.is_reservable.checked = Boolean(member.is_reservable);
       form.elements.sort_order.value = member.sort_order ?? "";
       showPreview(member.image_url);
     }
@@ -289,6 +291,9 @@
         const visibility = member.is_visible
           ? '<span class="status-badge status-badge-visible">顯示中</span>'
           : '<span class="status-badge status-badge-hidden">已隱藏</span>';
+        const reservable = member.is_reservable
+          ? '<span class="status-badge status-badge-visible">可指定</span>'
+          : '<span class="status-badge status-badge-hidden">不開放指定</span>';
         return `
           <article class="staff-admin-row${member.is_visible ? "" : " is-hidden"}">
             <div class="staff-order">${escapeHtml(member.sort_order)}</div>
@@ -300,7 +305,7 @@
               <p>${escapeHtml(member.subtitle)}</p>
               <small>${escapeHtml(member.role)}</small>
             </div>
-            <div class="staff-visibility">${visibility}</div>
+            <div class="staff-visibility">${visibility}${reservable}</div>
             <div class="staff-row-actions">
               <button class="text-button" data-edit-id="${escapeHtml(member.id)}" type="button">編輯</button>
               <button class="text-button" data-toggle-id="${escapeHtml(member.id)}" type="button">${member.is_visible ? "隱藏" : "顯示"}</button>
@@ -314,7 +319,7 @@
     const { data, error } = await client
       .from("staff_members")
       .select(
-        "id, name, subtitle, quote, role, image_url, is_visible, sort_order"
+        "id, name, subtitle, quote, role, image_url, is_visible, is_reservable, sort_order"
       )
       .order("sort_order", { ascending: true });
 
@@ -349,6 +354,7 @@
         role: form.elements.role.value.trim(),
         image_url: imageUrl,
         is_visible: form.elements.is_visible.checked,
+        is_reservable: form.elements.is_reservable.checked,
         sort_order: sortInput ? Number(sortInput) : maxSort + 10,
       };
 

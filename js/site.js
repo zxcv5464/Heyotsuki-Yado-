@@ -29,16 +29,22 @@
     if (!config) return;
 
     const menus = Array.isArray(menuData) ? menuData : [];
+    const reservationUrl = "reservation.html";
     document.querySelectorAll("[data-config-href]").forEach((link) => {
       const configKey = link.dataset.configHref;
       const href = config[configKey];
       if (typeof href === "string" && href) {
-        link.href = safeHref(href);
+        if (configKey === "bookingUrl") {
+          link.href = reservationUrl;
+          link.removeAttribute("target");
+          link.removeAttribute("rel");
+        } else {
+          link.href = safeHref(href);
+        }
       }
     });
 
     const page = document.body.dataset.page;
-    const bookingUrl = safeHref(config.bookingUrl);
     const threadsUrl = safeHref(config.threadsUrl);
     const discordUrl = safeHref(config.discordUrl);
     const links = [
@@ -121,7 +127,7 @@
             <div class="flex flex-col gap-8">
               <span class="font-label text-[10px] tracking-[0.5em] text-stone-300 uppercase">Contact</span>
               <div class="flex flex-col gap-4 font-headline text-sm tracking-[0.2em]">
-                <a class="text-red-800 hover:tracking-[0.4em] transition-all duration-700" href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer">線上預約</a>
+                <a class="text-red-800 hover:tracking-[0.4em] transition-all duration-700" href="${reservationUrl}">線上預約</a>
                 <a class="text-stone-500 hover:text-primary transition-all duration-500" href="${escapeHtml(threadsUrl)}" target="_blank" rel="noopener noreferrer">Threads 追蹤</a>
                 <a class="text-stone-500 hover:text-primary transition-all duration-500" href="${escapeHtml(discordUrl)}" target="_blank" rel="noopener noreferrer">Discord 社群</a>
               </div>
@@ -149,7 +155,7 @@
       const mobileLinks = [
         ["index", "index.html", "首頁", icons.home],
         ["menus", "menus.html", "菜單", icons.menu],
-        ["booking", bookingUrl, "預約", icons.booking],
+        ["reservation", reservationUrl, "預約", icons.booking],
         ["staff", "staff.html", "湯娘", icons.staff],
         ["rules", "rules.html", "規範", icons.rules],
       ];
@@ -157,15 +163,11 @@
         <nav class="mobile-bottom-nav md:hidden fixed inset-x-0 bottom-0 bg-white/95 backdrop-blur-xl border-t border-stone-100 grid items-stretch z-50">
           ${mobileLinks
             .map(([key, href, label, icon]) => {
-              const external =
-                key === "booking"
-                  ? ' target="_blank" rel="noopener noreferrer"'
-                  : "";
               const isActive = key === "menus" ? isMenuPage : key === page;
               const stateClass = isActive
                 ? "text-red-800 bg-red-50/80"
                 : "text-stone-400 hover:text-stone-700";
-              return `<a aria-label="${escapeHtml(label)}" class="${stateClass} flex flex-col items-center justify-center gap-1.5 px-1 py-2.5 transition-all duration-300" href="${escapeHtml(safeHref(href))}"${external}>${icon}<span class="font-label text-[10px] leading-none tracking-[0.12em]">${escapeHtml(label)}</span></a>`;
+              return `<a aria-label="${escapeHtml(label)}" class="${stateClass} flex flex-col items-center justify-center gap-1.5 px-1 py-2.5 transition-all duration-300" href="${escapeHtml(safeHref(href))}">${icon}<span class="font-label text-[10px] leading-none tracking-[0.12em]">${escapeHtml(label)}</span></a>`;
             })
             .join("")}
         </nav>`;
@@ -174,7 +176,7 @@
     const booking = document.querySelector("[data-booking-sidebar]");
     if (booking) {
       booking.innerHTML = `
-        <a class="hidden md:flex fixed right-0 top-1/2 -translate-y-1/2 z-[60] bg-primary text-white py-10 px-4 vertical-text font-headline tracking-[0.4em] text-xs hover:bg-stone-800 transition-all duration-500 shadow-[-4px_0_20px_rgba(0,0,0,0.15)] border-l border-stone-700/50 items-center gap-5 group" href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer">
+        <a class="hidden md:flex fixed right-0 top-1/2 -translate-y-1/2 z-[60] bg-primary text-white py-10 px-4 vertical-text font-headline tracking-[0.4em] text-xs hover:bg-stone-800 transition-all duration-500 shadow-[-4px_0_20px_rgba(0,0,0,0.15)] border-l border-stone-700/50 items-center gap-5 group" href="${reservationUrl}">
           ${icons.event}
           <span class="font-medium">立即預約</span>
           <span class="w-[1px] h-8 bg-white/20 mt-2"></span>

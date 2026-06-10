@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport">
+  <title>線上預約 | 嘿月湯宿 HEYOTSUKI YADO</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;400;700&amp;family=Noto+Sans+TC:wght@300;400&amp;family=Manrope:wght@200;400&amp;display=swap" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+  <script src="js/tailwind-config.js"></script>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased selection:bg-tertiary-fixed-dim selection:text-tertiary page-reservation" data-page="reservation">
+  <div data-site-header></div>
+  <main class="reservation-page relative pt-44 pb-40 md:pb-56 overflow-hidden">
+    <div class="absolute inset-0 washi-grain pointer-events-none"></div>
+    <section class="relative z-10 max-w-3xl mx-auto px-6 sm:px-8">
+      <header class="text-center mb-12 animate-reveal">
+        <div class="flex items-center justify-center gap-4 mb-6">
+          <div class="w-10 h-px bg-red-800"></div>
+          <span class="font-label text-red-800 uppercase tracking-[0.5em] text-[10px]">Reservation</span>
+          <div class="w-10 h-px bg-red-800"></div>
+        </div>
+        <h1 class="font-headline text-4xl sm:text-5xl font-bold tracking-[0.2em] text-primary" data-reservation-title>嘿月湯宿 預約表</h1>
+        <p class="reservation-description mt-8 text-stone-500 leading-loose tracking-[0.08em]" data-reservation-description>預約資料載入中。</p>
+      </header>
+
+      <section class="reservation-paper animate-reveal stagger-1">
+        <p class="reservation-message" data-reservation-message role="status" hidden></p>
+        <form data-reservation-form hidden>
+          <div class="reservation-fields" data-reservation-fields></div>
+          <div class="mt-10 flex justify-end">
+            <button class="reservation-submit" type="submit">送出預約</button>
+          </div>
+        </form>
+        <div class="reservation-fallback" data-reservation-fallback hidden>
+          <p>目前無法載入站內預約表，您仍可使用原預約表單。</p>
+          <a href="#" data-reservation-fallback-link target="_blank" rel="noopener noreferrer">前往原預約表單</a>
+        </div>
+      </section>
+    </section>
+  </main>
+  <div data-site-footer></div>
+  <div data-mobile-nav></div>
+  <div data-booking-sidebar></div>
+  <script src="js/site-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/data-provider.js"></script>
+  <script src="js/site.js"></script>
+  <script src="js/reservation.js"></script>
+</body>
+</html>

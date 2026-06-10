@@ -24,6 +24,7 @@ create table if not exists public.staff_members (
   role text,
   image_url text,
   is_visible boolean not null default true,
+  is_reservable boolean not null default true,
   sort_order integer not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
