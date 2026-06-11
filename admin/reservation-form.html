@@ -145,20 +145,34 @@
                 <h2>表單欄位</h2>
                 <p class="field-help">第一版不刪除欄位；不使用的欄位請設為隱藏。</p>
               </div>
+              <button class="admin-button admin-button-small" data-new-field type="button">新增欄位</button>
             </div>
             <div class="menu-admin-list" data-field-list></div>
           </section>
 
           <section class="staff-editor" data-field-editor hidden>
             <div class="staff-editor-heading">
-              <h2>編輯欄位</h2>
+              <h2 data-field-editor-title>編輯欄位</h2>
               <button class="text-button" data-cancel-field type="button">取消</button>
             </div>
             <form class="settings-form" data-field-form>
               <input name="id" type="hidden">
               <div class="settings-grid">
-                <div class="field"><label>欄位識別碼</label><input name="field_key" type="text" readonly></div>
-                <div class="field"><label>欄位類型</label><input name="field_type" type="text" readonly></div>
+                <div class="field">
+                  <label>欄位識別碼</label>
+                  <input name="field_key" type="text" required pattern="[a-z0-9_]+" autocomplete="off" aria-describedby="field-key-help">
+                  <small class="field-help" id="field-key-help">只能使用小寫英文、數字與底線；建立後不可修改。</small>
+                </div>
+                <div class="field">
+                  <label>欄位類型</label>
+                  <select name="field_type" required>
+                    <option value="text">text</option>
+                    <option value="textarea">textarea</option>
+                    <option value="number">number</option>
+                    <option value="radio">radio</option>
+                    <option value="select">select</option>
+                  </select>
+                </div>
                 <div class="field settings-grid-full"><label>標題</label><input name="label" type="text" required></div>
                 <div class="field settings-grid-full"><label>說明文字</label><textarea name="help_text" rows="3"></textarea></div>
                 <div class="field"><label>排序</label><input name="sort_order" type="number" min="0" step="1"></div>

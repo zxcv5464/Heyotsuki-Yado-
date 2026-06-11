@@ -80,6 +80,93 @@
                     <span>前台顯示</span>
                   </label>
                 </div>
+                <div class="field settings-grid-full">
+                  <h3 class="menu-order-settings-title">點餐欄位設定</h3>
+                  <p class="field-help">以下設定只影響此店的點餐頁，不影響公開菜單內容。</p>
+                </div>
+                <div class="field">
+                  <label for="menu-order-customer-label">客人欄位名稱</label>
+                  <input id="menu-order-customer-label" name="order_customer_label" type="text" placeholder="角色 ID">
+                </div>
+                <div class="field">
+                  <label class="checkbox-field">
+                    <input name="order_contact_visible" type="checkbox" checked>
+                    <span>顯示聯絡方式</span>
+                  </label>
+                  <label class="checkbox-field">
+                    <input name="order_contact_required" type="checkbox">
+                    <span>聯絡方式必填</span>
+                  </label>
+                </div>
+                <div class="field">
+                  <label class="checkbox-field">
+                    <input name="order_note_visible" type="checkbox" checked>
+                    <span>顯示整筆訂單備註</span>
+                  </label>
+                  <label class="checkbox-field">
+                    <input name="order_note_required" type="checkbox">
+                    <span>整筆訂單備註必填</span>
+                  </label>
+                </div>
+                <div class="field settings-grid-full">
+                  <h3 class="menu-order-settings-title">點餐營業設定</h3>
+                  <p class="field-help">營業判斷使用台灣時間，與網站顯示用營業文字分開管理。</p>
+                </div>
+                <div class="field">
+                  <label for="menu-order-acceptance-mode">點餐開放模式</label>
+                  <select id="menu-order-acceptance-mode" name="order_acceptance_mode">
+                    <option value="auto">依營業時間自動開放</option>
+                    <option value="open">手動開放</option>
+                    <option value="closed">手動關閉</option>
+                  </select>
+                  <p class="field-help" data-order-mode-hint>依照營業日與營業時間自動開關。</p>
+                </div>
+                <div class="field">
+                  <label for="menu-order-slot-minutes">時間間隔（分鐘）</label>
+                  <input id="menu-order-slot-minutes" name="order_time_slot_minutes" type="number" min="5" max="180" step="5" value="30">
+                </div>
+                <fieldset class="weekday-fieldset settings-grid-full">
+                  <legend>開放星期</legend>
+                  <div class="admin-option-staff-grid">
+                    <label class="checkbox-field"><input data-order-weekday type="checkbox" value="0" checked><span>星期日</span></label>
+                    <label class="checkbox-field"><input data-order-weekday type="checkbox" value="1"><span>星期一</span></label>
+                    <label class="checkbox-field"><input data-order-weekday type="checkbox" value="2"><span>星期二</span></label>
+                    <label class="checkbox-field"><input data-order-weekday type="checkbox" value="3"><span>星期三</span></label>
+                    <label class="checkbox-field"><input data-order-weekday type="checkbox" value="4"><span>星期四</span></label>
+                    <label class="checkbox-field"><input data-order-weekday type="checkbox" value="5" checked><span>星期五</span></label>
+                    <label class="checkbox-field"><input data-order-weekday type="checkbox" value="6" checked><span>星期六</span></label>
+                  </div>
+                </fieldset>
+                <div class="field">
+                  <label for="menu-order-open-time">開放時間</label>
+                  <input id="menu-order-open-time" name="order_open_time" type="text" inputmode="numeric" pattern="(?:[01]\d|2[0-3]):[0-5]\d|24:00" placeholder="21:00" required>
+                </div>
+                <div class="field">
+                  <label for="menu-order-close-time">關閉時間</label>
+                  <input id="menu-order-close-time" name="order_close_time" type="text" inputmode="numeric" pattern="(?:[01]\d|2[0-3]):[0-5]\d|24:00" placeholder="24:00" required>
+                  <p class="field-help">開始 22:00、結束 01:00 會自動視為跨日營業。</p>
+                </div>
+                <div class="field">
+                  <label for="menu-order-time-label">時間欄位名稱</label>
+                  <input id="menu-order-time-label" name="order_time_label" type="text" placeholder="用餐時間">
+                  <label class="checkbox-field">
+                    <input name="order_time_visible" type="checkbox" checked>
+                    <span>顯示用餐／出餐時間欄位</span>
+                  </label>
+                  <label class="checkbox-field">
+                    <input name="order_time_required" type="checkbox" checked>
+                    <span>時間必填</span>
+                  </label>
+                  <p class="field-help">即使隱藏此欄位，營業時間仍會用來判斷是否開放點餐。</p>
+                </div>
+                <div class="field">
+                  <label for="menu-order-closed-message">關閉提示</label>
+                  <textarea id="menu-order-closed-message" name="order_closed_message" rows="3" placeholder="目前非營業時間，暫不開放點餐"></textarea>
+                </div>
+                <div class="field settings-grid-full">
+                  <label for="menu-order-manual-notice">手動開放提示</label>
+                  <input id="menu-order-manual-notice" name="order_manual_notice" type="text" placeholder="目前開放點餐">
+                </div>
               </div>
               <div class="settings-form-actions">
                 <button class="admin-button" type="submit">儲存菜單資料</button>
@@ -189,6 +276,11 @@
                   <input id="item-sort-order" name="sort_order" type="number" step="1" min="0" placeholder="未填時自動加 10">
                 </div>
                 <div class="field">
+                  <label for="item-order-limit">本日限量</label>
+                  <input id="item-order-limit" name="order_limit_quantity" type="number" step="1" min="0" placeholder="留空代表不限量">
+                  <p class="field-help">填 0 代表售完／不可點。</p>
+                </div>
+                <div class="field">
                   <label class="checkbox-field">
                     <input name="featured" type="checkbox">
                     <span>強調品項</span>
@@ -200,9 +292,88 @@
                     <span>前台顯示</span>
                   </label>
                 </div>
+                <div class="field">
+                  <label class="checkbox-field">
+                    <input name="is_orderable" type="checkbox" checked>
+                    <span>開放前台點餐</span>
+                  </label>
+                </div>
+                <div class="field">
+                  <label class="checkbox-field">
+                    <input name="allow_item_note" type="checkbox" checked>
+                    <span>顯示品項備註欄位</span>
+                  </label>
+                </div>
+                <div class="field">
+                  <label class="checkbox-field">
+                    <input name="requires_staff_selection" type="checkbox">
+                    <span>點餐時必須選擇湯娘／員工</span>
+                  </label>
+                </div>
+                <div class="field settings-grid-full">
+                  <label for="item-staff-selection-label">選擇欄位文字</label>
+                  <input id="item-staff-selection-label" name="staff_selection_label" type="text" placeholder="請選擇湯娘的獨門料理">
+                  <p class="field-help">留空時使用預設文字。此設定只影響點餐頁，不影響公開菜單。</p>
+                </div>
               </div>
               <div class="settings-form-actions">
                 <button class="admin-button" type="submit">儲存品項</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="staff-editor" data-option-editor hidden aria-labelledby="option-manager-title">
+            <div class="staff-editor-heading">
+              <div>
+                <h2 id="option-manager-title">加購選項</h2>
+                <p class="field-help" data-option-item-label></p>
+              </div>
+              <button class="text-button" data-close-option-manager type="button">關閉</button>
+            </div>
+            <div class="menu-admin-list" data-order-option-list></div>
+            <form class="settings-form admin-order-option-form" data-order-option-form>
+              <input name="id" type="hidden">
+              <div class="settings-grid">
+                <div class="field">
+                  <label for="order-option-label">名稱</label>
+                  <input id="order-option-label" name="label" type="text" required>
+                </div>
+                <div class="field">
+                  <label for="order-option-sort">排序</label>
+                  <input id="order-option-sort" name="sort_order" type="number" step="1">
+                </div>
+                <div class="field settings-grid-full">
+                  <label for="order-option-description">說明</label>
+                  <textarea id="order-option-description" name="description" rows="2"></textarea>
+                </div>
+                <div class="field">
+                  <label for="order-option-amount">加購金額</label>
+                  <input id="order-option-amount" name="price_delta_amount" type="number" step="1" value="0" required>
+                </div>
+                <div class="field">
+                  <label for="order-option-price-text">顯示價格</label>
+                  <input id="order-option-price-text" name="price_delta_text" type="text" placeholder="+20,000 Gil">
+                </div>
+                <div class="field">
+                  <label class="checkbox-field">
+                    <input name="requires_staff_capability" type="checkbox">
+                    <span>需要員工具備此加購能力</span>
+                  </label>
+                </div>
+                <div class="field">
+                  <label class="checkbox-field">
+                    <input name="is_visible" type="checkbox" checked>
+                    <span>前台顯示</span>
+                  </label>
+                </div>
+                <fieldset class="weekday-fieldset settings-grid-full" data-option-staff-fieldset hidden>
+                  <legend>可提供此加購的員工</legend>
+                  <div class="admin-option-staff-grid" data-option-staff-list></div>
+                </fieldset>
+              </div>
+              <div class="settings-form-actions">
+                <button class="admin-button" type="submit">儲存加購選項</button>
+                <button class="admin-button admin-button-secondary" data-reset-order-option type="button">新增另一個</button>
               </div>
             </form>
           </section>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>品項員工設定 | 嘿月湯宿後台</title>
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body" data-admin-page="order-specials">
+  <div class="admin-shell">
+    <header class="admin-header">
+      <div>
+        <p class="admin-eyebrow">HEYOTSUKI YADO</p>
+        <h1>品項員工設定</h1>
+      </div>
+      <nav class="admin-header-actions" aria-label="後台操作">
+        <a class="admin-button admin-button-secondary admin-button-link" href="index.html">返回首頁</a>
+        <button class="admin-button admin-button-secondary" type="button" data-sign-out>登出</button>
+      </nav>
+    </header>
+
+    <main class="admin-main">
+      <section class="admin-panel" data-specials-access hidden>
+        <div class="admin-section-heading">
+          <div>
+            <p class="admin-eyebrow">ORDER SPECIALS</p>
+            <h2>品項可選員工</h2>
+          </div>
+        </div>
+        <p class="admin-help">每個品項各自設定可選員工，不會共用全店名單，也不使用預約的 is_reservable。</p>
+        <div class="admin-tabs" data-special-shop-tabs aria-label="選擇店別"></div>
+        <label class="admin-field admin-special-item-select">
+          <span>選擇品項</span>
+          <select data-special-item-select></select>
+        </label>
+        <div class="admin-message" data-specials-message role="status" aria-live="polite"></div>
+        <div class="admin-special-list" data-specials-list></div>
+      </section>
+
+      <section class="admin-panel" data-specials-denied hidden>
+        <h2>此帳號沒有品項員工設定權限</h2>
+        <p>只有 owner 或 admin 可以管理品項可選員工。</p>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/admin-auth.js"></script>
+  <script src="../js/admin-order-specials.js"></script>
+</body>
+</html>
