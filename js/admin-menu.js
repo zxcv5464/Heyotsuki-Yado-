@@ -11,6 +11,7 @@
   const itemForm = document.querySelector("[data-item-form]");
   const sectionEditor = document.querySelector("[data-section-editor]");
   const itemEditor = document.querySelector("[data-item-editor]");
+  const optionEditor = document.querySelector("[data-option-editor]");
   const sectionList = document.querySelector("[data-section-list]");
   const itemList = document.querySelector("[data-item-list]");
   const newSectionButton = document.querySelector("[data-new-section]");
@@ -18,12 +19,22 @@
   const currentKeyBadge = document.querySelector("[data-current-menu-key]");
   const itemSectionLabel = document.querySelector("[data-item-section-label]");
   const itemSectionSelect = itemForm?.elements.namedItem("section_id");
+  const optionForm = document.querySelector("[data-order-option-form]");
+  const optionList = document.querySelector("[data-order-option-list]");
+  const optionItemLabel = document.querySelector("[data-option-item-label]");
+  const optionStaffFieldset = document.querySelector("[data-option-staff-fieldset]");
+  const optionStaffList = document.querySelector("[data-option-staff-list]");
+  const orderModeHint = document.querySelector("[data-order-mode-hint]");
 
   let currentMenuKey = "menu";
   let menuData = null;
   let sections = [];
   let items = [];
   let selectedSectionId = null;
+  let optionItemId = null;
+  let orderOptions = [];
+  let optionStaffRows = [];
+  let staffMembers = [];
 
   const escapeHtml = (value) =>
     String(value ?? "")
@@ -54,6 +65,36 @@
       ? '<span class="status-badge status-badge-visible">顯示中</span>'
       : '<span class="status-badge status-badge-hidden">已隱藏</span>';
 
+  const formatMinuteValue = (minute) => {
+    const value = Number(minute);
+    if (!Number.isFinite(value)) return "";
+    if (value === 1440) return "24:00";
+    const normalized = ((value % 1440) + 1440) % 1440;
+    return `${String(Math.floor(normalized / 60)).padStart(2, "0")}:${String(
+      normalized % 60
+    ).padStart(2, "0")}`;
+  };
+
+  const parseTimeValue = (value) => {
+    const match = String(value || "").trim().match(/^(\d{2}):(\d{2})$/);
+    if (!match) return null;
+    const hour = Number(match[1]);
+    const minute = Number(match[2]);
+    if (hour === 24 && minute === 0) return 1440;
+    if (hour > 23 || minute > 59) return null;
+    return hour * 60 + minute;
+  };
+
+  const syncOrderModeHint = () => {
+    const mode = menuForm.elements.order_acceptance_mode.value;
+    const messages = {
+      auto: "依照營業日與營業時間自動開關。",
+      open: "目前會強制開放點餐。",
+      closed: "目前會強制關閉點餐。"
+    };
+    orderModeHint.textContent = messages[mode] || messages.auto;
+  };
+
   const fillMenuForm = () => {
     if (!menuData) return;
     menuForm.elements.title.value = menuData.title || "";
@@ -63,6 +104,45 @@
     menuForm.elements.href.value = menuData.href || "";
     menuForm.elements.is_visible.checked = Boolean(menuData.is_visible);
     menuForm.elements.sort_order.value = menuData.sort_order ?? "";
+    menuForm.elements.order_customer_label.value =
+      menuData.order_customer_label || "角色 ID";
+    menuForm.elements.order_contact_visible.checked =
+      menuData.order_contact_visible !== false;
+    menuForm.elements.order_contact_required.checked = Boolean(
+      menuData.order_contact_required
+    );
+    menuForm.elements.order_note_visible.checked =
+      menuData.order_note_visible !== false;
+    menuForm.elements.order_note_required.checked = Boolean(
+      menuData.order_note_required
+    );
+    menuForm.elements.order_acceptance_mode.value =
+      menuData.order_acceptance_mode || "auto";
+    const weekdays = new Set(menuData.order_open_weekdays || [5, 6, 0]);
+    document.querySelectorAll("[data-order-weekday]").forEach((checkbox) => {
+      checkbox.checked = weekdays.has(Number(checkbox.value));
+    });
+    menuForm.elements.order_open_time.value = formatMinuteValue(
+      menuData.order_open_minute ?? 1260
+    );
+    menuForm.elements.order_close_time.value = formatMinuteValue(
+      menuData.order_close_minute ?? 1440
+    );
+    menuForm.elements.order_time_slot_minutes.value =
+      menuData.order_time_slot_minutes ?? 30;
+    menuForm.elements.order_time_label.value =
+      menuData.order_time_label || "用餐時間";
+    menuForm.elements.order_time_visible.checked =
+      menuData.order_time_visible !== false;
+    menuForm.elements.order_time_required.checked =
+      menuData.order_time_required !== false;
+    menuForm.elements.order_closed_message.value =
+      menuData.order_closed_message || "";
+    menuForm.elements.order_manual_notice.value =
+      menuData.order_manual_notice || "";
+    syncMenuRequirementControls();
+    syncTimeFieldControls();
+    syncOrderModeHint();
     currentKeyBadge.textContent = currentMenuKey;
   };
 
@@ -141,12 +221,17 @@
                 <strong>${escapeHtml(item.name)}</strong>
                 ${item.featured ? '<span class="status-badge status-badge-featured">強調</span>' : ""}
                 ${statusBadge(item.is_visible)}
+                ${item.is_orderable ? '<span class="status-badge status-badge-visible">可點餐</span>' : '<span class="status-badge status-badge-hidden">不開放點餐</span>'}
+                ${item.requires_staff_selection ? '<span class="status-badge status-badge-featured">需選擇人員</span>' : ""}
+                ${item.order_limit_quantity == null ? "" : `<span class="status-badge ${Number(item.order_limit_quantity) === 0 ? "status-badge-hidden" : "status-badge-featured"}">本日限量 ${escapeHtml(item.order_limit_quantity)}</span>`}
+                ${item.allow_item_note === false ? '<span class="status-badge status-badge-hidden">無品項備註</span>' : ""}
               </div>
               <p>${escapeHtml(item.description || "")}</p>
               <small>${escapeHtml(item.price)} ・ 排序 ${escapeHtml(item.sort_order)}</small>
             </div>
             <div class="menu-admin-row-actions">
               <button class="text-button" data-edit-item="${escapeHtml(item.id)}" type="button">編輯</button>
+              <button class="text-button" data-manage-options="${escapeHtml(item.id)}" type="button">加購選項</button>
               <button class="text-button" data-toggle-item="${escapeHtml(item.id)}" type="button">${item.is_visible ? "隱藏" : "顯示"}</button>
             </div>
           </article>`
@@ -172,7 +257,7 @@
       client
         .from("menus")
         .select(
-          "key, title, short_title, english_title, description, href, theme, is_visible, sort_order"
+          "key, title, short_title, english_title, description, href, theme, is_visible, sort_order, order_customer_label, order_contact_visible, order_contact_required, order_note_visible, order_note_required, order_acceptance_mode, order_open_weekdays, order_open_minute, order_close_minute, order_time_slot_minutes, order_time_label, order_time_visible, order_time_required, order_closed_message, order_manual_notice"
         )
         .eq("key", currentMenuKey)
         .maybeSingle(),
@@ -205,7 +290,7 @@
       const itemResult = await client
         .from("menu_items")
         .select(
-          "id, section_id, name, description, price, featured, is_visible, sort_order"
+          "id, section_id, name, description, price, featured, is_visible, sort_order, is_orderable, requires_staff_selection, staff_selection_label, order_limit_quantity, allow_item_note"
         )
         .in("section_id", sectionIds)
         .order("sort_order", { ascending: true });
@@ -254,7 +339,223 @@
     itemForm.reset();
     itemForm.elements.id.value = "";
     itemForm.elements.is_visible.checked = true;
+    itemForm.elements.is_orderable.checked = true;
+    itemForm.elements.allow_item_note.checked = true;
+    itemForm.elements.requires_staff_selection.checked = false;
+    itemForm.elements.order_limit_quantity.value = "";
+    itemForm.elements.staff_selection_label.value =
+      "請選擇湯娘的獨門料理";
     itemEditor.hidden = true;
+  };
+
+  const formatOptionPrice = (option) =>
+    option.price_delta_text ||
+    `${Number(option.price_delta_amount) >= 0 ? "+" : ""}${Number(
+      option.price_delta_amount || 0
+    ).toLocaleString("en-US")} Gil`;
+
+  const resetOptionForm = () => {
+    optionForm.reset();
+    optionForm.elements.id.value = "";
+    optionForm.elements.price_delta_amount.value = "0";
+    optionForm.elements.is_visible.checked = true;
+    optionForm.elements.requires_staff_capability.checked = false;
+    syncOptionStaffFieldset();
+    renderOptionStaff([]);
+  };
+
+  const renderOptionStaff = (selectedIds) => {
+    const selected = new Set(selectedIds || []);
+    optionStaffList.innerHTML = staffMembers.map((staff) => `
+      <label class="checkbox-field">
+        <input type="checkbox" value="${escapeHtml(staff.id)}" data-option-staff-id${selected.has(staff.id) ? " checked" : ""}>
+        <span>${escapeHtml(staff.name)}${staff.is_visible ? "" : "（員工已隱藏）"}</span>
+      </label>
+    `).join("");
+  };
+
+  const syncOptionStaffFieldset = () => {
+    optionStaffFieldset.hidden =
+      !optionForm.elements.requires_staff_capability.checked;
+  };
+
+  const renderOrderOptions = () => {
+    if (!orderOptions.length) {
+      optionList.innerHTML = '<p class="empty-state">此品項尚無加購選項。</p>';
+      return;
+    }
+    optionList.innerHTML = orderOptions.map((option) => `
+      <article class="menu-admin-row${option.is_visible ? "" : " is-hidden"}">
+        <div class="menu-admin-row-main">
+          <div class="menu-admin-row-title">
+            <strong>${escapeHtml(option.label)}</strong>
+            ${statusBadge(option.is_visible)}
+            ${option.requires_staff_capability ? '<span class="status-badge status-badge-featured">限定員工</span>' : ""}
+          </div>
+          <p>${escapeHtml(option.description || "")}</p>
+          <small>${escapeHtml(formatOptionPrice(option))} ・ 排序 ${escapeHtml(option.sort_order)}</small>
+        </div>
+        <div class="menu-admin-row-actions">
+          <button class="text-button" data-edit-order-option="${escapeHtml(option.id)}" type="button">編輯</button>
+          <button class="text-button" data-toggle-order-option="${escapeHtml(option.id)}" type="button">${option.is_visible ? "隱藏" : "顯示"}</button>
+        </div>
+      </article>
+    `).join("");
+  };
+
+  const loadOrderOptions = async () => {
+    const [
+      optionsResult,
+      staffResult,
+      itemStaffResult,
+      capabilityResult
+    ] = await Promise.all([
+      client
+        .from("menu_item_order_options")
+        .select("id, menu_item_id, label, description, price_delta_amount, price_delta_text, requires_staff_capability, is_visible, sort_order")
+        .eq("menu_item_id", optionItemId)
+        .order("sort_order", { ascending: true }),
+      client
+        .from("staff_members")
+        .select("id, name, is_visible, sort_order")
+        .order("sort_order", { ascending: true }),
+      client
+        .from("menu_item_staff_options")
+        .select("staff_id")
+        .eq("menu_item_id", optionItemId)
+        .eq("is_visible", true),
+      client
+        .from("menu_item_order_option_staff")
+        .select("id, option_id, staff_id, is_visible, sort_order")
+    ]);
+    const error =
+      optionsResult.error ||
+      staffResult.error ||
+      itemStaffResult.error ||
+      capabilityResult.error;
+    if (error) throw error;
+    orderOptions = optionsResult.data || [];
+    const itemStaffIds = new Set(
+      (itemStaffResult.data || []).map((row) => row.staff_id)
+    );
+    staffMembers = (staffResult.data || []).filter((staff) =>
+      itemStaffIds.has(staff.id)
+    );
+    optionStaffRows = capabilityResult.data || [];
+    if (!optionForm.elements.id.value) renderOptionStaff([]);
+    renderOrderOptions();
+  };
+
+  const openOptionManager = async (itemId) => {
+    const item = items.find((entry) => entry.id === itemId);
+    if (!item) return;
+    optionItemId = itemId;
+    optionItemLabel.textContent = `目前品項：${item.name}`;
+    resetOptionForm();
+    optionEditor.hidden = false;
+    try {
+      await loadOrderOptions();
+      optionEditor.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (error) {
+      setMessage(`加購選項讀取失敗：${error.message}`);
+    }
+  };
+
+  const editOrderOption = (option) => {
+    optionForm.elements.id.value = option.id;
+    optionForm.elements.label.value = option.label || "";
+    optionForm.elements.description.value = option.description || "";
+    optionForm.elements.price_delta_amount.value =
+      option.price_delta_amount ?? 0;
+    optionForm.elements.price_delta_text.value =
+      option.price_delta_text || "";
+    optionForm.elements.requires_staff_capability.checked = Boolean(
+      option.requires_staff_capability
+    );
+    optionForm.elements.is_visible.checked = Boolean(option.is_visible);
+    optionForm.elements.sort_order.value = option.sort_order ?? 0;
+    syncOptionStaffFieldset();
+    renderOptionStaff(
+      optionStaffRows
+        .filter((row) => row.option_id === option.id && row.is_visible)
+        .map((row) => row.staff_id)
+    );
+  };
+
+  const saveOrderOption = async (event) => {
+    event.preventDefault();
+    const button = optionForm.querySelector('button[type="submit"]');
+    setBusy(button, true);
+    const id = optionForm.elements.id.value;
+    const payload = {
+      menu_item_id: optionItemId,
+      label: optionForm.elements.label.value.trim(),
+      description: optionForm.elements.description.value.trim() || null,
+      price_delta_amount:
+        Number(optionForm.elements.price_delta_amount.value) || 0,
+      price_delta_text:
+        optionForm.elements.price_delta_text.value.trim() || null,
+      requires_staff_capability:
+        optionForm.elements.requires_staff_capability.checked,
+      is_visible: optionForm.elements.is_visible.checked,
+      sort_order: Number(optionForm.elements.sort_order.value) || 0
+    };
+    let optionId = id;
+    const result = id
+      ? await client
+          .from("menu_item_order_options")
+          .update(payload)
+          .eq("id", id)
+          .select("id")
+          .single()
+      : await client
+          .from("menu_item_order_options")
+          .insert(payload)
+          .select("id")
+          .single();
+    if (result.error) {
+      setBusy(button, false);
+      setMessage(`加購選項儲存失敗：${result.error.message}`);
+      return;
+    }
+    optionId = result.data.id;
+    if (payload.requires_staff_capability) {
+      const selectedIds = [
+        ...optionStaffList.querySelectorAll("[data-option-staff-id]:checked")
+      ].map((input) => input.value);
+      const allRows = staffMembers.map((staff, index) => ({
+        option_id: optionId,
+        staff_id: staff.id,
+        is_visible: selectedIds.includes(staff.id),
+        sort_order: index * 10
+      }));
+      if (allRows.length) {
+        const { error } = await client
+          .from("menu_item_order_option_staff")
+          .upsert(allRows, { onConflict: "option_id,staff_id" });
+        if (error) {
+          setBusy(button, false);
+          setMessage(`加購員工能力儲存失敗：${error.message}`);
+          return;
+        }
+      }
+    }
+    setBusy(button, false);
+    setMessage("加購選項已儲存。", "success");
+    resetOptionForm();
+    await loadOrderOptions();
+  };
+
+  const toggleOrderOption = async (option) => {
+    const { error } = await client
+      .from("menu_item_order_options")
+      .update({ is_visible: !option.is_visible })
+      .eq("id", option.id);
+    if (error) {
+      setMessage(`加購選項狀態更新失敗：${error.message}`);
+      return;
+    }
+    await loadOrderOptions();
   };
 
   const openItemEditor = (item = null) => {
@@ -273,6 +574,16 @@
       itemForm.elements.price.value = item.price || "";
       itemForm.elements.featured.checked = Boolean(item.featured);
       itemForm.elements.is_visible.checked = Boolean(item.is_visible);
+      itemForm.elements.is_orderable.checked = Boolean(item.is_orderable);
+      itemForm.elements.allow_item_note.checked =
+        item.allow_item_note !== false;
+      itemForm.elements.order_limit_quantity.value =
+        item.order_limit_quantity ?? "";
+      itemForm.elements.requires_staff_selection.checked = Boolean(
+        item.requires_staff_selection
+      );
+      itemForm.elements.staff_selection_label.value =
+        item.staff_selection_label || "請選擇湯娘的獨門料理";
       itemForm.elements.sort_order.value = item.sort_order ?? "";
     }
     itemEditor.hidden = false;
@@ -284,6 +595,28 @@
     setMessage("");
     const button = menuForm.querySelector('button[type="submit"]');
     setBusy(button, true);
+    const openMinute = parseTimeValue(
+      menuForm.elements.order_open_time.value
+    );
+    let closeMinute = parseTimeValue(
+      menuForm.elements.order_close_time.value
+    );
+    if (openMinute === null || closeMinute === null) {
+      setBusy(button, false);
+      setMessage("請以 HH:MM 格式填寫點餐營業時間。");
+      return;
+    }
+    if (closeMinute <= openMinute && closeMinute < 1440) {
+      closeMinute += 1440;
+    }
+    if (closeMinute <= openMinute || closeMinute > 2880) {
+      setBusy(button, false);
+      setMessage("關閉時間必須晚於開放時間，跨日結束時間可填 01:00。");
+      return;
+    }
+    const weekdays = [
+      ...document.querySelectorAll("[data-order-weekday]:checked")
+    ].map((checkbox) => Number(checkbox.value));
     const payload = {
       title: menuForm.elements.title.value.trim(),
       short_title: menuForm.elements.short_title.value.trim(),
@@ -291,6 +624,35 @@
       description: menuForm.elements.description.value.trim(),
       is_visible: menuForm.elements.is_visible.checked,
       sort_order: Number(menuForm.elements.sort_order.value) || 0,
+      order_customer_label:
+        menuForm.elements.order_customer_label.value.trim() || "角色 ID",
+      order_contact_visible:
+        menuForm.elements.order_contact_visible.checked,
+      order_contact_required:
+        menuForm.elements.order_contact_visible.checked &&
+        menuForm.elements.order_contact_required.checked,
+      order_note_visible: menuForm.elements.order_note_visible.checked,
+      order_note_required:
+        menuForm.elements.order_note_visible.checked &&
+        menuForm.elements.order_note_required.checked,
+      order_acceptance_mode:
+        menuForm.elements.order_acceptance_mode.value,
+      order_open_weekdays: weekdays,
+      order_open_minute: openMinute,
+      order_close_minute: closeMinute,
+      order_time_slot_minutes:
+        Number(menuForm.elements.order_time_slot_minutes.value) || 30,
+      order_time_label:
+        menuForm.elements.order_time_label.value.trim() || "用餐時間",
+      order_time_visible:
+        menuForm.elements.order_time_visible.checked,
+      order_time_required:
+        menuForm.elements.order_time_visible.checked &&
+        menuForm.elements.order_time_required.checked,
+      order_closed_message:
+        menuForm.elements.order_closed_message.value.trim() || null,
+      order_manual_notice:
+        menuForm.elements.order_manual_notice.value.trim() || null,
     };
     const { error } = await client
       .from("menus")
@@ -348,6 +710,8 @@
     const id = itemForm.elements.id.value;
     const sectionId = itemForm.elements.section_id.value;
     const sortValue = itemForm.elements.sort_order.value.trim();
+    const limitValue =
+      itemForm.elements.order_limit_quantity.value.trim();
     const maxSort = items
       .filter((item) => item.section_id === sectionId)
       .reduce(
@@ -361,6 +725,14 @@
       price: itemForm.elements.price.value.trim(),
       featured: itemForm.elements.featured.checked,
       is_visible: itemForm.elements.is_visible.checked,
+      is_orderable: itemForm.elements.is_orderable.checked,
+      allow_item_note: itemForm.elements.allow_item_note.checked,
+      order_limit_quantity: limitValue === "" ? null : Number(limitValue),
+      requires_staff_selection:
+        itemForm.elements.requires_staff_selection.checked,
+      staff_selection_label:
+        itemForm.elements.staff_selection_label.value.trim() ||
+        "請選擇湯娘的獨門料理",
       sort_order: sortValue ? Number(sortValue) : maxSort + 10,
     };
     const query = id
@@ -418,6 +790,28 @@
     await loadCurrentMenu();
   };
 
+  const syncMenuRequirementControls = () => {
+    const contactVisible = menuForm.elements.order_contact_visible.checked;
+    const noteVisible = menuForm.elements.order_note_visible.checked;
+    menuForm.elements.order_contact_required.disabled = !contactVisible;
+    menuForm.elements.order_note_required.disabled = !noteVisible;
+    if (!contactVisible) {
+      menuForm.elements.order_contact_required.checked = false;
+    }
+    if (!noteVisible) {
+      menuForm.elements.order_note_required.checked = false;
+    }
+  };
+
+  const syncTimeFieldControls = () => {
+    const visible = menuForm.elements.order_time_visible.checked;
+    menuForm.elements.order_time_label.disabled = !visible;
+    menuForm.elements.order_time_required.disabled = !visible;
+    if (!visible) {
+      menuForm.elements.order_time_required.checked = false;
+    }
+  };
+
   document.querySelectorAll("[data-menu-key]").forEach((button) => {
     button.addEventListener("click", async () => {
       const key = button.dataset.menuKey;
@@ -430,8 +824,38 @@
     });
   });
   menuForm?.addEventListener("submit", saveMenu);
+  menuForm?.elements.order_contact_visible.addEventListener(
+    "change",
+    syncMenuRequirementControls
+  );
+  menuForm?.elements.order_note_visible.addEventListener(
+    "change",
+    syncMenuRequirementControls
+  );
+  menuForm?.elements.order_acceptance_mode.addEventListener(
+    "change",
+    syncOrderModeHint
+  );
+  menuForm?.elements.order_time_visible.addEventListener(
+    "change",
+    syncTimeFieldControls
+  );
   sectionForm?.addEventListener("submit", saveSection);
   itemForm?.addEventListener("submit", saveItem);
+  optionForm?.addEventListener("submit", saveOrderOption);
+  optionForm?.elements.requires_staff_capability.addEventListener(
+    "change",
+    syncOptionStaffFieldset
+  );
+  document
+    .querySelector("[data-reset-order-option]")
+    ?.addEventListener("click", resetOptionForm);
+  document
+    .querySelector("[data-close-option-manager]")
+    ?.addEventListener("click", () => {
+      optionEditor.hidden = true;
+      optionItemId = null;
+    });
   newSectionButton?.addEventListener("click", () => openSectionEditor());
   newItemButton?.addEventListener("click", () => openItemEditor());
   document
@@ -465,10 +889,29 @@
   itemList?.addEventListener("click", (event) => {
     const edit = event.target.closest("[data-edit-item]");
     const toggle = event.target.closest("[data-toggle-item]");
+    const manageOptions = event.target.closest("[data-manage-options]");
     if (edit) {
       openItemEditor(items.find((item) => item.id === edit.dataset.editItem));
+    } else if (manageOptions) {
+      openOptionManager(manageOptions.dataset.manageOptions);
     } else if (toggle) {
       toggleItem(toggle.dataset.toggleItem);
+    }
+  });
+
+  optionList?.addEventListener("click", (event) => {
+    const edit = event.target.closest("[data-edit-order-option]");
+    const toggle = event.target.closest("[data-toggle-order-option]");
+    if (edit) {
+      const option = orderOptions.find(
+        (entry) => entry.id === edit.dataset.editOrderOption
+      );
+      if (option) editOrderOption(option);
+    } else if (toggle) {
+      const option = orderOptions.find(
+        (entry) => entry.id === toggle.dataset.toggleOrderOption
+      );
+      if (option) toggleOrderOption(option);
     }
   });
 

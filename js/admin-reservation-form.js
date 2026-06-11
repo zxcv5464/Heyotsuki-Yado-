@@ -2,6 +2,14 @@
   const client = window.SUPABASE_CLIENT;
   const editableRoles = new Set(["owner", "admin"]);
   const optionFieldTypes = new Set(["radio", "select"]);
+  const creatableFieldTypes = new Set([
+    "text",
+    "textarea",
+    "number",
+    "radio",
+    "select",
+  ]);
+  const fieldKeyPattern = /^[a-z0-9_]+$/;
 
   const workspace = document.querySelector("[data-form-workspace]");
   const readonlyMessage = document.querySelector("[data-form-readonly]");
@@ -264,19 +272,33 @@
     overrideEditor.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const openField = (field) => {
-    if (!field) return;
+  const openField = (field = null) => {
     closeEditor(fieldEditor, fieldForm);
-    fieldForm.elements.id.value = field.id;
-    fieldForm.elements.field_key.value = field.field_key;
-    fieldForm.elements.field_type.value = field.field_type;
-    fieldForm.elements.label.value = field.label;
-    fieldForm.elements.help_text.value = field.help_text || "";
-    fieldForm.elements.sort_order.value = field.sort_order;
-    fieldForm.elements.required.checked = field.required;
-    fieldForm.elements.is_visible.checked = field.is_visible;
-    selectedFieldId = field.id;
-    renderOptions();
+    document.querySelector("[data-field-editor-title]").textContent = field
+      ? "編輯欄位"
+      : "新增欄位";
+    fieldForm.elements.field_key.readOnly = Boolean(field);
+    fieldForm.elements.field_type.disabled = Boolean(field);
+    if (field) {
+      fieldForm.elements.id.value = field.id;
+      fieldForm.elements.field_key.value = field.field_key;
+      fieldForm.elements.field_type.value = field.field_type;
+      fieldForm.elements.label.value = field.label;
+      fieldForm.elements.help_text.value = field.help_text || "";
+      fieldForm.elements.sort_order.value = field.sort_order;
+      fieldForm.elements.required.checked = field.required;
+      fieldForm.elements.is_visible.checked = field.is_visible;
+      selectedFieldId = field.id;
+      renderOptions();
+    } else {
+      const maxSort = fields.reduce(
+        (max, entry) => Math.max(max, Number(entry.sort_order) || 0),
+        0
+      );
+      fieldForm.elements.field_type.value = "text";
+      fieldForm.elements.sort_order.value = maxSort + 10;
+      fieldForm.elements.is_visible.checked = true;
+    }
     fieldEditor.hidden = false;
     fieldEditor.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -385,6 +407,22 @@
     event.preventDefault();
     if (!canEdit) return;
     const id = fieldForm.elements.id.value;
+    const fieldKey = fieldForm.elements.field_key.value.trim();
+    const fieldType = fieldForm.elements.field_type.value;
+    if (!fieldKeyPattern.test(fieldKey)) {
+      setMessage("欄位識別碼只能使用小寫英文、數字與底線。");
+      fieldForm.elements.field_key.focus();
+      return;
+    }
+    if (!id && fields.some((field) => field.field_key === fieldKey)) {
+      setMessage("欄位識別碼已存在，請使用其他名稱。");
+      fieldForm.elements.field_key.focus();
+      return;
+    }
+    if (!id && !creatableFieldTypes.has(fieldType)) {
+      setMessage("新增欄位類型只能使用 text、textarea、number、radio 或 select。");
+      return;
+    }
     const payload = {
       label: fieldForm.elements.label.value.trim(),
       help_text: fieldForm.elements.help_text.value.trim() || null,
@@ -392,14 +430,36 @@
       is_visible: fieldForm.elements.is_visible.checked,
       sort_order: Number(fieldForm.elements.sort_order.value) || 0,
     };
-    const { error } = await client
-      .from("reservation_form_fields")
-      .update(payload)
-      .eq("id", id);
-    if (error) setMessage(`欄位儲存失敗：${error.message}`);
+    const query = id
+      ? client.from("reservation_form_fields").update(payload).eq("id", id)
+      : client
+          .from("reservation_form_fields")
+          .insert({
+            ...payload,
+            field_key: fieldKey,
+            field_type: fieldType,
+          })
+          .select("id")
+          .single();
+    const { data, error } = await query;
+    if (error) {
+      if (
+        error.code === "23505" ||
+        /reservation_form_fields_field_key_key|duplicate key/i.test(
+          error.message || ""
+        )
+      ) {
+        setMessage("欄位識別碼已存在，請使用其他名稱。");
+      } else {
+        setMessage(`欄位儲存失敗：${error.message}`);
+      }
+    }
     else {
       closeEditor(fieldEditor, fieldForm);
-      setMessage("表單欄位已儲存。", "success");
+      if (!id && data?.id) {
+        selectedFieldId = data.id;
+      }
+      setMessage(id ? "表單欄位已儲存。" : "新欄位已建立。", "success");
       await loadData();
     }
   });
@@ -446,6 +506,7 @@
 
   document.querySelector("[data-new-slot]")?.addEventListener("click", () => openSlot());
   document.querySelector("[data-new-override]")?.addEventListener("click", () => openOverride());
+  document.querySelector("[data-new-field]")?.addEventListener("click", () => openField());
   document.querySelector("[data-new-option]")?.addEventListener("click", () => openOption());
   document.querySelector("[data-cancel-slot]")?.addEventListener("click", () => closeEditor(slotEditor, slotForm));
   document.querySelector("[data-cancel-override]")?.addEventListener("click", () => closeEditor(overrideEditor, overrideForm));

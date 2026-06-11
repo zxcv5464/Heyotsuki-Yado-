@@ -12,6 +12,9 @@
         "menu",
         "reservations",
         "reservation-form",
+        "orders",
+        "order-specials",
+        "reports",
       ].includes(page) &&
       event.persisted
     ) {
@@ -132,7 +135,9 @@
     document.body.dataset.authReady = "true";
     window.ADMIN_PROFILE = profile;
     window.dispatchEvent(
-      new CustomEvent("admin-auth-ready", { detail: profile })
+      new CustomEvent("admin-auth-ready", {
+        detail: { ...profile, profile, session, client },
+      })
     );
 
     const signOutButton = document.querySelector("[data-sign-out]");
@@ -158,6 +163,9 @@
       "menu",
       "reservations",
       "reservation-form",
+      "orders",
+      "order-specials",
+      "reports",
     ].includes(page)
   ) {
     initProtectedPage();
