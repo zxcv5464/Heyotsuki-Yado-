@@ -1,0 +1,34 @@
+# 點餐銷售報表測試
+
+- [ ] 重新執行 `supabase/orders.sql` 成功。
+- [ ] 執行 `supabase/order-reports.sql` 成功。
+- [ ] owner 可以查看湯宿與喫茶報表。
+- [ ] admin 可以查看湯宿與喫茶報表。
+- [ ] staff 只能查看 `can_view_orders = true` 的店別報表。
+- [ ] staff 無法查看未授權店別報表。
+- [ ] 沒有任何店別權限的 staff 會看到拒絕訊息。
+- [ ] anon 無法執行報表 RPC。
+- [ ] 選擇單一 `business_date` 可算出當日總金額。
+- [ ] 選擇日期區間可合併統計。
+- [ ] 跨日營業凌晨訂單會計入前一個 `business_date`。
+- [ ] 報表預設日期符合目前店別的營業日。
+- [ ] `pending`、`accepted`、`preparing`、`served` 預設列入。
+- [ ] `cancelled` 預設不列入。
+- [ ] 勾選 `cancelled` 後可列入。
+- [ ] `deleted_at is not null` 永遠不列入。
+- [ ] 訂單數只計算符合條件的 orders。
+- [ ] 大項 subtotal 正確。
+- [ ] 小項 subtotal 正確。
+- [ ] 品項數量加總正確。
+- [ ] 加購金額列入原品項 subtotal。
+- [ ] `line_total_amount_snapshot` 缺少時會使用價格與加購快照 fallback。
+- [ ] 無法計算金額的品項以 0 計入並顯示 warning。
+- [ ] 舊訂單沒有 section snapshot 時仍可產生報表。
+- [ ] 無法關聯分類的舊訂單會歸入「未分類」。
+- [ ] CSV 使用 UTF-8 BOM，Excel 開啟中文不亂碼。
+- [ ] CSV 金額欄位是純數字。
+- [ ] CSV 文字欄位不會觸發試算表公式。
+- [ ] CSV 檔名包含 shop key 與日期區間。
+- [ ] 複製文字摘要成功。
+- [ ] 手機版可選條件、查看報表與操作匯出按鈕。
+- [ ] 使用者輸入不會在報表頁執行 HTML 或 script。

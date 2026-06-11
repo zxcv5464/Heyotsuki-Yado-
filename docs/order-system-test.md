@@ -1,0 +1,118 @@
+# Phase 2-B-1 測試清單
+
+- [ ] SQL Editor 執行 `supabase/orders.sql` 成功。
+- [ ] `order-yado.html` 可讀取 `menu` 的可點餐品項。
+- [ ] `order-kissa.html` 可讀取 `menu2` 的可點餐品項。
+- [ ] 客人不登入也能送出點餐。
+- [ ] `customer_name` 必填。
+- [ ] 至少要選一個品項。
+- [ ] 隱藏版未選人員時不能送出。
+- [ ] 沒有 `menu_item_staff_options` 時，需要人員的品項不可點選。
+- [ ] 送出後 `admin/orders.html` 看得到訂單。
+- [ ] `order_items` 保存 `item_name_snapshot` 與 `price_snapshot`。
+- [ ] 修改菜單品項名稱後，舊訂單仍顯示快照舊名稱。
+- [ ] 隱藏品項或取消 `is_orderable` 後，點餐頁不再顯示。
+- [ ] staff 只授權 `menu` 時，只能看到湯宿訂單。
+- [ ] staff 只授權 `menu2` 時，只能看到喫茶訂單。
+- [ ] staff 沒有 `can_update_orders` 時不能修改訂單。
+- [ ] staff 有 `can_update_orders` 時可以修改狀態與管理備註。
+- [ ] 刪除訂單需要二次確認。
+- [ ] 軟刪除後預設不顯示，勾選後可查看。
+- [ ] 使用者輸入的 HTML／script 只以文字顯示，不會執行。
+- [ ] anon 無法直接 select 或 insert `orders`、`order_items`。
+- [ ] `get_public_order_menu` 不會回傳品項員工或加購能力的內部備註。
+- [ ] `order_limit_quantity` 留空時，品項不限量。
+- [ ] `order_limit_quantity = 0` 時，前台顯示售完且不可點。
+- [ ] `order_limit_quantity = 1` 時，成功送出一份後剩餘量變成 0。
+- [ ] 兩個瀏覽器同時送出同一限量品項時，資料庫不會超賣。
+- [ ] `cancelled` 訂單不占用本日限量。
+- [ ] `deleted_at is not null` 的訂單不占用本日限量。
+- [ ] 本日限量以 `Asia/Taipei` 日期計算。
+- [ ] `allow_item_note = false` 時，前台不顯示品項備註且 RPC 寫入 null。
+- [ ] `allow_item_note = true` 時，前台可填寫品項備註。
+- [ ] `order_contact_visible = false` 時，前台不顯示聯絡方式。
+- [ ] `order_note_visible = false` 時，前台不顯示整筆訂單備註。
+- [ ] contact／note 的 required 只在對應 visible 為 true 時生效。
+- [ ] 客人欄位顯示店別設定的 label，預設為「角色 ID」。
+- [ ] 隱藏版可新增兩筆，並分別選擇不同湯娘／員工。
+- [ ] 後台訂單逐筆顯示同名隱藏版及各自指定人員。
+- [ ] 成功送出後重新讀取菜單，剩餘數量會更新。
+- [ ] `submit_order` 會再次驗證限量與 `menu_item_staff_options`。
+- [ ] A／B 設定為湯娘隱藏版可選員工。
+- [ ] B／C 設定為拍立得可選員工。
+- [ ] 湯娘隱藏版前台只顯示 A／B。
+- [ ] 拍立得前台只顯示 B／C。
+- [ ] 拍立得可建立「簽繪版本 +20,000 Gil」加購。
+- [ ] 只有 C 設定為可提供簽繪。
+- [ ] 未勾簽繪時，拍立得可選 B／C。
+- [ ] 勾選簽繪後，拍立得只可選 C。
+- [ ] 已選 B 再勾簽繪時，員工選擇會被清空。
+- [ ] 同一訂單可送出隱藏版 A、隱藏版 B、拍立得 B、簽繪拍立得 C。
+- [ ] `submit_order` 保存 `selected_options_snapshot`。
+- [ ] 後台訂單顯示加購內容與 line 小計。
+- [ ] 訂單總金額包含加購金額。
+- [ ] 傳入不屬於該品項的 option ID 時，RPC 會拒絕。
+- [ ] 傳入不具加購能力的 staff ID 時，RPC 會拒絕。
+- [ ] 新版前台不再使用全店 `staff_order_specials`。
+- [ ] `order_acceptance_mode = closed` 時，前台顯示關閉原因且不可點餐。
+- [ ] `order_acceptance_mode = open` 時，即使目前不是營業時間仍可點餐。
+- [ ] `order_acceptance_mode = auto` 時，只在設定星期與時間內開放。
+- [ ] 非營業時間直接惡意呼叫 `submit_order` 仍會被 RPC 拒絕。
+- [ ] 開放狀態下會顯示 `requested_time` 選單。
+- [ ] `requested_time` 必填時，未選擇不能送出。
+- [ ] 傳入不在 `order_time_slots` 的時間時，RPC 會拒絕。
+- [ ] 成功點餐後，`orders.requested_time` 與 `business_date` 正確寫入。
+- [ ] `admin/orders.html` 會顯示用餐／出餐時間與營業日期。
+- [ ] 22:00 到 01:00 設為 `1320` 到 `1500`，00:30 仍屬前一營業日。
+- [ ] 營業時間判斷使用 `Asia/Taipei`，不解析 `site_settings` 顯示文字。
+- [ ] 新增營業時間功能後，限量、加購與品項級員工選擇仍正常。
+- [ ] staff 店別查看、更新與刪除權限仍正常。
+- [ ] 點餐成立後會以非阻斷方式呼叫 Discord Edge Function。
+- [ ] `order_time_visible = true` 時，前台顯示用餐／出餐時間欄位。
+- [ ] `order_time_visible = false` 時，前台不顯示時間欄位。
+- [ ] `order_time_visible = false` 時，送出的 `requested_time` 為 null。
+- [ ] `order_time_visible = false` 時，非營業時間仍會被 RPC 拒絕。
+- [ ] `order_time_visible = true` 且 required 時，未選時間不能送出。
+- [ ] `order_contact_visible = false` 時，前台與後台都不顯示聯絡方式。
+- [ ] `order_note_visible = false` 時，前台與後台都不顯示客人備註。
+- [ ] 後台搜尋在 contact hidden 時不會搜尋舊訂單的 contact。
+- [ ] 後台角色欄位使用 `order_customer_label`。
+- [ ] 後台時間欄位使用 `order_time_label`。
+- [ ] 欄位顯示調整後，限量、加購及品項級員工選擇仍正常。
+- [ ] 欄位顯示調整後，staff 店別權限仍正常。
+- [ ] 新訂單送出後，`admin/orders.html` 顯示頁內提示。
+- [ ] 點擊新訂單提示後會重新載入列表並清除目前店別未讀。
+- [ ] 正在編輯 `admin_note` 時，新訂單不會自動重繪中斷輸入。
+- [ ] 有未儲存變更時，點擊重新載入會先要求確認。
+- [ ] 提示音預設關閉。
+- [ ] 啟用提示音後，新訂單會播放短提示音。
+- [ ] 關閉提示音後，新訂單不播放聲音。
+- [ ] 提示音設定保存於 `heyotsuki.orderSoundEnabled`。
+- [ ] 有新訂單未讀時，`document.title` 顯示未讀數。
+- [ ] 清除未讀後，`document.title` 恢復原標題。
+- [ ] 有未讀新訂單時，分頁 favicon 顯示紅圈未讀數。
+- [ ] 清除該店未讀後，favicon 恢復原圖示。
+- [ ] staff 只收到有權限店別的新訂單提示與 badge。
+- [ ] 湯宿 staff 不會看到喫茶新訂單提示。
+- [ ] Realtime 正常、失敗或資料表尚未加入 publication 時，每 30 秒安全輪詢都會保持運作並以訂單 ID 去重。
+- [ ] 品項顯示順序為品項名與數量、指定、單價、加購、小計。
+- [ ] 單價不再重複加上 `options_amount_snapshot`。
+- [ ] 多個加購會顯示為獨立清單。
+- [ ] 舊訂單缺少 `selected_options_snapshot` 或小計時仍可顯示。
+- [ ] 勾選啟用提示音後會播放一次確認音，狀態顯示提示音已啟用。
+- [ ] 提示音使用清楚的雙音，不依賴外部音檔。
+- [ ] 正常點餐後 Discord 收到「出餐通知」。
+- [ ] 推播成功後 `orders.discord_status` 為 `sent`。
+- [ ] 推播成功後 `orders.discord_notified_at` 有時間。
+- [ ] Webhook 故意設錯時，點餐仍然成立。
+- [ ] Webhook 設錯時 `discord_status` 為 `failed`。
+- [ ] 後台可以看到 `discord_last_error`。
+- [ ] owner／admin 可以從後台重新推送 Discord。
+- [ ] staff 不會看到重新推送 Discord 按鈕。
+- [ ] 前台再次呼叫已為 `sent` 的訂單時不會重複推送。
+- [ ] 軟刪除訂單不會被推送。
+- [ ] 店別隱藏聯絡方式時，Discord 不顯示聯絡方式欄位。
+- [ ] 店別隱藏整筆備註時，Discord 不顯示客人備註欄位。
+- [ ] 店別隱藏用餐時間時，Discord 不顯示用餐資訊欄位。
+- [ ] Discord 出餐內容正確顯示加購選項與品項小計。
+- [ ] 舊訂單缺少加購或小計快照時，Discord 推播不會壞掉。
