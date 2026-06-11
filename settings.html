@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>網站設定管理 | 嘿月湯宿後台</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&amp;family=Noto+Sans+TC:wght@400;500;700&amp;display=swap" rel="stylesheet">
+  <link href="../css/admin.css" rel="stylesheet">
+</head>
+<body class="dashboard-page" data-admin-page="settings">
+  <div class="dashboard-content">
+    <header class="dashboard-header">
+      <div class="admin-shell dashboard-header-inner">
+        <a class="dashboard-brand dashboard-brand-link" href="index.html">嘿月湯宿後台</a>
+        <div class="dashboard-actions">
+          <a class="admin-button admin-button-secondary admin-button-link" href="index.html">返回首頁</a>
+          <button class="admin-button admin-button-secondary" data-sign-out type="button">登出</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-shell dashboard-main">
+      <section class="settings-panel">
+        <p class="admin-eyebrow">Site Settings</p>
+        <h1 class="admin-title">網站設定管理</h1>
+        <p class="admin-description">
+          登入者：<strong data-admin-name>讀取中</strong>　
+          角色：<strong data-admin-role>讀取中</strong>
+        </p>
+
+        <p class="permission-message" data-settings-denied hidden>
+          此帳號沒有設定管理權限。
+        </p>
+
+        <p class="auth-message settings-message" data-auth-message data-settings-message role="status" hidden></p>
+
+        <form class="settings-form" data-settings-form hidden>
+          <div class="settings-grid">
+            <div class="field">
+              <label for="bookingUrl">預約表單網址</label>
+              <input id="bookingUrl" name="bookingUrl" type="url" required>
+            </div>
+            <div class="field">
+              <label for="discordUrl">Discord 連結</label>
+              <input id="discordUrl" name="discordUrl" type="url" required>
+            </div>
+            <div class="field">
+              <label for="threadsUrl">Threads 連結</label>
+              <input id="threadsUrl" name="threadsUrl" type="url" required>
+            </div>
+            <div class="field">
+              <label for="address">地址</label>
+              <input id="address" name="address" type="text" required>
+            </div>
+            <div class="field">
+              <label for="openingDays">營業日</label>
+              <input id="openingDays" name="openingDays" type="text" required>
+            </div>
+            <div class="field">
+              <label for="openingHours">營業時間</label>
+              <input id="openingHours" name="openingHours" type="text" required>
+            </div>
+            <div class="field settings-grid-full">
+              <label for="status">目前狀態</label>
+              <input id="status" name="status" type="text" required>
+            </div>
+          </div>
+          <div class="settings-form-actions">
+            <button class="admin-button" type="submit">儲存設定</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script src="../js/site-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/admin-auth.js"></script>
+  <script src="../js/admin-settings.js"></script>
+</body>
+</html>
