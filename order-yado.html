@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport">
+  <title>湯宿點餐 | 嘿月湯宿 HEYOTSUKI YADO</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;400;700&amp;family=Noto+Sans+TC:wght@300;400&amp;family=Manrope:wght@200;400&amp;display=swap" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+  <script src="js/tailwind-config.js"></script>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased page-order" data-page="order-yado" data-shop-key="menu">
+  <div data-site-header></div>
+  <main class="order-page relative pt-44 pb-40 md:pb-56 overflow-hidden">
+    <div class="absolute inset-0 washi-grain pointer-events-none"></div>
+    <section class="relative z-10 max-w-6xl mx-auto px-6 sm:px-8">
+      <header class="text-center mb-12 animate-reveal">
+        <p class="font-label text-red-800 uppercase tracking-[0.5em] text-[10px]">Order</p>
+        <h1 class="font-headline text-4xl sm:text-5xl font-bold tracking-[0.2em] text-primary mt-5" data-order-title>湯宿點餐</h1>
+        <p class="mt-6 text-stone-500 leading-loose tracking-[0.08em]" data-order-description>請選擇本次需要的餐點與飲品。</p>
+      </header>
+      <p class="reservation-message" data-order-message role="status" hidden></p>
+      <section class="order-closed-panel" data-order-closed-panel hidden>
+        <h2>目前未開放點餐</h2>
+        <p data-order-closed-message>目前非營業時間，暫不開放點餐。</p>
+      </section>
+      <div class="order-layout">
+        <div class="order-menu-paper" data-order-menu>
+          <p class="order-loading">點餐菜單載入中...</p>
+        </div>
+        <aside class="order-cart-paper">
+          <h2>本次點餐</h2>
+          <div data-order-summary><p class="order-empty">尚未選擇品項。</p></div>
+          <form data-order-form>
+            <div class="order-customer-fields">
+              <label data-order-time-field><span class="order-field-heading"><span data-order-time-label>用餐時間</span><span class="order-required-mark" data-order-time-required>必填</span></span><select name="requested_time" data-order-time-select required><option value="">請選擇時間</option></select></label>
+              <label data-order-customer-field><span class="order-field-heading"><span data-order-customer-label>角色 ID</span><span class="order-required-mark">必填</span></span><input name="customer_name" type="text" required></label>
+              <label data-order-contact-field><span class="order-field-heading">聯絡方式<span class="order-required-mark" data-order-contact-required hidden>必填</span></span><input name="contact" type="text"></label>
+              <label data-order-note-field><span class="order-field-heading">備註<span class="order-required-mark" data-order-note-required hidden>必填</span></span><textarea name="note" rows="4"></textarea></label>
+            </div>
+            <button class="reservation-submit order-submit" type="submit">送出點餐</button>
+          </form>
+        </aside>
+      </div>
+    </section>
+  </main>
+  <div data-site-footer></div>
+  <div data-mobile-nav></div>
+  <div data-booking-sidebar></div>
+  <script src="js/site-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/data-provider.js"></script>
+  <script src="js/site.js"></script>
+  <script src="js/order.js"></script>
+</body>
+</html>

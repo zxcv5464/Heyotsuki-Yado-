@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>湯娘 | 嘿月湯宿 HEYOTSUKI YADO</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;400;700&amp;family=Noto+Sans+TC:wght@300;400&amp;family=Manrope:wght@200;400&amp;display=swap" rel="stylesheet"/>
+<link href="css/style.css" rel="stylesheet"/>
+<script src="js/tailwind-config.js"></script>
+
+</head><body class="bg-surface text-on-surface font-body selection:bg-tertiary-fixed-dim selection:text-tertiary page-staff" data-page="staff">
+<!-- Top Navigation Bar -->
+<div data-site-header></div>
+<main class="relative pt-48 pb-32 overflow-hidden">
+<div class="absolute inset-0 washi-grain pointer-events-none"></div>
+<!-- Hero Header -->
+<div class="mb-24 flex flex-col items-center text-center px-6 animate-reveal">
+<div class="flex items-center gap-4 mb-6">
+<div class="w-10 h-[1px] bg-red-800"></div>
+<span class="font-label text-red-800 uppercase tracking-[0.5em] text-[10px]">嘿月湯娘 儀式守護</span>
+<div class="w-10 h-[1px] bg-red-800"></div>
+</div>
+<h2 class="font-headline text-5xl md:text-7xl font-bold mb-8 tracking-[0.3em] text-primary">湯娘</h2>
+<p class="max-w-2xl text-lg text-stone-500 leading-loose yubaku-spacing">
+            溫柔體貼的湯娘。微笑接待的月娘。演奏樂器的琴娘。<br/>每一位夥伴都將畢生的體貼與溫柔，帶入您的月下湯泉之旅。
+        </p>
+<div class="mt-12 w-[1px] h-20 bg-primary/20"></div>
+</div>
+<!-- Staff Grid -->
+<div id="staff-grid" class="max-w-screen-2xl mx-auto px-8 md:px-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12 lg:gap-16"></div>
+<!-- CTA Section -->
+<div class="mt-32 max-w-screen-xl mx-auto p-16 bg-[#1e1b17] relative overflow-hidden flex flex-col items-center text-center animate-reveal stagger-4">
+<div class="absolute inset-0 washi-grain opacity-20 pointer-events-none"></div>
+<div class="relative z-10">
+<h3 class="font-headline text-3xl font-bold mb-6 text-white tracking-[0.3em]">您也是嘿月的追求者嗎？</h3>
+<p class="text-stone-400 mb-10 max-w-lg mx-auto font-body leading-loose tracking-wider">月色之下，我們正在尋找願意一起陪伴客人一起完成溫柔接待的人。</p>
+<a class="px-14 py-5 bg-red-900 text-white font-label text-[10px] tracking-[0.5em] hover:bg-red-800 transition-all duration-500 uppercase border border-red-900 inline-block" data-config-href="discordUrl" href="#" target="_blank" rel="noopener noreferrer">洽詢加入 / DC群組</a>
+</div>
+</div>
+</main>
+<!-- Footer Section -->
+<div data-site-footer></div>
+<div data-mobile-nav></div>
+<div data-booking-sidebar></div>
+<script src="js/site-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/data-staff.js"></script>
+<script src="js/data-provider.js"></script>
+<script src="js/site.js"></script>
+<script src="js/staff.js"></script>
+</body></html>
