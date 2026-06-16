@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>遊戲卡管理 | 嘿月湯宿後台</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&amp;family=Noto+Sans+TC:wght@400;500;700&amp;display=swap" rel="stylesheet">
+  <link href="../css/admin.css" rel="stylesheet">
+</head>
+<body class="dashboard-page" data-admin-page="game-cards">
+  <div class="dashboard-content">
+    <header class="dashboard-header">
+      <div class="admin-shell dashboard-header-inner">
+        <a class="dashboard-brand dashboard-brand-link" href="index.html">嘿月湯宿後台</a>
+        <div class="dashboard-actions">
+          <a class="admin-button admin-button-secondary admin-button-link" href="staff.html">湯娘管理</a>
+          <a class="admin-button admin-button-secondary admin-button-link" href="index.html">返回首頁</a>
+          <button class="admin-button admin-button-secondary" data-sign-out type="button">登出</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-shell dashboard-main">
+      <section class="settings-panel">
+        <div class="admin-section-heading">
+          <div>
+            <p class="admin-eyebrow">Game Staff Cards</p>
+            <h1 class="admin-title">遊戲卡管理</h1>
+            <p class="admin-description">
+              登入者：<strong data-admin-name>讀取中</strong>　
+              角色：<strong data-admin-role>讀取中</strong>
+            </p>
+            <p class="admin-description">
+              季節固定由月份推導。專用卡面未設定時，遊戲沿用一般湯娘照片。
+            </p>
+          </div>
+          <button class="admin-button" data-auto-assign type="button" hidden>自動分配未設定卡片</button>
+        </div>
+
+        <p class="permission-message" data-game-card-denied hidden>
+          此帳號沒有遊戲卡管理權限。
+        </p>
+        <p class="auth-message settings-message" data-auth-message data-game-card-message role="status" hidden></p>
+
+        <div data-game-card-content hidden>
+          <section class="game-card-summary" aria-label="遊戲卡摘要">
+            <article>
+              <span>員工總數</span>
+              <strong data-summary-total>0</strong>
+            </article>
+            <article>
+              <span>可進入新卡池</span>
+              <strong data-summary-active>0</strong>
+            </article>
+            <article>
+              <span>未設定</span>
+              <strong data-summary-unset>0</strong>
+            </article>
+            <article>
+              <span>有效卡標準</span>
+              <strong data-summary-standard>22 張</strong>
+            </article>
+          </section>
+
+          <section class="game-card-distributions" aria-label="卡片分布">
+            <div>
+              <h2>月份分布</h2>
+              <div class="distribution-grid distribution-months" data-month-distribution></div>
+            </div>
+            <div>
+              <h2>印記分布</h2>
+              <div class="distribution-grid" data-mark-distribution></div>
+            </div>
+          </section>
+
+          <section class="game-card-filters" aria-label="遊戲卡篩選">
+            <label class="field">
+              <span>設定狀態</span>
+              <select data-filter-status>
+                <option value="all">全部</option>
+                <option value="unset">未設定</option>
+                <option value="enabled">遊戲啟用</option>
+                <option value="disabled">遊戲停用</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>官網顯示狀態</span>
+              <select data-filter-visibility>
+                <option value="all">全部</option>
+                <option value="visible">顯示中</option>
+                <option value="hidden">已隱藏</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>搜尋名稱</span>
+              <input data-filter-search type="search" placeholder="輸入湯娘名稱">
+            </label>
+          </section>
+
+          <section class="staff-editor game-card-editor" data-game-card-editor hidden aria-labelledby="game-card-form-title">
+            <div class="staff-editor-heading">
+              <div>
+                <p class="admin-eyebrow">Card Settings</p>
+                <h2 id="game-card-form-title">編輯遊戲卡</h2>
+              </div>
+              <button class="text-button" data-cancel-game-card type="button">取消</button>
+            </div>
+            <form class="settings-form" data-game-card-form>
+              <input name="staff_id" type="hidden">
+              <div class="settings-grid">
+                <div class="field">
+                  <label for="game-card-staff-name">湯娘</label>
+                  <input id="game-card-staff-name" name="staff_name" type="text" readonly>
+                </div>
+                <div class="field">
+                  <label for="game-card-month">月份</label>
+                  <select id="game-card-month" name="month_no" required></select>
+                </div>
+                <div class="field">
+                  <label for="game-card-season">季節</label>
+                  <input id="game-card-season" name="season" type="text" readonly>
+                </div>
+                <div class="field">
+                  <label for="game-card-mark">印記</label>
+                  <select id="game-card-mark" name="mark" required>
+                    <option value="moon">月印</option>
+                    <option value="bell">鈴印</option>
+                    <option value="fan">扇印</option>
+                    <option value="knot">結印</option>
+                  </select>
+                </div>
+                <div class="field settings-grid-full">
+                  <label for="game-card-title">卡片標題</label>
+                  <input id="game-card-title" name="card_title" type="text" maxlength="120">
+                </div>
+                <div class="field settings-grid-full">
+                  <label for="game-card-image-url">遊戲專用圖片網址</label>
+                  <input id="game-card-image-url" name="card_image_url" type="url">
+                  <p class="field-help">留空時沿用一般湯娘照片。</p>
+                </div>
+                <div class="field settings-grid-full">
+                  <label for="game-card-image-file">上傳遊戲專用卡面</label>
+                  <input id="game-card-image-file" data-game-card-image-file type="file" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif">
+                  <p class="field-help">圖片會等比例縮放至 600 × 800 以內、轉成 WebP，並使用長期快取；每次更換圖片會建立新網址，因此不會顯示舊圖片。上傳至 <code>heyotsuki-images/game-cards/</code>，GIF 僅取第一幀。</p>
+                </div>
+                <div class="field">
+                  <label class="checkbox-field">
+                    <input name="is_game_enabled" type="checkbox" checked>
+                    <span>允許進入新遊戲卡池</span>
+                  </label>
+                </div>
+                <div class="game-card-preview" data-game-card-preview>
+                  <div class="game-card-preview-image">
+                    <img data-game-card-preview-image alt="遊戲卡預覽" hidden>
+                    <span data-game-card-preview-empty>沒有可用圖片</span>
+                  </div>
+                  <div class="game-card-preview-copy">
+                    <span data-game-card-preview-month>月份未設定</span>
+                    <strong data-game-card-preview-name>湯娘名稱</strong>
+                    <small data-game-card-preview-meta>季節・印記</small>
+                    <p data-game-card-preview-title></p>
+                  </div>
+                </div>
+              </div>
+              <div class="settings-form-actions staff-form-actions">
+                <button class="admin-button admin-button-secondary" data-upload-game-card-image type="button" disabled>上傳專用圖片</button>
+                <button class="admin-button" type="submit">儲存遊戲卡設定</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="staff-list-section">
+            <div class="staff-list-heading">
+              <h2>湯娘遊戲卡</h2>
+              <span data-game-card-count></span>
+            </div>
+            <div class="game-card-admin-list" data-game-card-list></div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/admin-auth.js"></script>
+  <script src="../js/admin-game-cards.js"></script>
+</body>
+</html>

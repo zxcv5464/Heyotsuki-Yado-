@@ -29,12 +29,13 @@
 - [ ] PNG 上傳前轉成 WebP，透明背景可保留。
 - [ ] WebP 仍重新縮放及壓縮成 WebP。
 - [ ] GIF 僅取第一幀並轉成 WebP，不保留動畫。
-- [ ] 大圖只縮小、不放大，尺寸不超過 1200 × 1600。
-- [ ] 輸出 quality 為 0.82。
+- [ ] 大圖只縮小、不放大，尺寸不超過 600 × 800。
+- [ ] 輸出 quality 為 0.76。
 - [ ] 上傳路徑符合 `staff/{yyyyMMdd-HHmmss}-{slug}.webp`。
 - [ ] 無法產生英文 slug 時使用 `staff`。
 - [ ] 同名檔案衝突時自動更換 timestamp，不覆蓋既有圖片。
-- [ ] 上傳使用 `contentType: image/webp` 與 `upsert: false`。
+- [ ] 上傳使用 `contentType: image/webp`、`cacheControl: 31536000` 與 `upsert: false`。
+- [ ] 新圖片回應標頭包含 `max-age=31536000` 或 `public, max-age=31536000`。
 - [ ] 上傳成功後，`image_url` 自動填入 `heyotsuki-images` 的 public URL。
 - [ ] 上傳失敗時顯示錯誤，且不清空原本 `image_url`。
 - [ ] 更換圖片不會自動刪除舊 Storage object。

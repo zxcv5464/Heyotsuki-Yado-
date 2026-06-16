@@ -30,7 +30,10 @@
               角色：<strong data-admin-role>讀取中</strong>
             </p>
           </div>
-          <button class="admin-button" data-new-staff type="button" hidden>新增湯娘</button>
+          <div class="admin-header-actions">
+            <a class="admin-button admin-button-secondary admin-button-link" href="game-cards.html">遊戲卡管理</a>
+            <button class="admin-button" data-new-staff type="button" hidden>新增湯娘</button>
+          </div>
         </div>
 
         <p class="permission-message" data-staff-denied hidden>
@@ -73,7 +76,7 @@
               <div class="field settings-grid-full">
                 <label for="staff-image-file">上傳圖片</label>
                 <input id="staff-image-file" data-image-file type="file" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif">
-                <p class="field-help">將在瀏覽器縮放至 1200 × 1600 以內並轉成 WebP；GIF 僅取第一幀。</p>
+                <p class="field-help">圖片會等比例縮放至 600 × 800 以內、轉成 WebP，並使用長期快取；每次更換圖片會建立新網址，因此不會顯示舊圖片。GIF 僅取第一幀。</p>
               </div>
               <div class="field">
                 <label class="checkbox-field">
