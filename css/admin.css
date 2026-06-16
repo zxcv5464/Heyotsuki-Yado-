@@ -773,6 +773,12 @@ a {
   text-decoration: underline;
 }
 
+.text-button-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 .image-preview-panel {
   min-height: 150px;
   display: grid;
@@ -874,6 +880,7 @@ a {
 
 .staff-row-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 4px;
 }
@@ -907,6 +914,168 @@ a {
   min-height: 40px;
   padding: 0 16px;
   font-size: 13px;
+}
+
+.game-card-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 30px;
+}
+
+.game-card-summary article {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: #faf7f3;
+}
+
+.game-card-summary span {
+  color: var(--admin-muted);
+  font-size: 13px;
+}
+
+.game-card-summary strong {
+  font-family: "Noto Serif TC", serif;
+  font-size: 25px;
+}
+
+.game-card-distributions {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  margin-top: 28px;
+}
+
+.game-card-distributions > div {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+}
+
+.game-card-distributions h2 {
+  margin: 0 0 14px;
+  font-family: "Noto Serif TC", serif;
+  font-size: 18px;
+}
+
+.distribution-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.distribution-months {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.distribution-grid div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 11px;
+  border-radius: 8px;
+  background: #f4eee8;
+  font-size: 12px;
+}
+
+.game-card-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+  padding: 20px;
+  border-radius: 12px;
+  background: #f4eee8;
+}
+
+.game-card-editor {
+  scroll-margin-top: 20px;
+}
+
+.game-card-preview {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(150px, 0.7fr) minmax(0, 1.3fr);
+  min-height: 280px;
+  overflow: hidden;
+  border: 1px solid rgba(127, 29, 29, 0.28);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #f5e8db, #fffdf9);
+}
+
+.game-card-preview-image {
+  min-height: 280px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #ded4ca;
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+
+.game-card-preview-image img {
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  object-fit: cover;
+}
+
+.game-card-preview-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 28px;
+}
+
+.game-card-preview-copy span,
+.game-card-preview-copy small {
+  color: var(--admin-accent);
+  font-weight: 700;
+}
+
+.game-card-preview-copy strong {
+  margin-top: 12px;
+  font-family: "Noto Serif TC", serif;
+  font-size: clamp(25px, 5vw, 38px);
+}
+
+.game-card-preview-copy small {
+  margin-top: 10px;
+  color: var(--admin-muted);
+}
+
+.game-card-preview-copy p {
+  min-height: 1.5em;
+  margin: 24px 0 0;
+  color: var(--admin-muted);
+  line-height: 1.7;
+}
+
+.game-card-admin-list {
+  display: grid;
+}
+
+.game-card-admin-row {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr) 130px 110px;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.game-card-admin-row.is-hidden {
+  opacity: 0.68;
+}
+
+.game-card-admin-thumb {
+  width: 80px;
+  height: 104px;
 }
 
 .menu-admin-tabs {
@@ -1504,6 +1673,51 @@ a {
 
   .menu-admin-tabs {
     flex-direction: column;
+  }
+
+  .game-card-summary,
+  .game-card-distributions,
+  .game-card-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .distribution-months {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .game-card-preview {
+    grid-template-columns: 1fr;
+  }
+
+  .game-card-preview-image,
+  .game-card-preview-image img {
+    min-height: 340px;
+  }
+
+  .game-card-admin-row {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .game-card-admin-thumb {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    width: 68px;
+    height: 88px;
+  }
+
+  .game-card-admin-row .staff-summary {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .game-card-admin-row .staff-visibility {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .game-card-admin-row .staff-row-actions {
+    grid-column: 1 / -1;
   }
 
   .menu-management-grid {
