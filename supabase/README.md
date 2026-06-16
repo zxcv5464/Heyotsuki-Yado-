@@ -148,6 +148,71 @@ from public.admin_profiles;
 
 詳細測試請參考 `docs/staff-admin-test.md`。
 
+## 10-A. 遊戲卡設定與專用圖片
+
+遊戲卡設定沿用 `staff_members` 作為員工名稱、一般照片、官網顯示狀態與排序的來源。
+
+依序執行：
+
+```text
+supabase/migrations/20260615090000_game_staff_card_settings.sql
+supabase/migrations/20260615100000_allow_game_card_auto_assign_trusted_roles.sql
+supabase/migrations/20260615103000_fix_game_card_auto_assign_conflict.sql
+supabase/storage.sql
+```
+
+後兩個 migration 是自動分配 hotfix。全新環境的第一個 migration 已包含相同修正；既有環境依序套用尚未執行的 hotfix 即可。
+
+Migration 會建立：
+
+- `public.game_staff_card_settings`
+- `public.get_game_month_catalog()`
+- `public.get_active_game_staff_cards()`
+- `public.auto_assign_unset_game_staff_cards()`
+- updated_at trigger、index、RLS、grants
+
+`get_active_game_staff_cards()` 是正式遊戲卡池的唯一公開讀取介面。它只回傳：
+
+- `staff_members.is_visible = true`
+- `is_game_enabled = true`
+- 月份與印記設定完整
+- 專用圖片或一般員工圖片至少有一個可用值
+
+此 RPC 不會使用 `js/data-staff.js` 或其他本地名單備援。讀取失敗時，正式遊戲必須阻止開局。
+
+Storage 使用同一個 public bucket：
+
+```text
+staff/       官網一般員工照片
+game-cards/  遊戲專用卡面
+```
+
+兩個子目錄都只有有效 owner/admin 可寫入。遊戲專用圖片未設定時，RPC 會沿用 `staff_members.image_url`。
+由於遊戲會獨立部署，正式啟用前必須確認 RPC 回傳的圖片 URL 可由遊戲網域直接載入。既有 seed 中的相對圖片路徑適合官網本身；正式遊戲卡建議將一般照片更新為 Storage public URL，或為該卡設定 `game-cards/` 專用圖片。
+
+月份與季節集中由 `get_game_month_catalog()` 提供：
+
+- 春：1–3 月
+- 夏：4–6 月
+- 秋：7–9 月
+- 冬：10–12 月
+
+後台不提供獨立季節欄位。自動分配 RPC 只新增尚未建立設定的員工，不更新既有設定；月份平手依 1–12 月，印記平手依 moon、bell、fan、knot。
+自動分配可由 owner/admin 後台、Dashboard SQL Editor 或 API `service_role` 執行；anon、一般 authenticated 與 staff 仍會被函式拒絕。
+
+Rollback：
+
+```text
+supabase/migrations/20260615090000_game_staff_card_settings.rollback.sql
+```
+
+Rollback 不會刪除 `staff_members` 或 Storage 圖片。若也要撤回 `game-cards/` 寫入權限，需將 `supabase/storage.sql` 的允許子目錄恢復為只有 `staff` 後重新執行。
+
+驗證文件：
+
+- `supabase/game-card-smoke-test.sql`
+- `docs/game-card-admin-test.md`
+
 ## 11. 預約管理
 
 Phase 2-A 需要在完成 `supabase/schema.sql` 後，於 SQL Editor 執行：

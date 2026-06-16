@@ -1,0 +1,7 @@
+-- Re-apply these migrations in order to restore the previous function bodies:
+-- 1. 20260615134000_explicit_game_exit_and_auto_close.sql
+-- 2. 20260615140000_game_room_turn_timer.sql
+--
+-- Then restore join_game_room(text, text) from
+-- 20260615120000_game_lobby_rooms_chat.sql. Existing room, player, message,
+-- game state, and action rows are intentionally preserved.

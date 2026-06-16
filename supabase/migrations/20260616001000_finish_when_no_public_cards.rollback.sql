@@ -1,0 +1,9 @@
+-- Restore the prior apply_game_action function body by re-applying:
+-- 1. 20260615130000_server_authoritative_gameplay.sql
+-- 2. 20260615135000_randomize_replayed_games_and_public_reselect.sql
+-- 3. 20260615140000_game_room_turn_timer.sql
+-- 4. 20260615141000_harden_active_room_identity.sql
+-- 5. 20260615142000_dynamic_field_refill.sql
+--
+-- This removes the no-public-card terminal condition introduced by
+-- 20260616001000_finish_when_no_public_cards.sql.

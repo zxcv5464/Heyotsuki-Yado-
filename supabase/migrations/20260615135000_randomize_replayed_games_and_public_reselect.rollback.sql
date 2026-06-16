@@ -1,0 +1,14 @@
+-- Rollback for 20260615135000_randomize_replayed_games_and_public_reselect.sql
+--
+-- Re-apply these migrations in order to restore the previous Phase 4 function
+-- bodies, then re-apply any later hotfixes that should remain active:
+--
+--   1. 20260615130000_server_authoritative_gameplay.sql
+--   2. 20260615131000_fix_game_action_state_ambiguity.sql
+--   3. 20260615132000_preserve_game_history_on_leave.sql
+--   4. 20260615133000_reset_finished_game_room.sql
+--   5. 20260615134000_explicit_game_exit_and_auto_close.sql
+--
+-- This rollback is documented rather than automated because the migration
+-- modifies existing function bodies dynamically to preserve whatever earlier
+-- Phase 4 hotfixes are already deployed.
