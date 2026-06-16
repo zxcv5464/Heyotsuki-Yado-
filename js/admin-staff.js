@@ -8,6 +8,10 @@
     "image/webp",
     "image/gif",
   ]);
+  const IMAGE_CACHE_CONTROL = "31536000";
+  const IMAGE_MAX_WIDTH = 600;
+  const IMAGE_MAX_HEIGHT = 800;
+  const IMAGE_WEBP_QUALITY = 0.76;
 
   const form = document.querySelector("[data-staff-form]");
   const editor = document.querySelector("[data-staff-editor]");
@@ -54,7 +58,8 @@
 
   const safeImageUrl = (value) => {
     try {
-      const url = new URL(value, window.location.href);
+      const baseUrl = new URL("../", window.location.href);
+      const url = new URL(value, baseUrl);
       return ["http:", "https:"].includes(url.protocol) ? url.href : "";
     } catch {
       return "";
@@ -119,7 +124,7 @@
           else reject(new Error("瀏覽器無法將圖片轉成 WebP。"));
         },
         "image/webp",
-        0.82
+        IMAGE_WEBP_QUALITY
       );
     });
 
@@ -144,8 +149,8 @@
     try {
       const scale = Math.min(
         1,
-        1200 / image.naturalWidth,
-        1600 / image.naturalHeight
+        IMAGE_MAX_WIDTH / image.naturalWidth,
+        IMAGE_MAX_HEIGHT / image.naturalHeight
       );
       const width = Math.max(1, Math.round(image.naturalWidth * scale));
       const height = Math.max(1, Math.round(image.naturalHeight * scale));
@@ -209,7 +214,7 @@
         .from(bucket)
         .upload(path, pendingImage.blob, {
           contentType: "image/webp",
-          cacheControl: "3600",
+          cacheControl: IMAGE_CACHE_CONTROL,
           upsert: false,
         });
       uploadError = error;
@@ -288,12 +293,18 @@
     list.innerHTML = members
       .map((member) => {
         const imageUrl = safeImageUrl(member.image_url);
+        const gameSettings = member.gameSettings;
         const visibility = member.is_visible
           ? '<span class="status-badge status-badge-visible">顯示中</span>'
           : '<span class="status-badge status-badge-hidden">已隱藏</span>';
         const reservable = member.is_reservable
           ? '<span class="status-badge status-badge-visible">可指定</span>'
           : '<span class="status-badge status-badge-hidden">不開放指定</span>';
+        const gameStatus = !gameSettings
+          ? '<span class="status-badge status-badge-featured">遊戲卡未設定</span>'
+          : gameSettings.is_game_enabled
+            ? '<span class="status-badge status-badge-visible">遊戲卡啟用</span>'
+            : '<span class="status-badge status-badge-hidden">遊戲卡停用</span>';
         return `
           <article class="staff-admin-row${member.is_visible ? "" : " is-hidden"}">
             <div class="staff-order">${escapeHtml(member.sort_order)}</div>
@@ -305,10 +316,11 @@
               <p>${escapeHtml(member.subtitle)}</p>
               <small>${escapeHtml(member.role)}</small>
             </div>
-            <div class="staff-visibility">${visibility}${reservable}</div>
+            <div class="staff-visibility">${visibility}${reservable}${gameStatus}</div>
             <div class="staff-row-actions">
               <button class="text-button" data-edit-id="${escapeHtml(member.id)}" type="button">編輯</button>
               <button class="text-button" data-toggle-id="${escapeHtml(member.id)}" type="button">${member.is_visible ? "隱藏" : "顯示"}</button>
+              <a class="text-button text-button-link" href="game-cards.html?staff=${encodeURIComponent(member.id)}">遊戲卡</a>
             </div>
           </article>`;
       })
@@ -316,18 +328,32 @@
   };
 
   const loadMembers = async () => {
-    const { data, error } = await client
-      .from("staff_members")
-      .select(
-        "id, name, subtitle, quote, role, image_url, is_visible, is_reservable, sort_order"
-      )
-      .order("sort_order", { ascending: true });
+    const [staffResult, settingsResult] = await Promise.all([
+      client
+        .from("staff_members")
+        .select(
+          "id, name, subtitle, quote, role, image_url, is_visible, is_reservable, sort_order"
+        )
+        .order("sort_order", { ascending: true }),
+      client
+        .from("game_staff_card_settings")
+        .select("staff_id, is_game_enabled"),
+    ]);
 
-    if (error) {
-      setMessage(`湯娘資料讀取失敗：${error.message}`);
+    if (staffResult.error) {
+      setMessage(`湯娘資料讀取失敗：${staffResult.error.message}`);
       return;
     }
-    members = data || [];
+    if (settingsResult.error) {
+      console.warn("遊戲卡設定讀取失敗，湯娘 CRUD 仍可繼續。", settingsResult.error);
+    }
+    const settingsByStaff = new Map(
+      (settingsResult.data || []).map((settings) => [settings.staff_id, settings])
+    );
+    members = (staffResult.data || []).map((member) => ({
+      ...member,
+      gameSettings: settingsByStaff.get(member.id) || null,
+    }));
     renderList();
   };
 
