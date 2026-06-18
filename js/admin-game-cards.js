@@ -372,7 +372,7 @@
             return `
               <article class="game-card-admin-row${member.is_visible ? "" : " is-hidden"}">
                 <div class="staff-thumb game-card-admin-thumb">
-                  ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(member.name)}" loading="lazy">` : "<span>無圖片</span>"}
+                  ${imageUrl ? `<img data-game-card-thumb="${escapeHtml(member.id)}" alt="${escapeHtml(member.name)}" loading="lazy" decoding="async">` : "<span>無圖片</span>"}
                 </div>
                 <div class="staff-summary">
                   <h3>${escapeHtml(member.name)}</h3>
@@ -387,6 +387,23 @@
           })
           .join("")
       : '<p class="admin-empty">沒有符合條件的湯娘。</p>';
+
+    filteredMembers.forEach((member) => {
+      const imageUrl = effectiveImageUrl(member);
+      if (!imageUrl) return;
+      const image = list.querySelector(
+        `img[data-game-card-thumb="${CSS.escape(member.id)}"]`
+      );
+      if (!image) return;
+      image.addEventListener(
+        "error",
+        () => {
+          image.replaceWith(document.createTextNode("圖片載入失敗"));
+        },
+        { once: true }
+      );
+      image.src = imageUrl;
+    });
   };
 
   const loadData = async () => {
