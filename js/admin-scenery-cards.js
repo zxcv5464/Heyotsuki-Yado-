@@ -237,7 +237,7 @@
       const timestamp = formatTimestamp(
         new Date(Date.now() + (uploadSequence + attempt) * 1000)
       );
-      path = `game-scenery/${timestamp}-${slug}.webp`;
+      path = `game-cards/scenery/${timestamp}-${slug}.webp`;
       const { error } = await client.storage
         .from(bucket)
         .upload(path, pendingImage.blob, {
