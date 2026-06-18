@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>月景牌管理 | 嘿月湯宿後台</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&amp;family=Noto+Sans+TC:wght@400;500;700&amp;display=swap" rel="stylesheet">
+  <link href="../css/admin.css" rel="stylesheet">
+</head>
+<body class="dashboard-page" data-admin-page="scenery-cards">
+  <div class="dashboard-content">
+    <header class="dashboard-header">
+      <div class="admin-shell dashboard-header-inner">
+        <a class="dashboard-brand dashboard-brand-link" href="index.html">嘿月湯宿後台</a>
+        <div class="dashboard-actions">
+          <a class="admin-button admin-button-secondary admin-button-link" href="game-cards.html">湯娘遊戲卡</a>
+          <a class="admin-button admin-button-secondary admin-button-link" href="index.html">回後台首頁</a>
+          <button class="admin-button admin-button-secondary" data-sign-out type="button">登出</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-shell dashboard-main">
+      <section class="settings-panel">
+        <div class="admin-section-heading">
+          <div>
+            <p class="admin-eyebrow">Game Scenery Cards</p>
+            <h1 class="admin-title">月景牌管理</h1>
+            <p class="admin-description">
+              月景牌會加入正式牌庫補足牌數，可參與季節、月份與印記計分，但不會成為指名員工。
+            </p>
+            <p class="admin-description">
+              圖片會等比例縮放至 600 × 800 以內、轉成 WebP，並使用長期快取；每次更換圖片會建立新網址，因此不會顯示舊圖片。
+            </p>
+          </div>
+          <button class="admin-button" data-new-scenery-card type="button" hidden>新增月景牌</button>
+        </div>
+
+        <p class="permission-message" data-scenery-card-denied hidden>
+          目前帳號沒有月景牌管理權限。
+        </p>
+        <p class="auth-message settings-message" data-auth-message data-scenery-card-message role="status" hidden></p>
+
+        <div data-scenery-card-content hidden>
+          <section class="game-card-summary" aria-label="月景牌統計">
+            <article>
+              <span>月景牌總數</span>
+              <strong data-summary-total>0</strong>
+            </article>
+            <article>
+              <span>啟用中</span>
+              <strong data-summary-active>0</strong>
+            </article>
+            <article>
+              <span>停用中</span>
+              <strong data-summary-disabled>0</strong>
+            </article>
+            <article>
+              <span>建議補牌</span>
+              <strong>12 張起</strong>
+            </article>
+          </section>
+
+          <section class="game-card-distributions" aria-label="分布統計">
+            <div>
+              <h2>月份分布</h2>
+              <div class="distribution-grid distribution-months" data-month-distribution></div>
+            </div>
+            <div>
+              <h2>印記分布</h2>
+              <div class="distribution-grid" data-mark-distribution></div>
+            </div>
+          </section>
+
+          <section class="game-card-filters" aria-label="月景牌篩選">
+            <label class="field">
+              <span>狀態</span>
+              <select data-filter-status>
+                <option value="all">全部</option>
+                <option value="enabled">啟用</option>
+                <option value="disabled">停用</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>月份</span>
+              <select data-filter-month>
+                <option value="all">全部月份</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>搜尋</span>
+              <input data-filter-search type="search" placeholder="輸入月景牌名稱">
+            </label>
+          </section>
+
+          <section class="staff-editor game-card-editor" data-scenery-card-editor hidden aria-labelledby="scenery-card-form-title">
+            <div class="staff-editor-heading">
+              <div>
+                <p class="admin-eyebrow">Scenery Card Settings</p>
+                <h2 id="scenery-card-form-title">新增月景牌</h2>
+              </div>
+              <button class="text-button" data-cancel-scenery-card type="button">取消</button>
+            </div>
+            <form class="settings-form" data-scenery-card-form>
+              <input name="id" type="hidden">
+              <div class="settings-grid">
+                <div class="field">
+                  <label for="scenery-card-name">名稱</label>
+                  <input id="scenery-card-name" name="name" type="text" maxlength="80" required>
+                </div>
+                <div class="field">
+                  <label for="scenery-card-sort-order">排序</label>
+                  <input id="scenery-card-sort-order" name="sort_order" type="number" step="1" value="0" required>
+                </div>
+                <div class="field">
+                  <label for="scenery-card-month">月份</label>
+                  <select id="scenery-card-month" name="month_no" required></select>
+                </div>
+                <div class="field">
+                  <label for="scenery-card-season">季節</label>
+                  <input id="scenery-card-season" name="season" type="text" readonly>
+                </div>
+                <div class="field">
+                  <label for="scenery-card-mark">印記</label>
+                  <select id="scenery-card-mark" name="mark" required>
+                    <option value="moon">月印</option>
+                    <option value="bell">鈴印</option>
+                    <option value="fan">扇印</option>
+                    <option value="knot">結印</option>
+                  </select>
+                </div>
+                <div class="field settings-grid-full">
+                  <label for="scenery-card-title">卡片副標</label>
+                  <input id="scenery-card-title" name="card_title" type="text" maxlength="120">
+                </div>
+                <div class="field settings-grid-full">
+                  <label for="scenery-card-image-url">圖片網址</label>
+                  <input id="scenery-card-image-url" name="image_url" type="url" required>
+                  <p class="field-help">正式遊戲只接受絕對 HTTPS 圖片網址。</p>
+                </div>
+                <div class="field settings-grid-full">
+                  <label for="scenery-card-image-file">上傳月景圖片</label>
+                  <input id="scenery-card-image-file" data-scenery-card-image-file type="file" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif">
+                  <p class="field-help">會等比例縮放到 600 × 800 以內並轉成 WebP，儲存於 <code>heyotsuki-images/game-scenery/</code>。</p>
+                </div>
+                <div class="field">
+                  <label class="checkbox-field">
+                    <input name="is_active" type="checkbox" checked>
+                    <span>啟用並加入新牌局</span>
+                  </label>
+                </div>
+                <div class="game-card-preview" data-scenery-card-preview>
+                  <div class="game-card-preview-image">
+                    <img data-scenery-card-preview-image alt="月景牌預覽" hidden>
+                    <span data-scenery-card-preview-empty>尚未選擇圖片</span>
+                  </div>
+                  <div class="game-card-preview-copy">
+                    <span data-scenery-card-preview-month>尚未選擇月份</span>
+                    <strong data-scenery-card-preview-name>月景牌名稱</strong>
+                    <small data-scenery-card-preview-meta>季節 / 印記</small>
+                    <p data-scenery-card-preview-title></p>
+                  </div>
+                </div>
+              </div>
+              <div class="settings-form-actions staff-form-actions">
+                <button class="admin-button admin-button-secondary" data-delete-scenery-card type="button" hidden>刪除</button>
+                <button class="admin-button admin-button-secondary" data-upload-scenery-card-image type="button" disabled>上傳圖片</button>
+                <button class="admin-button" type="submit">儲存月景牌</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="staff-list-section">
+            <div class="staff-list-heading">
+              <h2>月景牌列表</h2>
+              <span data-scenery-card-count></span>
+            </div>
+            <div class="game-card-admin-list" data-scenery-card-list></div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/admin-auth.js"></script>
+  <script src="../js/admin-scenery-cards.js"></script>
+</body>
+</html>

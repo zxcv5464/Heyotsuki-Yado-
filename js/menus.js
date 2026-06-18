@@ -38,9 +38,7 @@
             dark
               ? "bg-stone-900 text-white border-stone-800 hover:shadow-[0_20px_50px_rgba(45,41,38,0.18)]"
               : "bg-white/70 text-on-surface border-stone-100 hover:shadow-[0_20px_50px_rgba(45,41,38,0.1)]"
-          } border shadow-sm p-9 sm:p-12 md:p-16 flex flex-col justify-between overflow-hidden transition-all duration-500 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-800/30 ${
-            index > 0 ? "md:mt-12" : ""
-          }" href="${escapeHtml(safeHref(menu.href))}">
+          } border shadow-sm p-9 sm:p-12 md:p-16 flex flex-col justify-between overflow-hidden transition-all duration-500 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-800/30" href="${escapeHtml(safeHref(menu.href))}">
             <div class="absolute inset-0 washi-grain ${
               dark ? "opacity-20" : ""
             } pointer-events-none"></div>
