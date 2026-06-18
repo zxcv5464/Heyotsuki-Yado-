@@ -110,6 +110,12 @@ begin
   );
 
   if updated_sql = function_sql then
+    if position('remaining_actions + 3' in function_sql) > 0
+      and position('state-invariant-violation' in function_sql) > 0
+    then
+      return;
+    end if;
+
     raise exception 'apply_game_action public-priority field refill hotfix did not match expected function body.';
   end if;
 

@@ -1,0 +1,23 @@
+-- Rollback for 20260616004000_canonical_server_authoritative_gameplay.sql
+--
+-- This canonical migration replaces functions created by the Phase 4 hotfix
+-- chain. A safe rollback is to re-apply the prior gameplay chain, in order,
+-- against a maintenance window:
+--
+--   20260615130000_server_authoritative_gameplay.sql
+--   20260615131000_fix_game_action_state_ambiguity.sql
+--   20260615132000_preserve_game_history_on_leave.sql
+--   20260615133000_reset_finished_game_room.sql
+--   20260615134000_explicit_game_exit_and_auto_close.sql
+--   20260615135000_randomize_replayed_games_and_public_reselect.sql
+--   20260615140000_game_room_turn_timer.sql
+--   20260615141000_harden_active_room_identity.sql
+--   20260615142000_dynamic_field_refill.sql
+--   20260616001000_finish_when_no_public_cards.sql
+--   20260616002000_preserve_public_refill_card.sql
+--   20260616003000_prioritize_public_cards_for_field_refill.sql
+--
+-- If you must temporarily restore direct table read access for debugging,
+-- do it only in a private maintenance session and revoke it again before
+-- returning the project to public traffic. Direct SELECT exposes full deck
+-- order and private designation choices.
