@@ -1,3 +1,13 @@
+# Supabase Setup
+
+For the official Hanafuda game production migration order, rollback order, Realtime, Anonymous Auth, Cron cleanup, Storage paths and GitHub Pages setup, use:
+
+```text
+../Heyotsuki-Hanafuda/docs/production-deployment.md
+```
+
+The notes below are legacy official-site setup notes and should not be used as the sole source for Hanafuda production deployment order.
+
 # Supabase Phase 1 設定說明
 
 目前網站仍是 GitHub Pages 純前端網站。Supabase 尚未設定、連線失敗或查無資料時，`js/data-provider.js` 會繼續使用原本的本地 JavaScript 資料。

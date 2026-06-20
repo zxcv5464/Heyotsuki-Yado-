@@ -1,0 +1,18 @@
+-- Rollback guidance for 20260619031000_canonical_gameplay_with_scenery.sql.
+--
+-- This canonical migration is a direct-definition consolidation of the
+-- previously deployed chain:
+--   20260616004000_canonical_server_authoritative_gameplay.sql
+--   20260618173000_seed_first_player_from_game_seed.sql
+--   20260619010000_game_scenery_cards.sql
+--
+-- To roll back only this consolidation while preserving scenery-card gameplay,
+-- re-apply those three migrations in the order above. Do not drop
+-- game_scenery_cards unless you intentionally want to remove scenery cards from
+-- future games.
+--
+-- To remove scenery cards entirely, use:
+--   20260619010000_game_scenery_cards.rollback.sql
+--
+-- Existing started games keep their JSONB snapshots and are not rewritten by
+-- this rollback note.
