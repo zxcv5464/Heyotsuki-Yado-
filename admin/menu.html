@@ -281,6 +281,16 @@
                   <p class="field-help">填 0 代表售完／不可點。</p>
                 </div>
                 <div class="field">
+                  <label for="item-payroll-rule">薪資分潤規則</label>
+                  <select id="item-payroll-rule" name="payroll_rule">
+                    <option value="excluded">不列入薪資</option>
+                    <option value="food_pool">公池平均分配</option>
+                    <option value="direct_staff">指定員工取得</option>
+                    <option value="dance_split">舞蹈場次分配</option>
+                  </select>
+                  <p class="field-help">只影響薪資結算，不會改變公開菜單與既有訂單。</p>
+                </div>
+                <div class="field">
                   <label class="checkbox-field">
                     <input name="featured" type="checkbox">
                     <span>強調品項</span>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>薪資分潤結算 | 嘿月湯宿後台</title>
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body" data-admin-page="payroll">
+  <div class="admin-shell">
+    <header class="admin-header">
+      <div>
+        <p class="admin-eyebrow">HEYOTSUKI YADO</p>
+        <h1>薪資分潤結算</h1>
+      </div>
+      <nav class="admin-header-actions" aria-label="後台導覽">
+        <a class="admin-button admin-button-secondary admin-button-link" href="index.html">返回後台</a>
+        <button class="admin-button admin-button-secondary" type="button" data-sign-out>登出</button>
+      </nav>
+    </header>
+
+    <main class="admin-main">
+      <section class="admin-panel" data-payroll-access hidden>
+        <div class="admin-section-heading">
+          <div>
+            <p class="admin-eyebrow">PAYROLL SETTLEMENT</p>
+            <h2>建立或讀取薪資批次</h2>
+            <p class="field-help">依營業日彙整可分潤品項，設定公池、舞蹈場次與手動調整，重算確認後可鎖定批次。</p>
+          </div>
+        </div>
+
+        <form class="admin-report-filters" data-payroll-form>
+          <label class="admin-field">
+            <span>店別</span>
+            <select data-payroll-shop required>
+              <option value="menu">湯宿菜單</option>
+              <option value="menu2">喫茶菜單</option>
+            </select>
+          </label>
+          <label class="admin-field">
+            <span>營業日</span>
+            <input type="date" data-payroll-date required>
+          </label>
+          <button class="admin-button" type="submit" data-payroll-load>建立／讀取批次</button>
+        </form>
+
+        <div class="admin-message" data-payroll-message role="status" aria-live="polite"></div>
+
+        <section data-payroll-workspace hidden>
+          <div class="payroll-summary" data-payroll-summary></div>
+
+          <section class="admin-order-card">
+            <div class="admin-section-heading">
+              <div>
+                <h3>公池人員</h3>
+                <p class="field-help">公池品項會平均分給勾選的人員。批次建立舞蹈場次時，也會使用目前公池勾選的人員作為參與者。</p>
+              </div>
+              <button class="admin-button admin-button-secondary" type="button" data-payroll-save-pool>儲存公池人員</button>
+            </div>
+            <div class="payroll-participant-tools">
+              <button class="admin-button admin-button-secondary" type="button" data-payroll-pool-select-all>全選</button>
+              <button class="admin-button admin-button-secondary" type="button" data-payroll-pool-clear>清空</button>
+            </div>
+            <div class="admin-option-staff-grid payroll-compact-staff-grid" data-payroll-pool-members></div>
+          </section>
+
+          <section class="admin-order-card">
+            <div class="admin-section-heading">
+              <div>
+                <h3>舞蹈場次</h3>
+                <p class="field-help">數量 1 的舞蹈品項可批次建立空場次；同一筆訂單數量大於 1 或需要拆分金額時，再手動新增場次。</p>
+              </div>
+            </div>
+            <div class="payroll-dance-bulk">
+              <p class="field-help">批次建立只建立空場次，參與者請在已建立場次中逐場勾選。</p>
+              <button class="admin-button admin-button-secondary" type="button" data-dance-auto-create>
+                為數量 1 的未建品項批次建立場次
+              </button>
+            </div>
+            <p class="payroll-count-line" data-dance-item-summary></p>
+            <details class="payroll-details">
+              <summary>手動新增場次</summary>
+              <form class="admin-form-grid" data-dance-session-form>
+                <label class="admin-field">
+                  <span>舞蹈訂單品項</span>
+                  <select data-dance-item required></select>
+                </label>
+                <label class="admin-field">
+                  <span>分配金額</span>
+                  <input type="number" min="0" step="1" data-dance-amount required>
+                </label>
+                <div class="admin-field-full">
+                  <button class="admin-button" type="submit">新增場次</button>
+                </div>
+              </form>
+            </details>
+            <details class="payroll-details" open>
+              <summary>已建立舞蹈場次</summary>
+              <div class="payroll-list" data-dance-sessions></div>
+            </details>
+          </section>
+
+          <section class="admin-order-card">
+            <div class="admin-section-heading">
+              <div>
+                <h3>薪資明細</h3>
+                <p class="field-help">重算後會依目前規則產生員工合計、待分配項目，完整明細會列出每位員工實際分配到的公池金額。</p>
+              </div>
+              <div class="admin-card-actions">
+                <button class="admin-button admin-button-secondary" type="button" data-payroll-regenerate>重算明細</button>
+                <button class="admin-button admin-button-secondary" type="button" data-payroll-csv>匯出 CSV</button>
+                <button class="admin-button admin-button-secondary" type="button" data-payroll-copy>複製文字摘要</button>
+                <button class="admin-button" type="button" data-payroll-lock>鎖定批次</button>
+              </div>
+            </div>
+            <div class="payroll-list" data-payroll-unassigned></div>
+            <div class="payroll-list" data-payroll-totals></div>
+            <details class="payroll-details" open>
+              <summary>完整薪資明細</summary>
+              <div class="payroll-table" data-payroll-entries></div>
+            </details>
+          </section>
+
+          <section class="admin-order-card">
+            <h3>手動調整</h3>
+            <p class="field-help">批次鎖定前可新增補款或扣款，會併入薪資明細。</p>
+            <form class="admin-form-grid" data-payroll-adjustment-form>
+              <label class="admin-field">
+                <span>員工</span>
+                <select data-adjustment-staff required></select>
+              </label>
+              <label class="admin-field">
+                <span>金額</span>
+                <input type="number" step="1" data-adjustment-amount required>
+              </label>
+              <label class="admin-field admin-field-full">
+                <span>說明</span>
+                <input type="text" data-adjustment-description required>
+              </label>
+              <div class="admin-field-full">
+                <button class="admin-button admin-button-secondary" type="submit">新增調整</button>
+              </div>
+            </form>
+          </section>
+        </section>
+      </section>
+
+      <section class="admin-panel" data-payroll-denied hidden>
+        <h2>沒有薪資結算權限</h2>
+        <p>薪資分潤目前僅開放 owner / admin 使用。</p>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/admin-auth.js"></script>
+  <script src="../js/admin-payroll.js"></script>
+</body>
+</html>

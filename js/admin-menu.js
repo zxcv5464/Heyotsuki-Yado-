@@ -44,6 +44,13 @@
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
 
+  const PAYROLL_RULE_LABELS = {
+    excluded: "不列入薪資",
+    food_pool: "公池平均",
+    direct_staff: "指定員工",
+    dance_split: "舞蹈分配"
+  };
+
   const setMessage = (text, type = "error") => {
     if (!message) return;
     message.textContent = text;
@@ -223,6 +230,7 @@
                 ${statusBadge(item.is_visible)}
                 ${item.is_orderable ? '<span class="status-badge status-badge-visible">可點餐</span>' : '<span class="status-badge status-badge-hidden">不開放點餐</span>'}
                 ${item.requires_staff_selection ? '<span class="status-badge status-badge-featured">需選擇人員</span>' : ""}
+                <span class="status-badge status-badge-featured">薪資：${escapeHtml(PAYROLL_RULE_LABELS[item.payroll_rule] || PAYROLL_RULE_LABELS.excluded)}</span>
                 ${item.order_limit_quantity == null ? "" : `<span class="status-badge ${Number(item.order_limit_quantity) === 0 ? "status-badge-hidden" : "status-badge-featured"}">本日限量 ${escapeHtml(item.order_limit_quantity)}</span>`}
                 ${item.allow_item_note === false ? '<span class="status-badge status-badge-hidden">無品項備註</span>' : ""}
               </div>
@@ -299,6 +307,26 @@
         return;
       }
       items = itemResult.data || [];
+      if (items.length) {
+        const ruleResult = await client
+          .from("menu_item_payroll_rules")
+          .select("menu_item_id, payroll_rule")
+          .in("menu_item_id", items.map((item) => item.id));
+        if (ruleResult.error) {
+          items = items.map((item) => ({ ...item, payroll_rule: "excluded" }));
+        } else {
+          const rules = new Map(
+            (ruleResult.data || []).map((row) => [
+              row.menu_item_id,
+              row.payroll_rule
+            ])
+          );
+          items = items.map((item) => ({
+            ...item,
+            payroll_rule: rules.get(item.id) || "excluded"
+          }));
+        }
+      }
     }
 
     selectedSectionId = sections.some(
@@ -345,6 +373,9 @@
     itemForm.elements.order_limit_quantity.value = "";
     itemForm.elements.staff_selection_label.value =
       "請選擇湯娘的獨門料理";
+    if (itemForm.elements.payroll_rule) {
+      itemForm.elements.payroll_rule.value = "excluded";
+    }
     itemEditor.hidden = true;
   };
 
@@ -585,6 +616,9 @@
       itemForm.elements.staff_selection_label.value =
         item.staff_selection_label || "請選擇湯娘的獨門料理";
       itemForm.elements.sort_order.value = item.sort_order ?? "";
+      if (itemForm.elements.payroll_rule) {
+        itemForm.elements.payroll_rule.value = item.payroll_rule || "excluded";
+      }
     }
     itemEditor.hidden = false;
     itemEditor.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -735,13 +769,24 @@
         "請選擇湯娘的獨門料理",
       sort_order: sortValue ? Number(sortValue) : maxSort + 10,
     };
+    const payrollRule = itemForm.elements.payroll_rule?.value || "excluded";
     const query = id
       ? client.from("menu_items").update(payload).eq("id", id)
       : client.from("menu_items").insert(payload);
-    const { error } = await query;
-    setBusy(button, false);
+    const saveResult = await query.select("id").single();
+    const { error } = saveResult;
     if (error) {
+      setBusy(button, false);
       setMessage(`品項儲存失敗：${error.message}`);
+      return;
+    }
+    const ruleResult = await client.rpc("upsert_menu_item_payroll_rule", {
+      p_menu_item_id: saveResult.data.id,
+      p_payroll_rule: payrollRule
+    });
+    setBusy(button, false);
+    if (ruleResult.error) {
+      setMessage(`品項已儲存，但薪資規則儲存失敗：${ruleResult.error.message}`);
       return;
     }
     selectedSectionId = sectionId;

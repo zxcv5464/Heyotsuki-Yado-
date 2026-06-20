@@ -17,6 +17,7 @@
         "orders",
         "order-specials",
         "reports",
+        "payroll",
       ].includes(page) &&
       event.persisted
     ) {
@@ -170,6 +171,7 @@
       "orders",
       "order-specials",
       "reports",
+      "payroll",
     ].includes(page)
   ) {
     initProtectedPage();
