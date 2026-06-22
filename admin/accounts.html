@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>帳號與權限管理 | 嘿月湯宿後台</title>
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body" data-admin-page="accounts">
+  <div class="admin-shell">
+    <header class="admin-header">
+      <div><p class="admin-eyebrow">ACCOUNT PERMISSIONS</p><h1>帳號與權限管理</h1></div>
+      <nav class="admin-header-actions" aria-label="後台導覽">
+        <a class="admin-button admin-button-secondary admin-button-link" href="index.html">返回後台</a>
+        <button class="admin-button admin-button-secondary" type="button" data-sign-out>登出</button>
+      </nav>
+    </header>
+    <main class="admin-main">
+      <section class="admin-panel" data-accounts-workspace hidden>
+        <div class="admin-message" data-accounts-message role="status" aria-live="polite"></div>
+        <section class="admin-order-card">
+          <h2>後台帳號</h2>
+          <p class="field-help">帳號停用與員工顯示狀態分開管理。一般員工帳號必須綁定一位員工；同一位員工只能綁定一個帳號。</p>
+          <div class="payroll-list" data-accounts-list></div>
+        </section>
+        <section class="admin-order-card" data-accounts-manage hidden>
+          <h2>新增帳號</h2>
+          <p class="field-help">初始密碼只在本次建立時送往 Supabase Auth，不會寫入資料庫或後台紀錄。</p>
+          <form class="admin-form-grid" data-account-create-form>
+            <label class="admin-field"><span>Email</span><input type="email" name="email" required autocomplete="email"></label>
+            <label class="admin-field"><span>初始密碼</span><input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
+            <label class="admin-field"><span>顯示名稱</span><input type="text" name="display_name" required></label>
+            <label class="admin-field"><span>角色</span><select name="role" data-account-create-role required><option value="staff">一般員工</option><option value="admin">管理員</option><option value="owner">Owner</option></select></label>
+            <label class="admin-field"><span>綁定員工</span><select name="staff_id" data-account-create-staff></select></label>
+            <label class="admin-field"><span>權限模板</span><select name="template_id" data-account-create-template required></select></label>
+            <label class="admin-checkbox"><input type="checkbox" name="is_active" checked><span>啟用帳號</span></label>
+            <div class="admin-field-full"><button class="admin-button" type="submit">建立帳號</button></div>
+          </form>
+        </section>
+        <section class="admin-order-card" data-accounts-manage data-account-edit-section hidden>
+          <h2>編輯帳號</h2>
+          <form class="admin-form-grid" data-account-edit-form>
+            <label class="admin-field admin-field-full"><span>帳號</span><select name="profile_id" data-account-edit-profile required></select></label>
+            <label class="admin-field"><span>顯示名稱</span><input type="text" name="display_name" required></label>
+            <label class="admin-field"><span>角色</span><select name="role" data-account-edit-role required><option value="staff">一般員工</option><option value="admin">管理員</option><option value="owner">Owner</option></select></label>
+            <label class="admin-field"><span>綁定員工</span><select name="staff_id" data-account-edit-staff></select></label>
+            <label class="admin-field"><span>權限模板</span><select name="template_id" data-account-edit-template></select></label>
+            <label class="admin-checkbox"><input type="checkbox" name="is_active"><span>啟用帳號</span></label>
+            <div class="admin-field-full"><span class="admin-field-label">個別權限</span><div class="admin-permission-grid" data-account-edit-permissions></div></div>
+            <div class="admin-field-full admin-card-actions"><button class="admin-button" type="submit">儲存帳號權限</button><button class="admin-button admin-button-secondary" type="button" data-account-reset-password>重設密碼</button><button class="admin-button admin-button-secondary" type="button" data-account-delete>註銷帳號</button></div>
+          </form>
+        </section>
+        <section class="admin-order-card" data-permissions-manage hidden>
+          <h2>自訂權限模板</h2>
+          <p class="field-help">系統模板不可刪除或編輯；可建立自訂模板後套用到帳號，再進行個別微調。</p>
+          <form class="admin-form-grid" data-template-form>
+            <label class="admin-field"><span>模板名稱</span><input type="text" name="name" required></label>
+            <label class="admin-field"><span>說明</span><input type="text" name="description"></label>
+            <div class="admin-field-full"><span class="admin-field-label">模板權限</span><div class="admin-permission-grid" data-template-permissions></div></div>
+            <div class="admin-field-full"><button class="admin-button admin-button-secondary" type="submit">儲存自訂模板</button></div>
+          </form>
+          <div class="payroll-list" data-template-list></div>
+        </section>
+      </section>
+      <section class="admin-panel" data-accounts-denied hidden><h2>沒有帳號管理權限</h2><p>此帳號沒有查看帳號與權限資料的權限。</p></section>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/admin-auth.js"></script>
+  <script src="../js/admin-accounts.js"></script>
+</body>
+</html>

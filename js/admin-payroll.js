@@ -10,6 +10,7 @@
     food_pool: "公池平均",
     direct_staff: "指定員工",
     dance_split: "舞蹈分配",
+    manual_dance_split: "補登舞蹈分潤",
     manual_adjustment: "調整項",
     unassigned_direct_staff: "待分配",
     unassigned_dance_split: "待分配舞蹈"
@@ -35,6 +36,7 @@
   const savePoolButton = document.querySelector("[data-payroll-save-pool]");
   const poolSelectAllButton = document.querySelector("[data-payroll-pool-select-all]");
   const poolClearButton = document.querySelector("[data-payroll-pool-clear]");
+  const poolExclusionSummary = document.querySelector("[data-payroll-pool-exclusion-summary]");
   const danceForm = document.querySelector("[data-dance-session-form]");
   const danceItemSelect = document.querySelector("[data-dance-item]");
   const danceAmount = document.querySelector("[data-dance-amount]");
@@ -49,9 +51,16 @@
   const totals = document.querySelector("[data-payroll-totals]");
   const entries = document.querySelector("[data-payroll-entries]");
   const adjustmentForm = document.querySelector("[data-payroll-adjustment-form]");
-  const adjustmentStaff = document.querySelector("[data-adjustment-staff]");
-  const adjustmentAmount = document.querySelector("[data-adjustment-amount]");
-  const adjustmentDescription = document.querySelector("[data-adjustment-description]");
+    const adjustmentStaff = document.querySelector("[data-adjustment-staff]");
+    const adjustmentAmount = document.querySelector("[data-adjustment-amount]");
+    const adjustmentDescription = document.querySelector("[data-adjustment-description]");
+    const manualDanceForm = document.querySelector("[data-payroll-manual-dance-form]");
+    const manualDanceAmount = document.querySelector("[data-payroll-manual-dance-amount]");
+    const manualDanceReason = document.querySelector("[data-payroll-manual-dance-reason]");
+    const manualDanceParticipants = document.querySelector("[data-payroll-manual-dance-participants]");
+    const manualDanceSelectAllButton = document.querySelector("[data-payroll-manual-dance-select-all]");
+    const manualDanceClearButton = document.querySelector("[data-payroll-manual-dance-clear]");
+    const manualDanceSessions = document.querySelector("[data-payroll-manual-dance-sessions]");
 
   const setMessage = (text, type = "") => {
     message.textContent = text || "";
@@ -96,7 +105,10 @@
   };
 
   const getEntryDisplayName = (entry) =>
-    entry.sourceItemName || SOURCE_LABELS[entry.sourceType] || "未命名";
+    entry.sourceItemName ||
+    (entry.sourceType === "manual_adjustment" ? entry.description : "") ||
+    SOURCE_LABELS[entry.sourceType] ||
+    "未命名";
 
   const getDanceSessionCountByItem = () => {
     const countByItem = new Map();
@@ -114,6 +126,39 @@
   const getActiveDanceSessions = () =>
     (state.snapshot?.danceSessions || []).filter((session) => session.status === "active");
 
+  const getDanceSessionAmount = (item, sessionNo) => {
+    const quantity = Math.max(1, Number(item?.quantity || 1));
+    const total = Number(item?.amount || 0);
+    return Math.floor(total / quantity) + (sessionNo <= total % quantity ? 1 : 0);
+  };
+
+  const getIncompleteDanceItems = () => {
+    const countByItem = getDanceSessionCountByItem();
+    return (state.snapshot?.danceItems || [])
+      .map((item) => ({
+        ...item,
+        sessionCount: countByItem.get(item.orderItemId) || 0
+      }))
+      .filter((item) => item.sessionCount < Number(item.quantity || 0));
+  };
+
+  const warnIncompleteDanceItems = (forLock = false) => {
+    const incomplete = getIncompleteDanceItems();
+    if (!incomplete.length) return false;
+    const details = incomplete
+      .map(
+        (item) =>
+          `訂單 #${shortId(item.orderItemId)} 應有 ${item.quantity} 場，目前只有 ${item.sessionCount} 場。`
+      )
+      .join("\n");
+    window.alert(
+      forLock
+        ? `祈願之舞場次尚未建立完整。\n${details}\n請先補齊場次後再鎖定批次。`
+        : `祈願之舞場次尚未建立完整。\n${details}\n本次重算會將缺少場次列為待處理；補齊後請再次重算。`
+    );
+    return true;
+  };
+
   const getNextDanceSessionNo = (orderItemId) => {
     const used = new Set(
       getActiveDanceSessions()
@@ -125,7 +170,9 @@
     return next;
   };
 
-  const isLocked = () => state.snapshot?.batch?.status === "locked";
+  const isLocked = () =>
+    state.snapshot?.batch?.status === "locked" ||
+    window.ADMIN_CAN?.("payroll.manage") !== true;
 
   const loadDirectStaffIds = async (batchId) => {
     state.directStaffIds = new Set();
@@ -159,13 +206,13 @@
   const loadBatch = async () => {
     setBusy(loadButton, true);
     setMessage("讀取薪資批次中...");
-    const { data, error } = await state.client.rpc(
-      "create_or_get_payroll_batch",
-      {
-        p_shop_key: shopSelect.value,
-        p_business_date: dateInput.value
-      }
-    );
+    const rpcName = window.ADMIN_CAN?.("payroll.manage")
+      ? "create_or_get_payroll_batch"
+      : "get_payroll_batch_for_view";
+    const { data, error } = await state.client.rpc(rpcName, {
+      p_shop_key: shopSelect.value,
+      p_business_date: dateInput.value
+    });
     setBusy(loadButton, false);
     if (error) {
       setMessage(`薪資批次讀取失敗：${error.message}`, "error");
@@ -213,6 +260,15 @@
       (state.snapshot.poolMembers || []).map((member) => member.staffId)
     );
     poolMembers.replaceChildren();
+    const reservationExcludedStaff = (state.snapshot.staffOptions || []).filter(
+      (staff) => state.directStaffIds.has(staff.id)
+    );
+    if (poolExclusionSummary) {
+      poolExclusionSummary.hidden = reservationExcludedStaff.length === 0;
+      poolExclusionSummary.textContent = reservationExcludedStaff.length
+        ? `已預設排除公共池：${reservationExcludedStaff.map((staff) => staff.name).join("、")}。原因：當日有泡湯預約。`
+        : "";
+    }
     (state.snapshot.staffOptions || [])
       .filter((staff) => !state.directStaffIds.has(staff.id))
       .forEach((staff) => {
@@ -240,18 +296,12 @@
     danceItemSelect.replaceChildren();
     const countByItem = getDanceSessionCountByItem();
     const danceItems = state.snapshot.danceItems || [];
-    const missingQuantityOne = danceItems.filter(
-      (item) => Number(item.quantity) === 1 && !countByItem.has(item.orderItemId)
-    ).length;
-    const manualItems = danceItems.filter(
-      (item) => Number(item.quantity) !== 1 && !countByItem.has(item.orderItemId)
-    ).length;
-    const createdItems = danceItems.filter((item) =>
-      countByItem.has(item.orderItemId)
-    ).length;
+    const incompleteItems = getIncompleteDanceItems();
     if (danceItemSummary) {
       danceItemSummary.textContent =
-        `舞蹈品項 ${danceItems.length} 筆；未建數量 1：${missingQuantityOne} 筆；需手動處理：${manualItems} 筆；已建：${createdItems} 筆。`;
+        incompleteItems.length
+          ? `舞蹈品項 ${danceItems.length} 筆；有 ${incompleteItems.length} 筆尚未建立完整場次，重算與鎖定前請補齊。`
+          : `舞蹈品項 ${danceItems.length} 筆；所有訂單場次已建立完整。`;
     }
     danceItems.forEach((item) => {
       const option = document.createElement("option");
@@ -260,7 +310,7 @@
       option.value = item.orderItemId;
       option.textContent =
         `#${shortId(item.orderItemId)}｜${item.customerName}｜${item.itemName}｜數量 ${item.quantity}｜${formatAmount(item.amount)}｜${status}`;
-      option.dataset.amount = item.amount;
+      option.dataset.amount = getDanceSessionAmount(item, getNextDanceSessionNo(item.orderItemId));
       danceItemSelect.append(option);
     });
     if (danceItemSelect.options[0]) {
@@ -352,18 +402,83 @@
     });
   };
 
+  const renderManualDanceSupplements = () => {
+    manualDanceParticipants.replaceChildren();
+    (state.snapshot.staffOptions || []).forEach((staff) => {
+      const label = document.createElement("label");
+      label.className = "checkbox-field";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.value = staff.id;
+      input.dataset.manualDanceStaffId = staff.id;
+      const text = document.createElement("span");
+      text.textContent = staff.name;
+      label.append(input, text);
+      manualDanceParticipants.append(label);
+    });
+
+    manualDanceSessions.replaceChildren();
+    const sessions = state.snapshot.manualDanceSessions || [];
+    if (!sessions.length) {
+      append(manualDanceSessions, "p", "admin-empty", "尚未補登舞蹈分潤。");
+      return;
+    }
+    sessions.forEach((session) => {
+      const card = document.createElement("article");
+      card.className = "payroll-row";
+      append(card, "strong", "", `補登舞蹈 #${session.sessionNo}｜${formatAmount(session.amount)}`);
+      append(card, "p", "field-help", `原因：${session.reason}`);
+      append(
+        card,
+        "p",
+        "field-help",
+        `參與：${(session.participants || []).map((participant) => participant.name).join("、") || "未設定"}`
+      );
+      manualDanceSessions.append(card);
+    });
+  };
+
   const renderEntries = () => {
     unassigned.replaceChildren();
     const unassignedEntries = state.snapshot.unassigned || [];
     if (unassignedEntries.length) {
       append(unassigned, "h4", "", "待分配項目");
       unassignedEntries.forEach((entry) => {
+        const card = document.createElement("article");
+        card.className = "payroll-row";
         append(
-          unassigned,
-          "p",
-          "admin-message is-error",
-          `${SOURCE_LABELS[entry.sourceType] || entry.sourceType}：${getEntryDisplayName(entry)} / ${formatAmount(entry.amount)}`
+          card,
+          "strong",
+          "",
+          `${SOURCE_LABELS[entry.sourceType] || entry.sourceType}｜訂單 #${shortId(entry.sourceId)}｜${getEntryDisplayName(entry)}｜${formatAmount(entry.amount)}`
         );
+        append(card, "p", "field-help", entry.description || "尚未指定受益員工。");
+        if (entry.sourceType === "unassigned_direct_staff" && entry.sourceId && !isLocked()) {
+          const tools = document.createElement("div");
+          tools.className = "payroll-participant-tools";
+          const select = document.createElement("select");
+          select.className = "admin-select";
+          select.dataset.unassignedStaffFor = entry.id;
+          const placeholder = document.createElement("option");
+          placeholder.value = "";
+          placeholder.textContent = "選擇受益員工";
+          select.append(placeholder);
+          (state.snapshot.staffOptions || []).forEach((staff) => {
+            const option = document.createElement("option");
+            option.value = staff.id;
+            option.textContent = staff.name;
+            select.append(option);
+          });
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "admin-button admin-button-secondary";
+          button.dataset.assignUnassignedDirect = entry.id;
+          button.dataset.sourceId = entry.sourceId;
+          button.textContent = "儲存受益員工";
+          tools.append(select, button);
+          card.append(tools);
+        }
+        unassigned.append(card);
       });
     }
 
@@ -414,6 +529,7 @@
     renderPoolMembers();
     renderDanceItems();
     renderDanceSessions();
+    renderManualDanceSupplements();
     renderEntries();
     renderAdjustmentOptions();
     regenerateButton.disabled = isLocked();
@@ -427,22 +543,31 @@
 
   shopSelect.addEventListener("change", loadDefaultDate);
   danceItemSelect.addEventListener("change", () => {
-    danceAmount.value =
-      danceItemSelect.selectedOptions[0]?.dataset.amount || "0";
+    danceAmount.value = danceItemSelect.selectedOptions[0]?.dataset.amount || "0";
   });
 
   const setPoolMemberChecks = (checked) => {
     poolMembers.querySelectorAll("[data-pool-staff-id]").forEach((input) => {
-      input.checked = checked;
+      if (!input.disabled) input.checked = checked;
     });
   };
 
   poolSelectAllButton.addEventListener("click", () => setPoolMemberChecks(true));
   poolClearButton.addEventListener("click", () => setPoolMemberChecks(false));
+  manualDanceSelectAllButton.addEventListener("click", () => {
+    manualDanceParticipants.querySelectorAll("[data-manual-dance-staff-id]").forEach((input) => {
+      input.checked = true;
+    });
+  });
+  manualDanceClearButton.addEventListener("click", () => {
+    manualDanceParticipants.querySelectorAll("[data-manual-dance-staff-id]").forEach((input) => {
+      input.checked = false;
+    });
+  });
 
   savePoolButton.addEventListener("click", async () => {
     const selectedIds = [
-      ...poolMembers.querySelectorAll("[data-pool-staff-id]:checked")
+      ...poolMembers.querySelectorAll("[data-pool-staff-id]:checked:not(:disabled)")
     ].map((input) => input.value);
     setBusy(savePoolButton, true);
     const { data, error } = await state.client.rpc(
@@ -542,6 +667,43 @@
     render();
   });
 
+  unassigned.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-assign-unassigned-direct]");
+    if (!button || isLocked()) return;
+    const select = unassigned.querySelector(
+      `[data-unassigned-staff-for="${button.dataset.assignUnassignedDirect}"]`
+    );
+    if (!select?.value) {
+      setMessage("請先選擇受益員工。", "error");
+      return;
+    }
+    setBusy(button, true);
+    const assignmentResult = await state.client.rpc("set_payroll_source_assignment", {
+      p_batch_id: state.snapshot.batch.id,
+      p_source_type: "direct_staff",
+      p_source_id: button.dataset.sourceId,
+      p_assigned_staff_id: select.value
+    });
+    if (assignmentResult.error) {
+      setBusy(button, false);
+      setMessage(`受益員工儲存失敗：${assignmentResult.error.message}`, "error");
+      return;
+    }
+    const regenerationResult = await state.client.rpc("regenerate_payroll_entries", {
+      p_batch_id: state.snapshot.batch.id
+    });
+    setBusy(button, false);
+    if (regenerationResult.error) {
+      setMessage(`受益員工已儲存，但重算失敗：${regenerationResult.error.message}`, "error");
+      await setSnapshot(assignmentResult.data);
+      render();
+      return;
+    }
+    await setSnapshot(regenerationResult.data);
+    setMessage("受益員工已儲存，薪資明細已重新計算。", "success");
+    render();
+  });
+
   danceAutoCreateButton.addEventListener("click", async () => {
     const targets = (state.snapshot.danceItems || []).filter(
       (item) => Number(item.quantity) === 1 && !getDanceSessionCountByItem().has(item.orderItemId)
@@ -574,6 +736,7 @@
   });
 
   regenerateButton.addEventListener("click", async () => {
+    warnIncompleteDanceItems();
     setBusy(regenerateButton, true);
     const { data, error } = await state.client.rpc(
       "regenerate_payroll_entries",
@@ -612,7 +775,7 @@
         entry.staffName || "待分配",
         getEntryDisplayName(entry),
         entry.amount || 0,
-        "",
+        entry.description || "",
         batch.businessDate,
         SHOPS[batch.shopKey] || batch.shopKey
       ]);
@@ -655,6 +818,28 @@
         lines.push(`- ${getEntryDisplayName(entry)}：${formatAmount(entry.amount)}`);
       });
     }
+    const adjustments = (state.snapshot.entries || []).filter(
+      (entry) => entry.sourceType === "manual_adjustment"
+    );
+    if (adjustments.length) {
+      lines.push("", "手動調整：");
+      adjustments.forEach((entry) => {
+        lines.push(
+          `- ${entry.staffName || "未指定員工"}｜${entry.description || "未填原因"}｜${formatAmount(entry.amount)}`
+        );
+      });
+    }
+    const manualDanceSupplements = (state.snapshot.entries || []).filter(
+      (entry) => entry.sourceType === "manual_dance_split"
+    );
+    if (manualDanceSupplements.length) {
+      lines.push("", "補登舞蹈分潤：");
+      manualDanceSupplements.forEach((entry) => {
+        lines.push(
+          `- ${entry.sourceItemName || "補登舞蹈"}｜${entry.staffName || "未指定員工"}｜${entry.description || "未填原因"}｜${formatAmount(entry.amount)}`
+        );
+      });
+    }
     return lines.join("\n").trim();
   };
 
@@ -680,7 +865,8 @@
   copyButton.addEventListener("click", copySummary);
 
   lockButton.addEventListener("click", async () => {
-    if (!window.confirm("鎖定後不可重算或修改，只能新增調整項。確定鎖定？")) return;
+    if (warnIncompleteDanceItems(true)) return;
+    if (!window.confirm("鎖定時會先依目前資料重新計算薪資明細，確認無待處理項目後才會鎖定。確定鎖定？")) return;
     setBusy(lockButton, true);
     const { data, error } = await state.client.rpc("lock_payroll_batch", {
       p_batch_id: state.snapshot.batch.id
@@ -716,10 +902,46 @@
     render();
   });
 
+  manualDanceForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const staffIds = [
+      ...manualDanceParticipants.querySelectorAll("[data-manual-dance-staff-id]:checked")
+    ].map((input) => input.value);
+    if (!staffIds.length) {
+      setMessage("請至少勾選一位補登舞蹈參與員工。", "error");
+      return;
+    }
+    const submitButton = manualDanceForm.querySelector("button[type='submit']");
+    setBusy(submitButton, true);
+    const { data, error } = await state.client.rpc(
+      "create_payroll_manual_dance_supplement",
+      {
+        p_batch_id: state.snapshot.batch.id,
+        p_amount: Number(manualDanceAmount.value),
+        p_reason: manualDanceReason.value.trim(),
+        p_staff_ids: staffIds
+      }
+    );
+    setBusy(submitButton, false);
+    if (error) {
+      setMessage(`補登舞蹈分潤失敗：${error.message}`, "error");
+      return;
+    }
+    await setSnapshot(data);
+    manualDanceForm.reset();
+    setMessage(
+      isLocked()
+        ? "鎖定後補登舞蹈分潤已新增，原始鎖定明細未被修改。"
+        : "補登舞蹈分潤已新增。",
+      "success"
+    );
+    render();
+  });
+
   window.addEventListener("admin-auth-ready", async (event) => {
     state.client = event.detail.client;
     state.profile = event.detail.profile;
-    if (!["owner", "admin"].includes(state.profile.role)) {
+    if (!event.detail.can("payroll.view")) {
       deniedPanel.hidden = false;
       return;
     }

@@ -1,142 +1,81 @@
 # 薪資分潤結算
 
-本功能屬於官網後台 `Heyotsuki-Yado`，不影響花札遊戲專案。
+薪資分潤只處理菜單品項分配；不處理小費、泡湯收入、排班或員工自行查詢。
 
-## 套用順序
+## Migration 順序
 
-1. 先確認既有點餐系統已套用：
-   - `supabase/orders.sql`
-   - `supabase/order-reports.sql`
-2. 再執行：
-   - `supabase/migrations/20260620050000_staff_payroll_settlement.sql`
-   - `supabase/migrations/20260620061000_payroll_admin_usability.sql`
+依序執行：
 
-Rollback：
-
-```sql
-\i supabase/migrations/20260620061000_payroll_admin_usability.rollback.sql
-\i supabase/migrations/20260620050000_staff_payroll_settlement.rollback.sql
-```
-
-Rollback 只移除薪資分潤新增的表、RPC、trigger 與 policy，不會修改 `orders`、`order_items`、`menu_items` 或 `staff_members`。
-
-## 權限
-
-- `owner` / `admin` 可管理薪資分潤。
-- `staff` 目前不可查看完整薪資資料。
-- `anon` 沒有任何薪資資料權限。
-- 所有正式操作走 RPC，RPC 會使用目前登入者 `auth.uid()` 判斷權限。
-- 前端不可放 service role 或其他私密金鑰。
+1. `supabase/migrations/20260620050000_staff_payroll_settlement.sql`
+2. `supabase/migrations/20260620061000_payroll_admin_usability.sql`
+3. `supabase/migrations/20260620062000_payroll_reservation_direct_staff_pool_exclusion.sql`
+4. `supabase/migrations/20260622010000_payroll_settlement_lock_and_dance_hotfix.sql`
+5. `supabase/migrations/20260622020000_payroll_direct_assignment_and_locked_entries.sql`
+6. `supabase/migrations/20260622030000_payroll_manual_dance_supplements.sql`
 
 ## 分潤規則
 
-每個 `menu_items` 可設定一種薪資規則：
+- `food_pool`：餐點公共池，依已勾選成員人頭平均分配；尾數按勾選順序分配。
+- `direct_staff`：受益人依序採用薪資草稿補選、訂單品項原本的 `selected_staff_id`；兩者都沒有時列為待分配。
+- `dance_split`：訂單數量就是必須建立的場次數。每場金額由訂單行快照總額除以數量計算，尾數依場次序號由前至後分配。
+- `excluded`：不進薪資分潤。
 
-- `food_pool`：公池平均分配。
-- `direct_staff`：指定員工取得。
-- `dance_split`：舞蹈場次分配。
-- `excluded`：不列入薪資。
+例如 `320,000 / 4` 為四場各 `80,000`；`100,001 / 3` 為第 1、2 場 `33,334`、第 3 場 `33,333`。每場再依參與者登記順序人頭平均，尾數同樣依順序分配。
 
-規則只影響薪資結算，不改變公開菜單、點餐送出、限量或報表邏輯。
+若舞蹈訂單應有 N 場但有效場次少於 N，重算會建立待分配項目並阻擋鎖定。場次沒有參與者也會阻擋鎖定。
 
-## 結算資料來源
+## 補登舞蹈分潤
 
-薪資結算只讀取訂單快照：
+臨時舞蹈若未建立訂單，可直接在欲歸屬的營業日薪資批次新增「補登舞蹈分潤」。它只存在薪資分潤模組，不建立或修改訂單，也不影響營業額與營業報表。
 
-- `orders.shop_key`
-- `orders.business_date`
-- `orders.status`
-- `orders.deleted_at`
-- `order_items.item_name_snapshot`
-- `order_items.selected_staff_id`
-- `order_items.selected_staff_name_snapshot`
-- `order_items.line_total_amount_snapshot`
-- `order_items.price_amount_snapshot`
-- `order_items.options_amount_snapshot`
-- `order_items.quantity`
+補登必填金額、原因與至少一位參與員工；金額會依參與員工的勾選順序平均拆分，尾數由前面的員工取得。系統在該批次內自動編號為「補登舞蹈 #1、#2」等。可輸入負數建立沖銷／更正紀錄。
 
-符合條件：
+補登可在草稿與已鎖定批次新增。每筆補登與其分配明細均為 append-only：儲存後不可修改或刪除；若填寫錯誤，請以相同參與者新增一筆反向金額補登。這保留原始 locked 快照，同時讓後續補登可被稽核。補登會出現在薪資預覽、員工合計、CSV 與文字摘要。
 
-- `orders.deleted_at is null`
-- `orders.status in ('pending', 'accepted', 'preparing', 'served')`
-- `business_date` 符合批次營業日
+## 公共池預約排除
 
-`cancelled` 與軟刪除訂單不進入薪資結算。
+公共池名單預設排除當日有泡湯預約、且狀態不是下列兩種的員工：
 
-## 批次流程
+- `cancelled`
+- `no_show`
 
-1. 到 `admin/menu.html` 為品項設定薪資分潤規則。
-2. 到 `admin/payroll.html` 選店別與營業日。
-3. 建立或讀取薪資批次。
-4. 設定公池成員。公池可勾選名單會預設排除當日已指名員工；舞蹈場次參與者仍可從完整員工清單勾選。
-5. 數量為 1 的未建舞蹈品項可批次建立空場次，再逐場勾選參與者。
-6. 同一筆訂單數量不等於 1、需要拆場或金額需要調整時，再手動新增場次；場次編號由系統依目前啟用場次自動補上。
-7. 點擊「重算明細」產生薪資明細。
-8. 處理所有待分配項目。
-9. 鎖定批次。
+目前實際預約狀態為：`pending`、`confirmed`、`cancelled`、`completed`、`no_show`。因此 `pending`、`confirmed`、`completed` 都會排除；取消與未到場不排除。
 
-鎖定後不可重算或修改公池、舞蹈場次與既有明細。若鎖定後需要補差額，請新增「調整項」。
+此規則只影響公共池候選名單，不影響舞蹈場次的完整員工勾選名單，也不以點餐 `selected_staff_id` 排除公共池。被排除者不會出現在公共池可勾選列表；頁面只會以一行摘要顯示排除名單與原因。
 
-## 規則細節
+## 直接歸屬待分配補選
 
-### 公池平均
+拍立得、占卜或其他 `direct_staff` 品項若缺少受益員工，可在薪資草稿的「待分配項目」選擇員工並儲存。補選會寫入 `payroll_source_assignments`，記錄 `batch_id`、`source_type`、`source_id`、`assigned_staff_id`、建立與更新時間及操作者；不會修改原始訂單或 `order_items.selected_staff_id`。
 
-`food_pool` 品項總額依公池成員人頭平均分配。若不能整除，餘數依勾選順序固定分配，總額必須與來源總額完全一致。
+補選後系統立即重算，該項目會改為直接歸屬薪資明細。已鎖定批次不可新增、修改或刪除補選。
 
-若有公池金額但沒有設定公池成員，會產生待分配項目。
+## 鎖定流程
 
-### 指定員工
+`lock_payroll_batch()` 在單一交易內：
 
-`direct_staff` 直接分配給 `order_items.selected_staff_id`。
+1. 鎖定草稿批次列。
+2. 以目前公池、舞蹈場次、參與者與直接歸屬重新產生薪資明細。
+3. 檢查待分配項目與是否有產生明細。
+4. 檢查系統分配總額與來源可分配總額一致。
+5. 全數通過才把批次標記為 `locked`。
 
-若訂單品項沒有指定員工，會列入待分配清單，不自動猜測員工。
+管理者不需要先手動按「重算明細」，但可以先重算預覽結果。
 
-### 舞蹈場次
+## 手動調整
 
-`dance_split` 需要建立舞蹈場次並設定參與員工。數量為 1 且尚未建立場次的舞蹈品項，可在後台批次建立空場次。
+`manual_adjustment` 是例外薪資明細，不是一般分潤規則。建立時必須選員工、填金額與原因；它會出現在預覽、員工合計、CSV 與文字摘要中。`payroll_entries_prevent_locked_changes` 實際掛載 `prevent_locked_payroll_entry_changes()`；鎖定後整個批次明細固定，包含手動調整在內均不能新增、修改或刪除。
 
-同一筆訂單數量不等於 1、需要拆成多場，或實際分配金額不同時，由管理者手動新增場次。
+## 小費
 
-刪除場次採軟刪除，會將場次標示為作廢，不列入薪資計算，也不占用下一次新增場次的編號。
+拍立得、占卜、跳舞小費由客人直接交給喜歡的店員；點餐小費充公。全部不進薪資分潤，系統不會產生 `tip` 類型薪資明細。
 
-每個場次金額依參與員工人頭平均分配。若不能整除，餘數依參與者順序固定分配。
+## 部署與回滾
 
-若舞蹈品項尚未建立場次，或場次沒有參與者，會列入待分配清單。
+部署時先套用上述 migration，再部署：
 
-### 調整項
+- `admin/payroll.html`
+- `js/admin-payroll.js`
 
-調整項會寫入 `payroll_entries.source_type = 'manual_adjustment'`，並保存建立者與原因。這是鎖定後修正差額的正式方式。
+不需要重跑 Storage Policy 或 Realtime Publication。
 
-## 測試期間清除當日計算資料
-
-以下 SQL 只會清除指定店別與營業日的薪資批次、舞蹈場次、參與者與薪資明細，不會刪除訂單、菜單或員工資料。請先確認 `shop_key` 與 `business_date`。
-
-```sql
-with target_batch as (
-  select id
-  from public.payroll_batches
-  where shop_key = 'menu'
-    and business_date = date '2026-06-20'
-)
-delete from public.payroll_batches
-where id in (select id from target_batch);
-```
-
-`payroll_entries`、`payroll_pool_members`、`dance_sessions`、`dance_session_participants` 會因外鍵 cascade 一併清除。若批次已鎖定，建議仍只在測試資料上執行。
-
-## 不影響項目
-
-本功能不修改：
-
-- 公開官網頁面
-- 公開點餐頁面
-- 訂單送出 RPC
-- 限量機制
-- Discord 推播
-- 銷售報表
-- 員工 CRUD
-- 花札遊戲
-
-## 手動驗證
-
-請參考 `docs/payroll-settlement-test.md`。
+Hotfix 套用前請先匯出草稿 `payroll_source_assignments` 與所有 `payroll_manual_dance_*` 資料。若必須回退，先停止使用薪資頁，先執行 `supabase/migrations/20260622030000_payroll_manual_dance_supplements.rollback.sql`，再視需要執行 `supabase/migrations/20260622020000_payroll_direct_assignment_and_locked_entries.rollback.sql`。補登 rollback 會移除 payroll-only 補登紀錄，不會修改訂單；不要回滾或刪除已鎖定批次。

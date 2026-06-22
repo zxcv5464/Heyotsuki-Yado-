@@ -2,6 +2,22 @@
   const client = window.SUPABASE_CLIENT;
   const page = document.body.dataset.adminPage;
   const allowedRoles = new Set(["owner", "admin", "staff"]);
+  const requiredPermissions = {
+    dashboard: "dashboard.view",
+    settings: "settings.view",
+    staff: "staff.view",
+    "game-cards": "game_cards.view",
+    "scenery-cards": "scenery_cards.view",
+    menu: "menu.view",
+    reservations: "reservations.view",
+    "reservation-form": "reservation_form.manage",
+    orders: "orders.view",
+    "order-specials": "order_specials.manage",
+    reports: "reports.view",
+    payroll: "payroll.view",
+    accounts: "accounts.view",
+    roster: "roster.view",
+  };
 
   window.addEventListener("pageshow", (event) => {
     if (
@@ -18,6 +34,8 @@
         "order-specials",
         "reports",
         "payroll",
+        "accounts",
+        "roster",
       ].includes(page) &&
       event.persisted
     ) {
@@ -109,11 +127,19 @@
       return;
     }
 
-    const { data: profile, error: profileError } = await client
-      .from("admin_profiles")
-      .select("display_name, role, is_active")
-      .eq("id", session.user.id)
-      .maybeSingle();
+    const { data: context, error: profileError } = await client.rpc(
+      "get_admin_permission_context"
+    );
+    const profile = context?.profile
+      ? {
+          id: context.profile.id,
+          display_name: context.profile.displayName,
+          role: context.profile.role,
+          is_active: context.profile.isActive,
+          staff_id: context.profile.staffId,
+          permission_template_id: context.profile.permissionTemplateId,
+        }
+      : null;
 
     if (profileError || !profile) {
       await signOutAndReturn("此帳號尚未建立後台權限。");
@@ -130,16 +156,37 @@
       return;
     }
 
+    const permissions = new Set(context?.permissions || []);
+    const can = (permission) => profile.role === "owner" || permissions.has(permission);
+    const requiredPermission = requiredPermissions[page];
+    if (requiredPermission && !can(requiredPermission)) {
+      setMessage("此帳號沒有這個後台系統的權限。");
+      if (page === "dashboard") {
+        await signOutAndReturn("此帳號目前沒有可使用的後台權限。");
+      } else {
+        redirect("index.html?reason=permission-denied");
+      }
+      return;
+    }
+
     const nameElement = document.querySelector("[data-admin-name]");
     const roleElement = document.querySelector("[data-admin-role]");
     if (nameElement) nameElement.textContent = profile.display_name;
     if (roleElement) roleElement.textContent = profile.role;
 
     document.body.dataset.authReady = "true";
+    document.body.dataset.adminCanManage = String(
+      !requiredPermission || can(requiredPermission.replace(/\.view$/, ".manage"))
+    );
     window.ADMIN_PROFILE = profile;
+    window.ADMIN_PERMISSIONS = permissions;
+    window.ADMIN_CAN = can;
+    document.querySelectorAll("[data-required-permission]").forEach((element) => {
+      element.hidden = !can(element.dataset.requiredPermission);
+    });
     window.dispatchEvent(
       new CustomEvent("admin-auth-ready", {
-        detail: { ...profile, profile, session, client },
+        detail: { ...profile, profile, permissions, can, session, client },
       })
     );
 
@@ -171,7 +218,9 @@
       "orders",
       "order-specials",
       "reports",
-      "payroll",
+        "payroll",
+        "accounts",
+        "roster",
     ].includes(page)
   ) {
     initProtectedPage();

@@ -1,6 +1,5 @@
 (() => {
   const client = window.SUPABASE_CLIENT;
-  const editableRoles = new Set(["owner", "admin"]);
   const fields = [
     ["bookingUrl", "預約表單網址"],
     ["discordUrl", "Discord 連結"],
@@ -65,7 +64,7 @@
   };
 
   const init = async (profile) => {
-    if (!editableRoles.has(profile.role)) {
+    if (!window.ADMIN_CAN?.("settings.manage")) {
       if (denied) denied.hidden = false;
       if (form) form.hidden = true;
       return;

@@ -1,7 +1,6 @@
 (() => {
   const client = window.SUPABASE_CLIENT;
   const bucket = "heyotsuki-images";
-  const editableRoles = new Set(["owner", "admin"]);
   const acceptedTypes = new Set([
     "image/jpeg",
     "image/png",
@@ -507,7 +506,7 @@
   };
 
   const init = async (profile) => {
-    if (!editableRoles.has(profile.role)) {
+    if (!window.ADMIN_CAN?.("scenery_cards.manage")) {
       denied.hidden = false;
       content.hidden = true;
       newButton.hidden = true;

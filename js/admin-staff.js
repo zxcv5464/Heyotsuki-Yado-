@@ -1,7 +1,6 @@
 (() => {
   const client = window.SUPABASE_CLIENT;
   const bucket = "heyotsuki-images";
-  const editableRoles = new Set(["owner", "admin"]);
   const acceptedTypes = new Set([
     "image/jpeg",
     "image/png",
@@ -419,7 +418,7 @@
   };
 
   const init = async (profile) => {
-    if (!editableRoles.has(profile.role)) {
+    if (!window.ADMIN_CAN?.("staff.manage")) {
       denied.hidden = false;
       editor.hidden = true;
       listSection.hidden = true;

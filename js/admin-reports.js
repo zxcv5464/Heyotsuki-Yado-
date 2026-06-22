@@ -126,7 +126,7 @@
   };
 
   const loadPermissions = async () => {
-    if (["owner", "admin"].includes(state.profile.role)) {
+    if (window.ADMIN_CAN?.("reports.view")) {
       state.shops = Object.keys(SHOPS);
       return;
     }

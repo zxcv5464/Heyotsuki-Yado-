@@ -79,7 +79,7 @@
   }
 
   function isContentAdmin() {
-    return state.profile && ["owner", "admin"].includes(state.profile.role);
+    return window.ADMIN_CAN?.("orders.manage") === true;
   }
 
   function permissionFor(shopKey) {

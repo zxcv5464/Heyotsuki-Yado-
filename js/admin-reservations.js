@@ -1,6 +1,5 @@
 (() => {
   const client = window.SUPABASE_CLIENT;
-  const editableRoles = new Set(["owner", "admin"]);
   const statusLabels = {
     pending: "待確認",
     confirmed: "已確認",
@@ -381,7 +380,7 @@
   };
 
   const init = async (profile) => {
-    canEdit = editableRoles.has(profile.role);
+    canEdit = window.ADMIN_CAN?.("reservations.manage") === true;
     const { data } = await client.auth.getSession();
     currentUserId = data?.session?.user?.id || null;
     workspace.hidden = false;

@@ -212,7 +212,7 @@
 
   window.addEventListener("admin-auth-ready", async (event) => {
     state.client = event.detail.client;
-    if (!["owner", "admin"].includes(event.detail.profile.role)) {
+    if (!event.detail.can("order_specials.manage")) {
       deniedPanel.hidden = false;
       return;
     }

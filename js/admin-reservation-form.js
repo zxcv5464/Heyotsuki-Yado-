@@ -1,6 +1,5 @@
 (() => {
   const client = window.SUPABASE_CLIENT;
-  const editableRoles = new Set(["owner", "admin"]);
   const optionFieldTypes = new Set(["radio", "select"]);
   const creatableFieldTypes = new Set([
     "text",
@@ -541,7 +540,7 @@
   });
 
   const init = async (profile) => {
-    canEdit = editableRoles.has(profile.role);
+    canEdit = window.ADMIN_CAN?.("reservation_form.manage") === true;
     workspace.hidden = false;
     await loadData();
   };

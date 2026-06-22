@@ -54,7 +54,7 @@
             <div class="admin-section-heading">
               <div>
                 <h3>公池人員</h3>
-                <p class="field-help">公池品項會平均分給勾選的人員。批次建立舞蹈場次時，也會使用目前公池勾選的人員作為參與者。</p>
+                <p class="field-help">公池品項會平均分給勾選的人員。當日有泡湯預約者會預設排除；已取消與未到場預約不排除。</p>
               </div>
               <button class="admin-button admin-button-secondary" type="button" data-payroll-save-pool>儲存公池人員</button>
             </div>
@@ -63,17 +63,18 @@
               <button class="admin-button admin-button-secondary" type="button" data-payroll-pool-clear>清空</button>
             </div>
             <div class="admin-option-staff-grid payroll-compact-staff-grid" data-payroll-pool-members></div>
+            <p class="field-help" data-payroll-pool-exclusion-summary hidden></p>
           </section>
 
           <section class="admin-order-card">
             <div class="admin-section-heading">
               <div>
                 <h3>舞蹈場次</h3>
-                <p class="field-help">數量 1 的舞蹈品項可批次建立空場次；同一筆訂單數量大於 1 或需要拆分金額時，再手動新增場次。</p>
+                <p class="field-help">訂單數量等於應建立場次數。每場金額由訂單行總額依場次序號自動拆分，尾數會先分給前面的場次。</p>
               </div>
             </div>
             <div class="payroll-dance-bulk">
-              <p class="field-help">批次建立只建立空場次，參與者請在已建立場次中逐場勾選。</p>
+                <p class="field-help">批次建立只建立空場次，參與者請在已建立場次中逐場勾選。</p>
               <button class="admin-button admin-button-secondary" type="button" data-dance-auto-create>
                 為數量 1 的未建品項批次建立場次
               </button>
@@ -87,8 +88,8 @@
                   <select data-dance-item required></select>
                 </label>
                 <label class="admin-field">
-                  <span>分配金額</span>
-                  <input type="number" min="0" step="1" data-dance-amount required>
+                  <span>本場金額</span>
+                  <input type="number" min="0" step="1" data-dance-amount readonly required>
                 </label>
                 <div class="admin-field-full">
                   <button class="admin-button" type="submit">新增場次</button>
@@ -105,7 +106,7 @@
             <div class="admin-section-heading">
               <div>
                 <h3>薪資明細</h3>
-                <p class="field-help">重算後會依目前規則產生員工合計、待分配項目，完整明細會列出每位員工實際分配到的公池金額。</p>
+                <p class="field-help">重算後會依目前規則產生員工合計與待分配項目。鎖定時也會先自動重算，確認無待處理項目後才會鎖定。</p>
               </div>
               <div class="admin-card-actions">
                 <button class="admin-button admin-button-secondary" type="button" data-payroll-regenerate>重算明細</button>
@@ -124,7 +125,7 @@
 
           <section class="admin-order-card">
             <h3>手動調整</h3>
-            <p class="field-help">批次鎖定前可新增補款或扣款，會併入薪資明細。</p>
+            <p class="field-help">手動調整是例外薪資明細，必須填寫原因。鎖定後資料會固定，不可再新增或修改。</p>
             <form class="admin-form-grid" data-payroll-adjustment-form>
               <label class="admin-field">
                 <span>員工</span>
@@ -142,6 +143,40 @@
                 <button class="admin-button admin-button-secondary" type="submit">新增調整</button>
               </div>
             </form>
+          </section>
+
+          <section class="admin-order-card">
+            <div class="admin-section-heading">
+              <div>
+                <h3>補登舞蹈分潤</h3>
+                <p class="field-help">僅補登薪資分潤，不會建立訂單或影響營業報表。可直接對目前營業日的草稿或已鎖定批次新增；儲存後不能修改或刪除，如需更正請另建一筆反向補登。</p>
+              </div>
+            </div>
+            <form class="admin-form-grid" data-payroll-manual-dance-form>
+              <label class="admin-field">
+                <span>金額</span>
+                <input type="number" step="1" data-payroll-manual-dance-amount required>
+              </label>
+              <label class="admin-field">
+                <span>原因</span>
+                <input type="text" data-payroll-manual-dance-reason required>
+              </label>
+              <div class="admin-field-full">
+                <span class="admin-field-label">參與員工</span>
+                <div class="payroll-participant-tools">
+                  <button class="admin-button admin-button-secondary" type="button" data-payroll-manual-dance-select-all>全選</button>
+                  <button class="admin-button admin-button-secondary" type="button" data-payroll-manual-dance-clear>清空</button>
+                </div>
+                <div class="admin-option-staff-grid payroll-compact-staff-grid" data-payroll-manual-dance-participants></div>
+              </div>
+              <div class="admin-field-full">
+                <button class="admin-button admin-button-secondary" type="submit">新增補登舞蹈分潤</button>
+              </div>
+            </form>
+            <details class="payroll-details" open>
+              <summary>已補登舞蹈分潤</summary>
+              <div class="payroll-list" data-payroll-manual-dance-sessions></div>
+            </details>
           </section>
         </section>
       </section>

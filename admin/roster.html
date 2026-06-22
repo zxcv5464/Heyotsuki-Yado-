@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>排班管理 | 嘿月湯宿後台</title>
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body" data-admin-page="roster">
+  <div class="admin-shell">
+    <header class="admin-header">
+      <div><p class="admin-eyebrow">HEYOTSUKI YADO</p><h1>排班管理</h1></div>
+      <nav class="admin-header-actions" aria-label="後台導覽">
+        <a class="admin-button admin-button-secondary admin-button-link" href="index.html">返回後台</a>
+        <button class="admin-button admin-button-secondary" type="button" data-sign-out>登出</button>
+      </nav>
+    </header>
+    <main class="admin-main">
+      <section class="admin-panel" data-roster-access hidden>
+        <div class="admin-section-heading"><div><p class="admin-eyebrow">ROSTER</p><h2>排班與可上班狀態</h2><p class="field-help">薪資公共池仍由薪資頁手動選擇；本頁目前不會自動串接薪資。</p></div></div>
+        <div class="admin-message" data-roster-message role="status" aria-live="polite"></div>
+        <nav class="roster-tabs" aria-label="排班操作">
+          <button type="button" class="roster-tab is-active" data-roster-tab="setup" data-roster-manage hidden>期間與班別</button>
+          <button type="button" class="roster-tab" data-roster-tab="roles" data-roster-manage hidden>職位設定</button>
+          <button type="button" class="roster-tab" data-roster-tab="availability">可上班狀態</button>
+          <button type="button" class="roster-tab" data-roster-tab="assignments" data-roster-manage hidden>排班草稿</button>
+          <button type="button" class="roster-tab" data-roster-tab="preview">正式班表</button>
+        </nav>
+        <section class="roster-period-switcher" data-roster-period-switcher>
+          <span>目前期間</span>
+          <div class="roster-period-list" data-roster-global-periods></div>
+        </section>
+        <section class="admin-order-card" data-roster-panel="setup">
+          <div class="admin-section-heading"><div><h3 data-roster-period-form-heading>建立新排班期間</h3><p class="field-help">期間名稱會依開始與結束日期自動建立。建立後立即開放員工填寫。</p></div><div class="admin-card-actions" data-roster-manage hidden><button class="admin-button" type="button" data-roster-new-period>建立新期間</button></div></div>
+          <div class="roster-period-list" data-roster-period-list hidden></div>
+          <form class="admin-form-grid" data-roster-period-form data-roster-manage hidden>
+            <label class="admin-field"><span>開始日期</span><input name="date_from" type="date" required></label>
+            <label class="admin-field"><span>結束日期</span><input name="date_to" type="date" required></label>
+            <div class="admin-field admin-field-full"><span class="admin-field-label">班別</span><p class="field-help">依日期範圍自動建立預設兩班，也可在下方逐筆調整。</p><div class="roster-slot-editor" data-roster-slot-editor></div></div>
+            <div class="admin-field admin-field-full"><span class="admin-field-label">職位需求快照</span><div class="roster-requirement-editor" data-roster-requirement-editor></div></div>
+            <div class="admin-field-full"><button class="admin-button" type="submit" data-roster-period-submit>建立並開放填寫</button></div>
+          </form>
+        </section>
+
+        <section class="admin-order-card" data-roster-manager-section data-roster-panel="roles" hidden>
+          <div class="admin-section-heading"><div><h3>職位設定</h3><p class="field-help">新期間會使用目前啟用的職位建立快照，修改舊期間不會受影響。</p></div><div class="admin-card-actions" data-roster-manage hidden><button class="admin-button" type="button" data-roster-new-role>新增職位</button></div></div>
+          <form class="admin-form-grid" data-roster-role-form hidden>
+            <div class="admin-field-full"><h4 data-roster-role-form-heading>新增職位</h4></div>
+            <label class="admin-field admin-field-full"><span>職位名稱</span><input name="name" required></label>
+            <div class="roster-role-counts admin-field-full">
+              <label class="admin-field"><span>最少人數</span><input name="min_staff_count" type="number" min="0" value="0" required></label>
+              <label class="admin-field"><span>最多人數</span><input name="max_staff_count" type="number" min="1" value="1" required></label>
+            </div>
+            <label class="admin-field admin-field-full"><span>備註</span><input name="description"></label>
+            <label class="checkbox-field admin-field-full"><input name="is_active" type="checkbox" checked><span>啟用職位</span></label>
+            <div class="admin-field-full"><button class="admin-button admin-button-secondary" type="submit">儲存職位</button><button class="admin-button admin-button-secondary" type="button" data-roster-close-role>取消</button></div>
+          </form>
+          <div class="payroll-list" data-roster-role-list></div>
+        </section>
+
+        <section class="admin-order-card" data-roster-period-workspace data-roster-panel="availability" hidden>
+          <div class="admin-section-heading"><div><h3 data-roster-period-title>可上班狀態</h3><p class="field-help" data-roster-period-status></p></div><div class="admin-card-actions" data-roster-manage hidden><button class="admin-button admin-button-secondary" type="button" data-roster-open>開放填寫</button><button class="admin-button admin-button-secondary" type="button" data-roster-close>停止填寫</button></div></div>
+          <div data-roster-self-availability></div>
+          <div data-roster-manage hidden>
+            <div class="admin-filter-grid roster-matrix-tools"><label class="admin-field"><span>搜尋員工</span><input type="search" data-roster-staff-search placeholder="輸入姓名"></label><label class="admin-field"><span>篩選狀態</span><select data-roster-status-filter><option value="all">全部狀態</option><option value="available">可</option><option value="unavailable">否</option><option value="standby">備用</option><option value="unselected">未選擇</option></select></label></div>
+            <div class="roster-column-tools" data-roster-column-tools></div>
+            <div class="roster-matrix-wrap"><table class="roster-matrix"><thead data-roster-matrix-head></thead><tbody data-roster-matrix-body></tbody></table></div>
+            <div class="admin-card-actions"><button class="admin-button" type="button" data-roster-save-matrix>儲存可上班矩陣</button></div>
+          </div>
+        </section>
+        <section class="admin-order-card" data-roster-no-open data-roster-panel="availability" hidden>
+          <h3>目前尚未開放填寫</h3>
+          <p class="field-help">管理員建立並開放排班期間後，這裡會顯示你的各班別可上班狀態。</p>
+        </section>
+        <section class="admin-order-card" data-roster-unbound data-roster-panel="availability" hidden>
+          <h3>尚未綁定員工資料</h3>
+          <p class="field-help">此帳號尚未綁定有效員工，因此無法填寫可上班狀態。請聯絡管理員到「帳號與權限管理」綁定對應員工後，再重新登入。</p>
+        </section>
+
+        <section class="admin-order-card" data-roster-assignment-section data-roster-panel="assignments" hidden>
+          <div class="admin-section-heading"><div><h3>職位與一鍵排班</h3><p class="field-help">自動排班只使用「可」的人員；可選擇在缺人時使用備用。手動指定不會被重新產生覆蓋。</p></div><div class="admin-card-actions" data-roster-manage hidden><label class="checkbox-field"><input type="checkbox" data-roster-use-standby><span>缺人時使用備用</span></label><label class="checkbox-field"><input type="checkbox" data-roster-clear-draft><span>清除既有草稿</span></label><button class="admin-button" type="button" data-roster-generate>一鍵排班</button></div></div>
+          <div class="roster-assignment-list" data-roster-assignment-list></div>
+        </section>
+
+        <section class="admin-order-card" data-roster-preview-section data-roster-panel="preview" hidden>
+          <div class="admin-section-heading"><div><h3>班表預覽</h3><p class="field-help">依日期收納，最新日期在最上方；每一天可獨立複製與下載圖片。</p></div></div>
+          <div class="roster-print-preview" data-roster-print-preview></div>
+        </section>
+      </section>
+      <section class="admin-panel" data-roster-denied hidden><h2>沒有排班查看權限</h2><p>請聯絡管理員開通排班權限。</p></section>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/admin-auth.js"></script>
+  <script src="../js/admin-roster.js"></script>
+</body>
+</html>

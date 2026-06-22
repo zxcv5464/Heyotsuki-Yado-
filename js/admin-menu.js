@@ -1,6 +1,5 @@
 (() => {
   const client = window.SUPABASE_CLIENT;
-  const editableRoles = new Set(["owner", "admin"]);
   const allowedMenuKeys = new Set(["menu", "menu2"]);
 
   const workspace = document.querySelector("[data-menu-workspace]");
@@ -826,7 +825,7 @@
   };
 
   const init = async (profile) => {
-    if (!editableRoles.has(profile.role)) {
+    if (!window.ADMIN_CAN?.("menu.manage")) {
       denied.hidden = false;
       workspace.hidden = true;
       return;
