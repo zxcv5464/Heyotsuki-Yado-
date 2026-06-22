@@ -170,13 +170,20 @@ Deno.serve(async (request) => {
       .select("role, is_active")
       .eq("id", userData.user.id)
       .maybeSingle();
+    const { data: permissions, error: permissionError } = await serviceClient
+      .from("admin_profile_permissions")
+      .select("permission_key, is_enabled")
+      .eq("profile_id", userData.user.id)
+      .eq("permission_key", "reservations.manage")
+      .eq("is_enabled", true);
     if (
       profileError ||
+      permissionError ||
       !profile ||
       !profile.is_active ||
-      !["owner", "admin"].includes(profile.role)
+      (profile.role !== "owner" && !(permissions || []).length)
     ) {
-      return jsonResponse({ error: "Owner or admin permission is required." }, 403);
+      return jsonResponse({ error: "Reservation management permission is required." }, 403);
     }
   }
 

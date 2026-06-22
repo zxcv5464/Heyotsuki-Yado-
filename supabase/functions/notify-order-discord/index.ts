@@ -194,13 +194,20 @@ Deno.serve(async (request) => {
       .select("role, is_active")
       .eq("id", userData.user.id)
       .maybeSingle();
+    const { data: permissions, error: permissionError } = await serviceClient
+      .from("admin_profile_permissions")
+      .select("permission_key, is_enabled")
+      .eq("profile_id", userData.user.id)
+      .eq("permission_key", "orders.manage")
+      .eq("is_enabled", true);
     if (
       profileError ||
+      permissionError ||
       !profile ||
       !profile.is_active ||
-      !["owner", "admin"].includes(profile.role)
+      (profile.role !== "owner" && !(permissions || []).length)
     ) {
-      return jsonResponse({ error: "Owner or admin permission is required." }, 403);
+      return jsonResponse({ error: "Order management permission is required." }, 403);
     }
   }
 
