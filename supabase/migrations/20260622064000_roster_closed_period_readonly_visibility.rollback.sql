@@ -1,0 +1,4 @@
+-- Rollback for 20260622064000_roster_closed_period_readonly_visibility.sql.
+-- Restore public.roster_snapshot and the three roster read policies from
+-- 20260622060000_roster_system_v1.sql, then reapply the visibility change in
+-- 20260622061000_roster_period_workflow_hotfix.sql if that is still desired.

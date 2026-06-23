@@ -1,0 +1,3 @@
+-- Restore the immediately previous implementation from
+-- 20260623010000_roster_assignment_draft_and_optional_autofill.sql.
+-- Reapply that migration's public.generate_roster_assignments definition.

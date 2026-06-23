@@ -1,0 +1,2 @@
+-- Restore the previous save_roster_assignment_draft definition from
+-- 20260623010000_roster_assignment_draft_and_optional_autofill.sql.

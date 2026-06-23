@@ -1,0 +1,2 @@
+-- Restore the immediately previous implementation by reapplying
+-- 20260623011000_roster_optional_autofill_available_only.sql.

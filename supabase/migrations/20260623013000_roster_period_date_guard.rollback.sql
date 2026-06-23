@@ -1,0 +1,4 @@
+-- Rollback note:
+-- Re-apply the prior canonical definition from
+-- 20260622063000_roster_open_submission_status_hotfix.sql to restore the
+-- previous save_roster_period behavior. Existing roster data is unchanged.
