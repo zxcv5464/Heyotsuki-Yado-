@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const state = { client: null, snapshot: null, periodId: null, roleId: null, roleFormMode: null, slotDraft: [], tab: "setup", accountRole: null, periodFormMode: null, editingPeriodId: null };
+  const state = { client: null, snapshot: null, periodId: null, roleId: null, roleFormMode: null, slotDraft: [], tab: "setup", accountRole: null, periodFormMode: null, editingPeriodId: null, availabilityMode: "manage", pickingAssignmentRow: null, pickingAssignmentRole: null, expandedDraftDays: new Set(), expandedDraftRoles: new Set() };
   const $ = (selector) => document.querySelector(selector);
   const access = $("[data-roster-access]");
   const denied = $("[data-roster-denied]");
@@ -14,8 +14,11 @@
   const previewSection = $("[data-roster-preview-section]");
   const roleForm = $("[data-roster-role-form]");
   const roleList = $("[data-roster-role-list]");
+  const staffPicker = $("[data-roster-staff-picker]");
+  const pickerSearch = $("[data-roster-picker-search]");
+  const pickerList = $("[data-roster-picker-list]");
   const statusLabels = { unselected: "未選擇", available: "可", unavailable: "否", standby: "備用" };
-  const periodLabels = { draft: "關閉填寫", open: "開放填寫", published: "關閉填寫", locked: "關閉填寫" };
+  const periodLabels = { draft: "已關閉填寫", open: "開放填寫", published: "已關閉填寫", locked: "已關閉填寫" };
   const append = (parent, tag, text = "", className = "") => {
     const node = document.createElement(tag); node.textContent = text; if (className) node.className = className; parent.append(node); return node;
   };
@@ -23,9 +26,9 @@
     const node = document.createElement("button"); node.type = "button"; node.className = className; node.textContent = text; node.dataset.rosterAction = action; return node;
   };
   const can = (key) => window.ADMIN_CAN?.(key) === true;
-  const isStaffAccount = () => state.accountRole === "staff";
-  const isManager = () => !isStaffAccount() && state.snapshot?.canManage === true && can("roster.manage");
+  const isManager = () => state.snapshot?.canManage === true && can("roster.manage");
   const activePeriod = () => state.snapshot?.period || null;
+  const selectedPeriodId = () => state.periodId || activePeriod()?.id || null;
   const slots = () => state.snapshot?.slots || [];
   const staff = () => state.snapshot?.staff || [];
   const requirements = () => state.snapshot?.requirements || [];
@@ -97,34 +100,35 @@
     periodList.replaceChildren();
     (state.snapshot?.periods || []).forEach((period) => {
       const item = document.createElement("button"); item.type = "button"; item.className = "roster-period-button"; item.dataset.periodId = period.id;
-      if (period.id === activePeriod()?.id) item.classList.add("is-active");
+      if (period.id === selectedPeriodId()) item.classList.add("is-active");
       append(item, "strong", period.title); append(item, "span", `${period.dateFrom} - ${period.dateTo}｜${periodLabels[period.status] || period.status}`); periodList.append(item);
     });
     if (!(state.snapshot?.periods || []).length) append(periodList, "p", "尚未建立排班期間。", "admin-empty");
   };
   const renderGlobalPeriods = () => {
     const container = $("[data-roster-global-periods]"); container.replaceChildren();
-    const periods = [...(state.snapshot?.periods || [])].sort((a, b) => b.dateFrom.localeCompare(a.dateFrom));
+    const periods = [...(state.snapshot?.periods || [])];
     if (!periods.length) { append(container, "span", "尚未建立可查看的排班期間。", "field-help"); return; }
 
     const renderGroup = (label, groupPeriods, isOpen) => {
       if (!groupPeriods.length) return;
-      const containsSelectedPeriod = state.periodFormMode !== "create" && groupPeriods.some((period) => period.id === activePeriod()?.id);
+      const suppressActivePeriod = state.tab === "setup" && state.periodFormMode === "create";
+      const containsSelectedPeriod = !suppressActivePeriod && groupPeriods.some((period) => period.id === selectedPeriodId());
       const group = document.createElement("details"); group.className = "roster-period-group"; group.open = isOpen || containsSelectedPeriod;
       const summary = document.createElement("summary");
       append(summary, "strong", label); append(summary, "span", `${groupPeriods.length} 期`); group.append(summary);
       const list = document.createElement("div"); list.className = "roster-period-list";
       groupPeriods.forEach((period) => {
         const item = document.createElement("button"); item.type = "button"; item.className = "roster-period-button"; item.dataset.periodId = period.id;
-        if (state.periodFormMode !== "create" && period.id === activePeriod()?.id) item.classList.add("is-active");
+        if (!suppressActivePeriod && period.id === selectedPeriodId()) item.classList.add("is-active");
         append(item, "strong", period.title); append(item, "span", periodLabels[period.status] || period.status); list.append(item);
       });
       group.append(list); container.append(group);
     };
 
     const today = taipeiToday();
-    renderGroup("目前與未過期期間", periods.filter((period) => period.dateTo >= today), true);
-    renderGroup("已過期期間", periods.filter((period) => period.dateTo < today), false);
+    renderGroup("目前與未過期期間", periods.filter((period) => period.dateTo >= today).sort((a, b) => a.dateFrom.localeCompare(b.dateFrom)), true);
+    renderGroup("已過期期間", periods.filter((period) => period.dateTo < today).sort((a, b) => b.dateFrom.localeCompare(a.dateFrom)), false);
   };
   const renderRoles = () => {
     roleList.replaceChildren();
@@ -149,9 +153,12 @@
   };
   const renderSelfAvailability = () => {
     const container = $("[data-roster-self-availability]"); container.replaceChildren(); const period = activePeriod();
-    if (!period || !state.snapshot?.canSubmit) return;
+    // A manager who is bound to a staff member can maintain their own availability too.
+    // Saving is still authorized by the existing roster.manage / roster.submit RPC checks.
+    if (!period) return;
     if (!state.snapshot?.myStaffId) return;
     append(container, "h4", "我的可上班狀態");
+    if (period.status === "open") append(container, "p", "目前開放填寫，請填寫自己的可上班狀態。", "field-help");
     const grid = document.createElement("div"); grid.className = "roster-self-grid";
     const editable = period.status === "open" || isManager();
     const days = new Map();
@@ -182,26 +189,158 @@
     }
   };
   const renderMatrix = () => {
-    const head = $("[data-roster-matrix-head]"); const body = $("[data-roster-matrix-body]"); head.replaceChildren(); body.replaceChildren(); if (!isManager()) return;
-    const tr = document.createElement("tr"); append(tr, "th", "員工"); slots().forEach((slot) => append(tr, "th", `${formatDate(slot.businessDate)}\n${slot.label}`)); head.append(tr);
+    const container = $("[data-roster-admin-availability]"); container.replaceChildren(); if (!isManager()) return;
     const query = $("[data-roster-staff-search]").value.trim().toLowerCase(); const filter = $("[data-roster-status-filter]").value;
-    staff().filter((person) => !query || person.name.toLowerCase().includes(query)).filter((person) => filter === "all" || slots().some((slot) => availabilityFor(slot.id, person.id) === filter)).forEach((person) => {
-      const row = document.createElement("tr"); append(row, "th", person.name); slots().forEach((slot) => { const cell = document.createElement("td"); const select = statusSelect(availabilityFor(slot.id, person.id)); select.dataset.matrixSlotId = slot.id; select.dataset.matrixStaffId = person.id; cell.append(select); row.append(cell); }); body.append(row);
+    const people = staff().filter((person) => !query || person.name.toLowerCase().includes(query)).filter((person) => filter === "all" || slots().some((slot) => availabilityFor(slot.id, person.id) === filter));
+    if (!people.length) { append(container, "p", "沒有符合篩選條件的員工。", "admin-empty"); return; }
+    const slotsByDate = new Map();
+    slots().forEach((slot) => { if (!slotsByDate.has(slot.businessDate)) slotsByDate.set(slot.businessDate, []); slotsByDate.get(slot.businessDate).push(slot); });
+    [...slotsByDate.entries()].forEach(([businessDate, dateSlots]) => {
+      const day = document.createElement("details"); day.className = "roster-admin-day";
+      const summary = document.createElement("summary"); append(summary, "strong", formatDate(businessDate)); append(summary, "span", `${dateSlots.length} 班｜${people.length} 人`, "roster-admin-day-summary"); day.append(summary);
+      dateSlots.sort((a, b) => a.sortOrder - b.sortOrder).forEach((slot) => {
+        const shift = document.createElement("section"); shift.className = "roster-admin-shift";
+        const heading = document.createElement("div"); heading.className = "roster-admin-shift-heading"; append(heading, "h4", `${slot.label}｜${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}`);
+        const bulk = document.createElement("div"); bulk.className = "roster-admin-shift-bulk";
+        const bulkSelect = statusSelect("available"); bulkSelect.dataset.columnSlotId = slot.id;
+        const apply = button("套用整班", "apply-column", "admin-button admin-button-secondary admin-button-small"); apply.dataset.slotId = slot.id;
+        bulk.append(bulkSelect, apply); heading.append(bulk); shift.append(heading);
+        const personGrid = document.createElement("div"); personGrid.className = "roster-admin-staff-grid";
+        people.forEach((person) => {
+          const row = document.createElement("label"); row.className = "roster-admin-staff-row"; append(row, "strong", person.name);
+          const select = statusSelect(availabilityFor(slot.id, person.id)); select.dataset.matrixSlotId = slot.id; select.dataset.matrixStaffId = person.id; row.append(select); personGrid.append(row);
+        });
+        shift.append(personGrid); day.append(shift);
+      });
+      container.append(day);
     });
-  };
-  const renderColumnTools = () => {
-    const container = $("[data-roster-column-tools]"); container.replaceChildren(); if (!isManager()) return;
-    slots().forEach((slot) => { const card = document.createElement("div"); card.className = "roster-column-tool"; append(card, "strong", `${formatDate(slot.businessDate)} ${slot.label}`); const select = statusSelect("available"); select.dataset.columnSlotId = slot.id; const apply = button("套用", "apply-column", "admin-button admin-button-small"); apply.dataset.slotId = slot.id; const clear = button("清空", "clear-column", "admin-button admin-button-secondary admin-button-small"); clear.dataset.slotId = slot.id; card.append(select, apply, clear); container.append(card); });
   };
   const renderAssignments = () => {
     const container = $("[data-roster-assignment-list]"); container.replaceChildren(); const period = activePeriod(); if (!period) return;
     const bySlot = new Map(slots().map((slot) => [slot.id, []])); assignments().forEach((item) => bySlot.get(item.shiftSlotId)?.push(item));
     slots().forEach((slot) => { const card = document.createElement("article"); card.className = "roster-assignment-card"; append(card, "h4", `${formatDate(slot.businessDate)}｜${slot.label} ${formatTime(slot.startTime)}-${formatTime(slot.endTime)}`);
       requirements().filter((requirement) => requirement.isRequired).forEach((requirement) => { const line = document.createElement("div"); line.className = "roster-assignment-role"; append(line, "strong", `${requirement.roleName}（至少 ${requirement.minStaffCount} 人）`);
-        const rows = bySlot.get(slot.id).filter((item) => item.roleRequirementId === requirement.id); rows.forEach((item) => line.append(assignmentEditor(item, slot, requirement)));
-        if (isManager() && period.status !== "published" && period.status !== "locked") { const add = button("新增人員／待定", "add-assignment", "admin-button admin-button-secondary admin-button-small"); add.dataset.slotId = slot.id; add.dataset.requirementId = requirement.id; line.append(add); }
-        if (!rows.length) append(line, "p", "待定", "field-help"); card.append(line);
+        line.dataset.slotId = slot.id; line.dataset.requirementId = requirement.id;
+        const rows = bySlot.get(slot.id).filter((item) => item.roleRequirementId === requirement.id); rows.forEach((item) => line.append(assignmentEditorDraft(item, slot, requirement)));
+        if (isManager() && period.status !== "published" && period.status !== "locked") { const add = button("新增人員", "add-assignment", "admin-button admin-button-secondary admin-button-small"); add.dataset.slotId = slot.id; add.dataset.requirementId = requirement.id; add.dataset.maxStaffCount = requirement.maxStaffCount; line.append(add); }
+        if (!rows.length) append(line, "p", "尚未安排人員。", "field-help"); card.append(line);
       }); container.append(card);
+    });
+  };
+  const renderAssignmentDraft = () => {
+    const container = $("[data-roster-assignment-list]"); container.replaceChildren(); const period = activePeriod(); if (!period) return;
+    const bySlot = new Map(slots().map((slot) => [slot.id, []])); assignments().forEach((item) => bySlot.get(item.shiftSlotId)?.push(item));
+    const days = new Map();
+    slots().forEach((slot) => { if (!days.has(slot.businessDate)) days.set(slot.businessDate, []); days.get(slot.businessDate).push(slot); });
+    [...days.entries()].forEach(([businessDate, daySlots]) => {
+      const day = document.createElement("details"); day.className = "roster-draft-day";
+      const summary = document.createElement("summary"); append(summary, "strong", formatDate(businessDate)); append(summary, "span", daySlots.length + " 班", "roster-draft-day-summary"); day.append(summary);
+      daySlots.sort((a, b) => a.sortOrder - b.sortOrder).forEach((slot) => {
+        const shift = document.createElement("section"); shift.className = "roster-draft-shift";
+        append(shift, "h4", slot.label + "｜" + formatTime(slot.startTime) + " - " + formatTime(slot.endTime));
+        requirements().filter((requirement) => requirement.isRequired).forEach((requirement) => {
+          const role = document.createElement("div"); role.className = "roster-draft-role"; role.dataset.slotId = slot.id; role.dataset.requirementId = requirement.id;
+          const rows = bySlot.get(slot.id).filter((item) => item.roleRequirementId === requirement.id);
+          const heading = document.createElement("div"); heading.className = "roster-draft-role-heading";
+          append(heading, "strong", requirement.roleName);
+          append(heading, "span", "已排 " + rows.filter((item) => item.status === "assigned").length + "／" + requirement.maxStaffCount + " 人", "field-help");
+          role.append(heading);
+          rows.forEach((item) => role.append(assignmentEditorDraft(item, slot, requirement)));
+          if (!rows.length) append(role, "p", "尚未安排人員。", "field-help");
+          if (isManager() && period.status !== "published" && period.status !== "locked") {
+            const add = button("新增人員", "add-assignment", "admin-button admin-button-secondary admin-button-small");
+            add.dataset.slotId = slot.id; add.dataset.requirementId = requirement.id; add.dataset.maxStaffCount = requirement.maxStaffCount; role.append(add);
+          }
+          shift.append(role);
+        });
+        day.append(shift);
+      });
+      container.append(day);
+    });
+  };
+  const renderCompactAssignmentDraft = () => {
+    const container = $("[data-roster-assignment-list]"); container.replaceChildren(); const period = activePeriod(); if (!period) return;
+    const bySlot = new Map(slots().map((slot) => [slot.id, []])); assignments().forEach((item) => bySlot.get(item.shiftSlotId)?.push(item));
+    const days = new Map(); slots().forEach((slot) => { if (!days.has(slot.businessDate)) days.set(slot.businessDate, []); days.get(slot.businessDate).push(slot); });
+    [...days.entries()].forEach(([businessDate, daySlots]) => {
+      const day = document.createElement("details"); day.className = "roster-draft-day";
+      const summary = document.createElement("summary"); append(summary, "strong", formatDate(businessDate)); append(summary, "span", daySlots.length + " 班", "roster-draft-day-summary"); day.append(summary);
+      daySlots.sort((a, b) => a.sortOrder - b.sortOrder).forEach((slot) => {
+        const shift = document.createElement("section"); shift.className = "roster-draft-shift";
+        append(shift, "h4", slot.label + "｜" + formatTime(slot.startTime) + " - " + formatTime(slot.endTime));
+        const slotRows = bySlot.get(slot.id);
+        const visibleRequirements = requirements().filter((requirement) => requirement.isRequired && slotRows.some((item) => item.roleRequirementId === requirement.id));
+        if (!visibleRequirements.length) append(shift, "p", "尚未安排職位。可從下方選擇職位加入。", "field-help roster-draft-empty");
+        visibleRequirements.forEach((requirement) => {
+          const role = document.createElement("div"); role.className = "roster-draft-role"; role.dataset.slotId = slot.id; role.dataset.requirementId = requirement.id;
+          const rows = slotRows.filter((item) => item.roleRequirementId === requirement.id);
+          const heading = document.createElement("div"); heading.className = "roster-draft-role-heading"; append(heading, "strong", requirement.roleName); append(heading, "span", "已排 " + rows.filter((item) => item.status === "assigned").length + "／" + requirement.maxStaffCount + " 人", "field-help"); role.append(heading);
+          rows.forEach((item) => role.append(assignmentEditorDraft(item, slot, requirement)));
+          if (isManager() && period.status !== "published" && period.status !== "locked" && rows.length < requirement.maxStaffCount) {
+            const add = button("新增人員", "add-assignment", "admin-button admin-button-secondary admin-button-small"); add.dataset.slotId = slot.id; add.dataset.requirementId = requirement.id; add.dataset.maxStaffCount = requirement.maxStaffCount; role.append(add);
+          }
+          shift.append(role);
+        });
+        if (isManager() && period.status !== "published" && period.status !== "locked") {
+          const availableRoles = requirements().filter((requirement) => requirement.isRequired && !slotRows.some((item) => item.roleRequirementId === requirement.id));
+          if (availableRoles.length) {
+            const addRole = document.createElement("div"); addRole.className = "roster-draft-add-role";
+            const select = document.createElement("select"); select.dataset.addRoleSlotId = slot.id; select.append(new Option("新增職位…", ""));
+            availableRoles.forEach((requirement) => select.append(new Option(requirement.roleName + "（最多 " + requirement.maxStaffCount + " 人）", requirement.id)));
+            const add = button("加入職位", "add-role-assignment", "admin-button admin-button-secondary admin-button-small"); add.dataset.slotId = slot.id;
+            addRole.append(select, add); shift.append(addRole);
+          }
+        }
+        day.append(shift);
+      });
+      container.append(day);
+    });
+  };
+  const renderRoleFirstAssignmentDraft = () => {
+    const container = $("[data-roster-assignment-list]");
+    container.querySelectorAll(".roster-draft-day").forEach((day) => {
+      const businessDate = day.dataset.businessDate;
+      if (!businessDate) return;
+      if (day.open) state.expandedDraftDays.add(businessDate);
+      else state.expandedDraftDays.delete(businessDate);
+    });
+    container.replaceChildren(); const period = activePeriod(); if (!period) return;
+    const bySlot = new Map(slots().map((slot) => [slot.id, []])); assignments().forEach((item) => bySlot.get(item.shiftSlotId)?.push(item));
+    const days = new Map(); slots().forEach((slot) => { if (!days.has(slot.businessDate)) days.set(slot.businessDate, []); days.get(slot.businessDate).push(slot); });
+    [...days.entries()].forEach(([businessDate, daySlots]) => {
+      const day = document.createElement("details"); day.className = "roster-draft-day"; day.dataset.businessDate = businessDate; day.open = state.expandedDraftDays.has(businessDate);
+      day.addEventListener("toggle", () => { if (day.open) state.expandedDraftDays.add(businessDate); else state.expandedDraftDays.delete(businessDate); });
+      const summary = document.createElement("summary"); append(summary, "strong", formatDate(businessDate)); append(summary, "span", daySlots.length + " 班", "roster-draft-day-summary"); day.append(summary);
+      daySlots.sort((a, b) => a.sortOrder - b.sortOrder).forEach((slot) => {
+        const shift = document.createElement("section"); shift.className = "roster-draft-shift";
+        const shiftHeading = document.createElement("div"); shiftHeading.className = "roster-draft-shift-heading";
+        append(shiftHeading, "h4", slot.label + "｜" + formatTime(slot.startTime) + " - " + formatTime(slot.endTime));
+        if (isManager() && period.status !== "published" && period.status !== "locked") {
+          const fillShift = button("自動排班", "generate-slot", "admin-button admin-button-secondary admin-button-small");
+          fillShift.dataset.slotId = slot.id;
+          const clearShift = button("清除", "clear-slot", "admin-button admin-button-secondary admin-button-small");
+          clearShift.dataset.slotId = slot.id;
+          const shiftActions = document.createElement("div"); shiftActions.className = "roster-draft-shift-actions"; shiftActions.append(fillShift, clearShift);
+          shiftHeading.append(shiftActions);
+        }
+        shift.append(shiftHeading);
+        requirements().filter((requirement) => requirement.isRequired).forEach((requirement) => {
+          const role = document.createElement("div"); role.className = "roster-draft-role"; role.dataset.slotId = slot.id; role.dataset.requirementId = requirement.id;
+          const rows = bySlot.get(slot.id).filter((item) => item.roleRequirementId === requirement.id);
+          const heading = document.createElement("div"); heading.className = "roster-draft-role-heading"; append(heading, "strong", requirement.roleName); const count = append(heading, "span", "已排 " + rows.filter((item) => item.status === "assigned").length + "／" + requirement.maxStaffCount + " 人", "field-help"); count.dataset.rosterAssignmentCount = "true"; role.append(heading);
+          const people = document.createElement("div"); people.className = "roster-draft-people";
+          if (rows.length >= 2) {
+            const overflow = document.createElement("details"); overflow.className = "roster-draft-extra-people"; setupRoleOverflow(overflow, role);
+            const overflowSummary = document.createElement("summary"); overflowSummary.textContent = "已選 " + rows.length + " 位人員"; overflowSummary.dataset.rosterOverflowSummary = "true"; overflow.append(overflowSummary);
+            const overflowList = document.createElement("div"); overflowList.className = "roster-draft-extra-people-list"; rows.forEach((item) => overflowList.append(assignmentEditorDraft(item, slot, requirement))); overflow.append(overflowList); people.append(overflow);
+          } else rows.forEach((item) => people.append(assignmentEditorDraft(item, slot, requirement)));
+          role.append(people);
+          syncAddPersonControl(role);
+          shift.append(role);
+        });
+        day.append(shift);
+      });
+      container.append(day);
     });
   };
   const assignmentEditor = (item, slot, requirement) => {
@@ -210,6 +349,112 @@
     const select = document.createElement("select"); select.dataset.assignmentStaffId = item.id; select.append(new Option("待定", "")); staff().forEach((person) => { const stateText = availabilityFor(slot.id, person.id); select.append(new Option(`${person.name}（${statusLabels[stateText]}）`, person.id, false, person.id === item.staffId)); });
     const save = button("儲存", "save-assignment", "admin-button admin-button-small"); save.dataset.assignmentId = item.id; save.dataset.slotId = slot.id; save.dataset.requirementId = requirement.id;
     const remove = button("移除", "delete-assignment", "admin-button admin-button-secondary admin-button-small"); remove.dataset.assignmentId = item.id; row.append(select, save, remove); return row;
+  };
+  const assignmentEditorDraft = (item, slot, requirement) => {
+    const row = document.createElement("div"); row.className = "roster-assignment-row";
+    row.dataset.assignmentRow = "true"; row.dataset.slotId = slot.id; row.dataset.requirementId = requirement.id; row.dataset.assignmentId = item?.id || ""; row.dataset.staffId = item?.staffId || ""; row.dataset.isManual = item?.isManual ? "true" : "false";
+    if (!isManager() || activePeriod().status === "published" || activePeriod().status === "locked") { append(row, "span", item.status === "pending" ? "待定" : staffName(item.staffId)); return row; }
+    const choose = button(item?.staffId ? staffName(item.staffId) : "選擇人員", "open-staff-picker", "roster-assignment-person");
+    choose.dataset.pickerTrigger = "true";
+    const remove = button("−", "delete-assignment", "roster-assignment-remove");
+    row.append(choose, remove);
+    return row;
+  };
+  const syncRoleAssignmentCount = (role) => {
+    const requirement = requirements().find((item) => item.id === role?.dataset.requirementId);
+    const count = role?.querySelector("[data-roster-assignment-count]");
+    if (!requirement || !count) return;
+    const assigned = [...role.querySelectorAll("[data-assignment-row]")].filter((row) => Boolean(row.dataset.staffId)).length;
+    count.textContent = "已排 " + assigned + "／" + requirement.maxStaffCount + " 人";
+  };
+  const draftRoleKey = (role) => `${role?.dataset.slotId || ""}:${role?.dataset.requirementId || ""}`;
+  const setupRoleOverflow = (overflow, role) => {
+    const key = draftRoleKey(role);
+    overflow.dataset.rosterRoleKey = key;
+    overflow.open = state.expandedDraftRoles.has(key);
+    overflow.addEventListener("toggle", () => {
+      if (overflow.open) state.expandedDraftRoles.add(key);
+      else state.expandedDraftRoles.delete(key);
+    });
+  };
+  const syncRolePeopleLayout = (role, openAfterLayout = false) => {
+    const people = role?.querySelector(".roster-draft-people");
+    if (!people) return;
+    const rows = [...people.querySelectorAll("[data-assignment-row]")];
+    const currentOverflow = people.querySelector(".roster-draft-extra-people");
+
+    if (rows.length >= 2) {
+      const overflow = currentOverflow || document.createElement("details");
+      overflow.className = "roster-draft-extra-people";
+      if (!currentOverflow) setupRoleOverflow(overflow, role);
+      let summary = overflow.querySelector("summary");
+      if (!summary) {
+        summary = document.createElement("summary");
+        summary.dataset.rosterOverflowSummary = "true";
+        overflow.append(summary);
+      }
+      summary.textContent = "已選 " + rows.length + " 位人員";
+      let list = overflow.querySelector(".roster-draft-extra-people-list");
+      if (!list) { list = document.createElement("div"); list.className = "roster-draft-extra-people-list"; overflow.append(list); }
+      rows.forEach((row) => list.append(row));
+      if (!currentOverflow) people.prepend(overflow);
+      if (openAfterLayout) { state.expandedDraftRoles.add(draftRoleKey(role)); overflow.open = true; }
+      return;
+    }
+
+    if (currentOverflow) {
+      rows.forEach((row) => people.insertBefore(row, currentOverflow));
+      currentOverflow.remove();
+    }
+  };
+  const syncAddPersonControl = (role) => {
+    const people = role?.querySelector(".roster-draft-people");
+    if (!people) return;
+
+    // A role has exactly one add control. Rebuild it after every local edit so
+    // stale controls cannot be left beside, or accidentally contain, a person row.
+    people.querySelectorAll('[data-roster-action="add-assignment"]').forEach((control) => control.remove());
+    syncRolePeopleLayout(role);
+    syncRoleAssignmentCount(role);
+    if (!isManager() || activePeriod()?.status === "published" || activePeriod()?.status === "locked") return;
+
+    const requirement = requirements().find((item) => item.id === role.dataset.requirementId);
+    if (!requirement || people.querySelectorAll("[data-assignment-row]").length >= requirement.maxStaffCount) return;
+
+    const add = button("＋", "add-assignment", "roster-assignment-add");
+    add.dataset.slotId = role.dataset.slotId;
+    add.dataset.requirementId = requirement.id;
+    add.dataset.maxStaffCount = requirement.maxStaffCount;
+    people.append(add);
+  };
+  const renderStaffPicker = () => {
+    pickerList.replaceChildren();
+    const query = pickerSearch.value.trim().toLowerCase();
+    const pickerSlotId = state.pickingAssignmentRow?.dataset.slotId || state.pickingAssignmentRole?.slot.id || null;
+    const occupied = new Set([...document.querySelectorAll('[data-assignment-row][data-slot-id="' + pickerSlotId + '"]')]
+      .filter((row) => row !== state.pickingAssignmentRow)
+      .map((row) => row.dataset.staffId)
+      .filter(Boolean));
+    const people = staff().filter((person) => {
+      const availabilityStatus = availabilityFor(pickerSlotId, person.id);
+      return (!query || person.name.toLowerCase().includes(query))
+        && !occupied.has(person.id)
+        && ["available", "standby"].includes(availabilityStatus);
+    }).sort((left, right) => {
+      const rank = { available: 0, standby: 1 };
+      const statusDifference = rank[availabilityFor(pickerSlotId, left.id)] - rank[availabilityFor(pickerSlotId, right.id)];
+      if (statusDifference) return statusDifference;
+      return Number(left.sortOrder || 0) - Number(right.sortOrder || 0) || left.name.localeCompare(right.name, "zh-Hant");
+    });
+    if (!people.length) { append(pickerList, "p", "沒有符合的人員。", "field-help"); return; }
+    people.forEach((person) => {
+      const choice = button(person.name, "pick-staff", "roster-staff-picker-choice");
+      choice.dataset.staffId = person.id;
+      const availabilityStatus = availabilityFor(pickerSlotId, person.id);
+      const status = append(choice, "small", statusLabels[availabilityStatus]);
+      status.classList.add(`roster-picker-status-${availabilityStatus}`);
+      pickerList.append(choice);
+    });
   };
   const taipeiToday = () => new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Taipei" }).format(new Date());
   const dateSummary = (businessDate) => {
@@ -225,7 +470,7 @@
   };
   const renderPreview = () => {
     const preview = $("[data-roster-print-preview]"); preview.replaceChildren(); const period = activePeriod(); if (!period) return;
-    const dates = [...new Set(slots().map((slot) => slot.businessDate))].sort((a, b) => b.localeCompare(a));
+    const dates = [...new Set(slots().map((slot) => slot.businessDate))].sort((a, b) => a.localeCompare(b));
     if (!dates.length) { append(preview, "p", "此期間尚未建立班別。", "field-help"); return; }
     dates.forEach((businessDate) => {
       const details = document.createElement("details"); details.className = "roster-day-details";
@@ -257,6 +502,16 @@
     });
     $("[data-roster-no-open]").hidden = isManager() || Boolean(period) || state.tab !== "availability";
     $("[data-roster-unbound]").hidden = isManager() || !period || !state.snapshot?.canSubmit || Boolean(state.snapshot?.myStaffId) || state.tab !== "availability";
+    const hasOwnAvailability = Boolean(state.snapshot?.myStaffId);
+    const availabilityModes = $("[data-roster-availability-modes]");
+    availabilityModes.hidden = !isManager() || !hasOwnAvailability || state.tab !== "availability";
+    if (!hasOwnAvailability) state.availabilityMode = "manage";
+    availabilityModes.querySelectorAll("[data-roster-availability-mode]").forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.rosterAvailabilityMode === state.availabilityMode);
+    });
+    $("[data-roster-self-availability]").hidden = isManager() && (!hasOwnAvailability || state.availabilityMode !== "self");
+    const managerAvailability = $("[data-roster-admin-availability]").closest("[data-roster-manage]");
+    if (isManager()) managerAvailability.hidden = state.availabilityMode !== "manage" || state.tab !== "availability";
     periodForm.hidden = !isManager() || !state.periodFormMode || (state.periodFormMode === "edit" && period?.status !== "open");
     if (isManager()) { renderRoles(); renderSlotEditor(); renderRequirementEditor(); }
     if (!period) return;
@@ -265,16 +520,37 @@
     $("[data-roster-open]").hidden = !isManager() || period.status !== "draft";
     $("[data-roster-close]").hidden = !isManager() || period.status !== "open";
     $("[data-roster-period-title]").textContent = period.title; $("[data-roster-period-status]").textContent = `目前狀態：${periodLabels[period.status] || period.status}`;
-    renderSelfAvailability(); renderMatrix(); renderColumnTools(); renderAssignments(); renderPreview();
+    renderSelfAvailability(); renderMatrix(); renderRoleFirstAssignmentDraft(); renderPreview();
   };
   const load = async (periodId = state.periodId) => { const data = await rpc("roster_snapshot", { p_period_id: periodId || null }); state.periodId = data?.period?.id || null; };
   const readSlots = () => state.slotDraft.map((slot) => ({ ...slot }));
   const readRequirements = () => [...requirementEditor.querySelectorAll("input:checked")].map((input, index) => { const role = (state.snapshot?.roles || []).find((item) => item.id === input.value); return { roleId: role.id, roleName: role.name, minStaffCount: role.minStaffCount, maxStaffCount: role.maxStaffCount, sortOrder: role.sortOrder || index, isRequired: true }; });
   const saveAvailability = async (entries, trigger) => { setBusy(trigger, true); try { await rpc("save_roster_availability", { p_period_id: activePeriod().id, p_entries: entries }); setMessage("可上班狀態已儲存。", "success"); } catch (error) { setMessage(`儲存失敗：${error.message}`, "error"); } finally { setBusy(trigger, false); } };
-  const setPeriodStatus = async (status, trigger) => { if (activePeriod()?.status === "locked") { setMessage("此期間已鎖定，無法再變更狀態。", "error"); return; } setBusy(trigger, true); try { await rpc("set_roster_period_status", { p_period_id: activePeriod().id, p_status: status }); setMessage(`期間已${periodLabels[status]}。`, "success"); } catch (error) { setMessage(`狀態更新失敗：${error.message}`, "error"); } finally { setBusy(trigger, false); } };
+  const readAssignmentDraftEntries = () => {
+    const rows = [...document.querySelectorAll("[data-assignment-row]")];
+    return rows.map((row, index) => {
+      const staffId = row.dataset.staffId || null;
+      return { assignmentId: row.dataset.assignmentId || null, shiftSlotId: row.dataset.slotId, roleRequirementId: row.dataset.requirementId, staffId, status: staffId ? "assigned" : "pending", isManual: row.dataset.isManual === "true", assignmentOrder: index };
+    });
+  };
+  const collapseDraftPeople = () => {
+    state.expandedDraftDays.clear();
+    state.expandedDraftRoles.clear();
+    document.querySelectorAll(".roster-draft-day").forEach((day) => { day.open = false; day.removeAttribute("open"); });
+    document.querySelectorAll(".roster-draft-extra-people").forEach((group) => { group.open = false; group.removeAttribute("open"); });
+  };
+  const saveAssignmentDraft = async (trigger) => {
+    const entries = readAssignmentDraftEntries();
+    setBusy(trigger, true);
+    try { await rpc("save_roster_assignment_draft", { p_period_id: activePeriod().id, p_assignments: entries }); collapseDraftPeople(); render(); setMessage("全部草稿已儲存。", "success"); }
+    catch (error) { setMessage("草稿儲存失敗：" + error.message, "error"); }
+    finally { setBusy(trigger, false); }
+  };
+  const setPeriodStatus = async (status, trigger) => { if (!["draft", "open"].includes(activePeriod()?.status)) { setMessage("此期間不是目前可調整的狀態。", "error"); return; } setBusy(trigger, true); try { await rpc("set_roster_period_status", { p_period_id: activePeriod().id, p_status: status }); setMessage(`期間已${periodLabels[status]}。`, "success"); } catch (error) { setMessage(`狀態更新失敗：${error.message}`, "error"); } finally { setBusy(trigger, false); } };
 
   document.addEventListener("click", (event) => {
     const target = event.target.closest("[data-period-id]"); if (!target) return;
+    state.periodId = target.dataset.periodId;
     const shouldEditSelectedPeriod = isManager() && state.tab === "setup";
     load(target.dataset.periodId).then(() => {
       if (!shouldEditSelectedPeriod) return;
@@ -283,9 +559,41 @@
     }).catch((error) => setMessage(error.message, "error"));
   });
   document.querySelector(".roster-tabs").addEventListener("click", (event) => { const tab = event.target.closest("[data-roster-tab]"); if (!tab || tab.hidden) return; state.tab = tab.dataset.rosterTab; render(); });
-  periodForm.elements.date_from.addEventListener("change", rebuildSlotDraft); periodForm.elements.date_to.addEventListener("change", rebuildSlotDraft);
+  periodForm.elements.date_from.addEventListener("change", () => { updatePeriodDateConstraints(); rebuildSlotDraft(); });
+  periodForm.elements.date_to.addEventListener("change", () => { updatePeriodDateConstraints(); rebuildSlotDraft(); });
   slotEditor.addEventListener("change", (event) => { const input = event.target; const index = Number(input.dataset.slotIndex); const key = input.dataset.slotField; if (!Number.isInteger(index) || !key) return; state.slotDraft[index][key] = input.type === "checkbox" ? input.checked : input.value; });
   const toDateKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  const updatePeriodDateConstraints = () => {
+    const fromInput = periodForm.elements.date_from;
+    const toInput = periodForm.elements.date_to;
+    const today = taipeiToday();
+    const isCreating = state.periodFormMode === "create";
+
+    fromInput.min = isCreating ? today : "";
+    toInput.min = isCreating ? (fromInput.value && fromInput.value > today ? fromInput.value : today) : fromInput.value;
+    fromInput.setCustomValidity("");
+    toInput.setCustomValidity("");
+  };
+  const validatePeriodDateRange = () => {
+    const from = periodForm.elements.date_from.value;
+    const to = periodForm.elements.date_to.value;
+    const today = taipeiToday();
+    const isCreating = state.periodFormMode === "create";
+    const otherPeriods = (state.snapshot?.periods || []).filter((period) => period.id !== state.editingPeriodId);
+    let messageText = "";
+
+    if (!from || !to || from > to) messageText = "請輸入有效的開始與結束日期。";
+    else if (isCreating && from < today) messageText = "不能建立已過期的排班期間。";
+    else if (otherPeriods.some((period) => from <= period.dateTo && to >= period.dateFrom)) messageText = "此日期範圍與既有排班期間重疊，請選擇尚未建立的日期。";
+
+    periodForm.elements.date_from.setCustomValidity(messageText);
+    periodForm.elements.date_to.setCustomValidity(messageText);
+    if (messageText) {
+      periodForm.reportValidity();
+      return false;
+    }
+    return true;
+  };
   const suggestWeekendRange = () => {
     const today = new Date(); const weekday = today.getDay(); const fridayOffset = weekday === 0 ? -2 : weekday === 6 ? -1 : 5 - weekday;
     const friday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + fridayOffset);
@@ -296,9 +604,9 @@
   $("[data-roster-new-period]").addEventListener("click", () => {
     state.periodFormMode = "create"; state.editingPeriodId = null; state.slotDraft = []; periodForm.reset();
     const range = suggestWeekendRange(); periodForm.elements.date_from.value = range.from; periodForm.elements.date_to.value = range.to;
-    rebuildSlotDraft(); render();
+    updatePeriodDateConstraints(); rebuildSlotDraft(); render();
   });
-  periodForm.addEventListener("submit", async (event) => { event.preventDefault(); const submit = event.submitter; const wasEditing = state.periodFormMode === "edit"; setBusy(submit, true); try { const form = new FormData(periodForm); const title = `${form.get("date_from")} - ${form.get("date_to")}`; await rpc("save_roster_period", { p_period_id: state.editingPeriodId, p_title: title, p_date_from: form.get("date_from"), p_date_to: form.get("date_to"), p_slots: readSlots(), p_requirements: readRequirements() }); state.periodFormMode = null; state.editingPeriodId = null; render(); setMessage(wasEditing ? "排班期間已更新。" : "排班期間已建立並開放填寫。", "success"); } catch (error) { setMessage(`期間儲存失敗：${error.message}`, "error"); } finally { setBusy(submit, false); } });
+  periodForm.addEventListener("submit", async (event) => { event.preventDefault(); if (!validatePeriodDateRange()) return; const submit = event.submitter; const wasEditing = state.periodFormMode === "edit"; const priorPeriodIds = new Set((state.snapshot?.periods || []).map((period) => period.id)); setBusy(submit, true); try { const form = new FormData(periodForm); const title = `${form.get("date_from")} - ${form.get("date_to")}`; const savedSnapshot = await rpc("save_roster_period", { p_period_id: state.editingPeriodId, p_title: title, p_date_from: form.get("date_from"), p_date_to: form.get("date_to"), p_slots: readSlots(), p_requirements: readRequirements() }); if (!wasEditing) { const createdPeriod = (savedSnapshot?.periods || []).find((period) => !priorPeriodIds.has(period.id) && period.dateFrom === form.get("date_from") && period.dateTo === form.get("date_to")); const createdPeriodId = createdPeriod?.id || savedSnapshot?.period?.id || null; if (createdPeriodId) { state.periodId = createdPeriodId; await load(createdPeriodId); } } state.periodFormMode = null; state.editingPeriodId = null; render(); setMessage(wasEditing ? "排班期間已更新。" : "排班期間已建立並開放填寫。", "success"); } catch (error) { setMessage(`期間儲存失敗：${error.message}`, "error"); } finally { setBusy(submit, false); } });
   const resetRoleForm = () => { state.roleId = null; state.roleFormMode = null; roleForm.reset(); roleForm.elements.is_active.checked = true; };
   $("[data-roster-new-role]").addEventListener("click", () => { resetRoleForm(); state.roleFormMode = "create"; render(); });
   $("[data-roster-close-role]").addEventListener("click", () => { resetRoleForm(); render(); });
@@ -339,6 +647,13 @@
     render();
   });
   $("[data-roster-save-matrix]").addEventListener("click", (event) => saveAvailability([...document.querySelectorAll("[data-matrix-slot-id]")].map((select) => ({ shiftSlotId: select.dataset.matrixSlotId, staffId: select.dataset.matrixStaffId, status: select.value })), event.currentTarget));
+  $("[data-roster-save-assignment-draft]").addEventListener("click", (event) => saveAssignmentDraft(event.currentTarget));
+  $("[data-roster-availability-modes]").addEventListener("click", (event) => {
+    const target = event.target.closest("[data-roster-availability-mode]");
+    if (!target || !isManager()) return;
+    state.availabilityMode = target.dataset.rosterAvailabilityMode;
+    render();
+  });
   $("[data-roster-self-availability]").addEventListener("click", (event) => {
     const action = event.target.closest("[data-roster-action]"); if (!action) return;
     if (action.dataset.rosterAction === "set-self-day") {
@@ -352,10 +667,97 @@
     saveAvailability([...document.querySelectorAll("[data-self-slot-id]")].map((select) => ({ shiftSlotId: select.dataset.selfSlotId, staffId, status: select.value })), action);
   });
   ["[data-roster-staff-search]", "[data-roster-status-filter]"].forEach((selector) => $(selector).addEventListener("input", renderMatrix));
-  $("[data-roster-column-tools]").addEventListener("click", (event) => { const action = event.target.dataset.rosterAction; if (!action) return; const slotId = event.target.dataset.slotId; const value = action === "clear-column" ? "unselected" : document.querySelector(`[data-column-slot-id="${slotId}"]`).value; document.querySelectorAll(`[data-matrix-slot-id="${slotId}"]`).forEach((select) => { select.value = value; select.className = `roster-status-${value}`; }); });
+  $("[data-roster-admin-availability]").addEventListener("click", (event) => {
+    const action = event.target.closest('[data-roster-action="apply-column"]');
+    if (!action) return;
+    const slotId = action.dataset.slotId;
+    const shift = action.closest(".roster-admin-shift");
+    const value = shift.querySelector(`[data-column-slot-id="${slotId}"]`).value;
+    const targets = [...document.querySelectorAll(`[data-matrix-slot-id="${slotId}"]`)];
+    const slotTitle = shift.querySelector("h4")?.textContent || "此班別";
+    if (!window.confirm(`確定要將 ${targets.length} 位員工的「${slotTitle}」全部設為「${statusLabels[value]}」嗎？\n這會覆蓋該班目前尚未儲存的個別選擇。`)) return;
+    targets.forEach((select) => { select.value = value; select.className = `roster-status-${value}`; });
+  });
   $("[data-roster-open]").addEventListener("click", (event) => setPeriodStatus("open", event.currentTarget)); $("[data-roster-close]").addEventListener("click", (event) => setPeriodStatus("draft", event.currentTarget));
-  $("[data-roster-generate]").addEventListener("click", async (event) => { if (!window.confirm("依目前可上班狀態產生草稿？手動指定的人員會保留。")) return; setBusy(event.currentTarget, true); try { await rpc("generate_roster_assignments", { p_period_id: activePeriod().id, p_use_standby: $("[data-roster-use-standby]").checked, p_clear_existing: $("[data-roster-clear-draft]").checked }); setMessage("排班草稿已產生。", "success"); } catch (error) { setMessage(`一鍵排班失敗：${error.message}`, "error"); } finally { setBusy(event.currentTarget, false); } });
-  $("[data-roster-assignment-list]").addEventListener("click", async (event) => { const action = event.target.dataset.rosterAction; if (!action || !isManager()) return; try { if (action === "delete-assignment") { await rpc("delete_roster_assignment", { p_assignment_id: event.target.dataset.assignmentId }); } else { const assignmentId = action === "save-assignment" ? event.target.dataset.assignmentId : null; const slotId = event.target.dataset.slotId; const requirementId = event.target.dataset.requirementId; const select = assignmentId ? document.querySelector(`[data-assignment-staff-id="${assignmentId}"]`) : null; const staffId = select?.value || null; if (staffId && availabilityFor(slotId, staffId) === "unavailable" && !window.confirm("此員工標示為「否」，仍要手動排入嗎？")) return; await rpc("save_roster_assignment", { p_assignment_id: assignmentId, p_period_id: activePeriod().id, p_shift_slot_id: slotId, p_role_requirement_id: requirementId, p_staff_id: staffId, p_status: staffId ? "assigned" : "pending", p_is_manual: true, p_note: null }); } setMessage("排班草稿已更新。", "success"); } catch (error) { setMessage(`草稿更新失敗：${error.message}`, "error"); } });
+  const generateSlotAssignments = async (trigger) => {
+    const slotId = trigger.dataset.slotId;
+    if (!slotId) return;
+    setBusy(trigger, true);
+    try {
+      // Persist unsaved manual choices before filling only this shift's gaps.
+      await rpc("save_roster_assignment_draft", { p_period_id: activePeriod().id, p_assignments: readAssignmentDraftEntries() });
+      await rpc("generate_roster_shift_assignments", { p_period_id: activePeriod().id, p_shift_slot_id: slotId, p_use_standby: $("[data-roster-use-standby]").checked });
+      setMessage("已自動補齊此班空缺。", "success");
+    } catch (error) {
+      setMessage("自動排此班失敗：" + error.message, "error");
+    } finally {
+      setBusy(trigger, false);
+    }
+  };
+  const clearSlotAssignments = async (trigger) => {
+    const slotId = trigger.dataset.slotId;
+    if (!slotId || !window.confirm("確定要清除這一班的所有安排嗎？其他班別不會受影響。")) return;
+    setBusy(trigger, true);
+    try {
+      const remainingEntries = readAssignmentDraftEntries().filter((entry) => entry.shiftSlotId !== slotId);
+      await rpc("save_roster_assignment_draft", { p_period_id: activePeriod().id, p_assignments: remainingEntries });
+      setMessage("已清除這一班的安排。", "success");
+    } catch (error) {
+      setMessage("清除班別失敗：" + error.message, "error");
+    } finally {
+      setBusy(trigger, false);
+    }
+  };
+  $("[data-roster-assignment-list]").addEventListener("click", (event) => {
+    const target = event.target.closest("[data-roster-action]"); if (!target || !isManager()) return;
+    if (target.dataset.rosterAction === "generate-slot") { generateSlotAssignments(target); return; }
+    if (target.dataset.rosterAction === "clear-slot") { clearSlotAssignments(target); return; }
+    if (target.dataset.rosterAction === "delete-assignment") {
+      const row = target.closest("[data-assignment-row]"); const role = row?.closest(".roster-draft-role");
+      row?.remove(); if (role) syncAddPersonControl(role); return;
+    }
+    if (target.dataset.rosterAction === "open-staff-picker") {
+      state.pickingAssignmentRow = target.closest("[data-assignment-row]");
+      state.pickingAssignmentRole = null;
+      pickerSearch.value = ""; renderStaffPicker(); staffPicker.showModal(); pickerSearch.focus(); return;
+    }
+    if (target.dataset.rosterAction !== "add-assignment") return;
+    const line = target.closest(".roster-draft-role");
+    if (!line) return;
+    if (line.querySelectorAll("[data-assignment-row]").length >= Number(target.dataset.maxStaffCount)) { setMessage("此職位已達最多人數。", "error"); return; }
+    const slot = slots().find((item) => item.id === target.dataset.slotId);
+    const requirement = requirements().find((item) => item.id === target.dataset.requirementId);
+    if (!slot || !requirement) return;
+    state.expandedDraftRoles.add(draftRoleKey(line));
+    line.querySelector(".roster-draft-extra-people")?.setAttribute("open", "");
+    state.pickingAssignmentRow = null; state.pickingAssignmentRole = { line, slot, requirement, trigger: target };
+    pickerSearch.value = ""; renderStaffPicker(); staffPicker.showModal(); pickerSearch.focus();
+  });
+  pickerSearch.addEventListener("input", renderStaffPicker);
+  pickerList.addEventListener("click", (event) => {
+    const choice = event.target.closest('[data-roster-action="pick-staff"]');
+    if (!choice) return;
+    if (state.pickingAssignmentRow) {
+      state.pickingAssignmentRow.dataset.staffId = choice.dataset.staffId;
+      state.pickingAssignmentRow.dataset.isManual = "true";
+      state.pickingAssignmentRow.querySelector("[data-picker-trigger]").textContent = staffName(choice.dataset.staffId);
+      syncAddPersonControl(state.pickingAssignmentRow.closest(".roster-draft-role"));
+    } else if (state.pickingAssignmentRole) {
+      const context = state.pickingAssignmentRole;
+      const row = assignmentEditorDraft(null, context.slot, context.requirement);
+      row.dataset.staffId = choice.dataset.staffId; row.dataset.isManual = "true";
+      row.querySelector("[data-picker-trigger]").textContent = staffName(choice.dataset.staffId);
+      const people = context.line.querySelector(".roster-draft-people") || context.line;
+      const addControl = people.querySelector('[data-roster-action="add-assignment"]');
+      people.insertBefore(row, addControl || null);
+      state.expandedDraftRoles.add(draftRoleKey(context.line));
+      syncAddPersonControl(context.line);
+      context.line.querySelector(".roster-draft-extra-people")?.setAttribute("open", "");
+    } else {
+      return;
+    }
+    staffPicker.close(); state.pickingAssignmentRow = null; state.pickingAssignmentRole = null;
+  });
   const downloadDayPng = (businessDate) => {
     const daySlots = slots().filter((slot) => slot.businessDate === businessDate).sort((a, b) => a.sortOrder - b.sortOrder);
     const roleRows = requirements().filter((requirement) => requirement.isRequired);
@@ -387,5 +789,5 @@
     const link = document.createElement("a"); link.href = canvas.toDataURL("image/png"); link.download = `heyotsuki-roster-${businessDate}.png`; link.click();
   };
   $("[data-roster-print-preview]").addEventListener("click", async (event) => { const action = event.target.dataset.rosterAction; const businessDate = event.target.dataset.businessDate; if (!action || !businessDate) return; if (action === "copy-date") { try { await navigator.clipboard.writeText(dateSummary(businessDate).join("\n")); setMessage("本日班表文字已複製。", "success"); } catch { setMessage("無法自動複製，請直接選取班表內容。", "error"); } } if (action === "png-date") downloadDayPng(businessDate); });
-  window.addEventListener("admin-auth-ready", async (event) => { state.client = event.detail.client; state.accountRole = event.detail.profile?.role || event.detail.role || null; if (!event.detail.can("roster.view") && !event.detail.can("roster.submit")) { denied.hidden = false; return; } state.tab = state.accountRole === "staff" ? "availability" : (event.detail.can("roster.manage") ? "setup" : "availability"); try { await load(); if (isManager()) { periodForm.elements.date_from.value ||= new Date().toISOString().slice(0, 10); periodForm.elements.date_to.value ||= periodForm.elements.date_from.value; rebuildSlotDraft(); renderRequirementEditor(); } access.hidden = false; } catch (error) { access.hidden = false; setMessage(`排班資料讀取失敗：${error.message}`, "error"); } }, { once: true });
+  window.addEventListener("admin-auth-ready", async (event) => { state.client = event.detail.client; state.accountRole = event.detail.profile?.role || event.detail.role || null; if (!event.detail.can("roster.view") && !event.detail.can("roster.submit") && !event.detail.can("roster.manage")) { denied.hidden = false; return; } state.tab = event.detail.can("roster.manage") ? "setup" : "availability"; try { await load(); if (isManager()) { periodForm.elements.date_from.value ||= new Date().toISOString().slice(0, 10); periodForm.elements.date_to.value ||= periodForm.elements.date_from.value; rebuildSlotDraft(); renderRequirementEditor(); } access.hidden = false; } catch (error) { access.hidden = false; setMessage(`排班資料讀取失敗：${error.message}`, "error"); } }, { once: true });
 })();

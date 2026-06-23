@@ -1068,6 +1068,21 @@ a {
   background: #fffdfa;
 }
 
+.roster-admin-availability { display: grid; gap: 12px; }
+.roster-availability-modes { display: flex; gap: 8px; margin: 0 0 16px; padding: 6px; border: 1px solid var(--admin-border); border-radius: 12px; background: #f5f0ea; }
+.roster-availability-modes .roster-tab { margin: 0; }
+.roster-admin-day { padding: 0 14px 14px; border: 1px solid var(--admin-border); border-radius: 12px; background: #fffdfa; }
+.roster-admin-day summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 50px; cursor: pointer; color: #513c2e; }
+.roster-admin-day-summary { color: #766b64; font-size: 0.88rem; }
+.roster-admin-shift { padding: 14px 0; border-top: 1px solid var(--admin-border); }
+.roster-admin-shift-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.roster-admin-shift-heading h4 { margin: 0; }
+.roster-admin-shift-bulk { display: flex; align-items: center; gap: 8px; }
+.roster-admin-shift-bulk select { min-width: 110px; min-height: 36px; }
+.roster-admin-staff-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; margin-top: 12px; }
+.roster-admin-staff-row { display: grid; grid-template-columns: minmax(0, 1fr) 105px; gap: 8px; align-items: center; padding: 8px 10px; border: 1px solid var(--admin-border); border-radius: 9px; background: #fff; }
+.roster-admin-staff-row select { min-height: 36px; }
+
 .roster-assignment-list { display: grid; gap: 16px; }
 .roster-assignment-card,
 .roster-print-slot {
@@ -1079,8 +1094,56 @@ a {
 .roster-assignment-card h4,
 .roster-print-slot h3 { margin: 0 0 12px; }
 .roster-assignment-role { display: grid; gap: 8px; padding: 12px 0; border-top: 1px solid var(--admin-border); }
-.roster-assignment-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.roster-assignment-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
 .roster-assignment-row select { min-width: 220px; }
+.roster-assignment-role > .admin-button { align-self: start; }
+.roster-draft-actions { margin-top: 0; margin-left: auto; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: nowrap; }
+.roster-draft-actions .admin-button { flex: 0 0 auto; min-width: 88px; padding: 0 16px; white-space: nowrap; }
+.roster-draft-save-actions { justify-content: flex-start; margin-top: 16px; }
+.roster-standby-option { flex: 0 0 auto; white-space: nowrap; }
+.admin-section-heading > div:first-child { min-width: 0; }
+.roster-draft-help { white-space: nowrap; }
+.roster-draft-day { border: 1px solid var(--admin-border); border-radius: 12px; background: #fffdfa; overflow: hidden; }
+.roster-draft-day + .roster-draft-day { margin-top: 10px; }
+.roster-draft-day summary { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 52px; padding: 0 16px; cursor: pointer; }
+.roster-draft-day-summary { color: #766b64; font-size: 0.9rem; }
+.roster-draft-shift { padding: 16px; border-top: 1px solid var(--admin-border); }
+.roster-draft-shift h4 { margin: 0 0 12px; }
+.roster-draft-shift-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.roster-draft-shift-heading h4 { margin: 0; }
+.roster-draft-shift-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.roster-draft-shift-heading .admin-button { flex: 0 0 auto; white-space: nowrap; }
+.roster-draft-role { display: flex; gap: 18px; align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--admin-border); }
+.roster-draft-role-heading { display: grid; flex: 0 0 180px; gap: 2px; padding-top: 10px; }
+.roster-draft-role > .field-help { margin: 0; }
+.roster-draft-role > .roster-assignment-row { min-width: 0; }
+.roster-draft-people { display: flex; flex: 1 1 auto; flex-direction: column; width: 0; gap: 6px; min-width: 0; }
+.roster-draft-people .roster-assignment-row { display: flex; width: 100%; gap: 8px; }
+.roster-assignment-person,
+.roster-assignment-remove,
+.roster-assignment-add { min-height: 46px; border: 0; border-radius: 10px; background: #eee7df; color: var(--admin-text); font: inherit; font-weight: 700; cursor: pointer; }
+.roster-assignment-person { display: flex; flex: 1 1 auto; align-items: center; justify-content: center; min-width: 0; padding: 0 14px; overflow: hidden; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.roster-assignment-person:hover { background: #e3d7ca; }
+.roster-assignment-remove { flex: 0 0 46px; font-size: 1.2rem; }
+.roster-assignment-remove:hover { background: #e4c9c5; color: #8f2020; }
+.roster-assignment-add { display: flex; align-items: center; justify-content: center; align-self: flex-end; width: 46px; min-width: 46px; margin-left: auto; font-size: 1.3rem; line-height: 1; white-space: nowrap; }
+.roster-assignment-add:hover { background: #dce8dc; color: #22633a; }
+.roster-draft-extra-people { border: 1px solid var(--admin-border); border-radius: 10px; background: #fbf8f4; }
+.roster-draft-extra-people summary { min-height: 40px; padding: 10px 14px; color: #685a51; cursor: pointer; font-weight: 700; }
+.roster-draft-extra-people-list { display: grid; gap: 6px; padding: 0 8px 8px; }
+.roster-draft-add-role { display: flex; gap: 8px; align-items: center; padding-top: 12px; border-top: 1px solid var(--admin-border); }
+.roster-draft-add-role select { min-width: 260px; }
+.roster-staff-picker { width: min(620px, calc(100vw - 32px)); max-height: min(720px, calc(100vh - 32px)); padding: 0; border: 1px solid var(--admin-border); border-radius: 14px; background: #fffdfa; color: var(--admin-text); box-shadow: 0 20px 60px rgba(46, 28, 20, 0.28); }
+.roster-staff-picker::backdrop { background: rgba(41, 26, 20, 0.45); }
+.roster-staff-picker-header { display: flex; align-items: start; justify-content: space-between; gap: 16px; padding: 20px 20px 12px; border-bottom: 1px solid var(--admin-border); }
+.roster-staff-picker-header h3 { margin: 0 0 4px; }
+.roster-staff-picker > .admin-field { display: grid; padding: 16px 20px 8px; }
+.roster-staff-picker-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; max-height: 420px; overflow: auto; padding: 12px 20px 20px; }
+.roster-staff-picker-choice { display: grid; gap: 3px; min-height: 58px; padding: 10px 12px; border: 1px solid var(--admin-border); border-radius: 9px; background: #fff; color: var(--admin-text); text-align: left; cursor: pointer; font: inherit; font-weight: 700; }
+.roster-staff-picker-choice:hover { border-color: var(--admin-primary); background: #fff8ef; }
+.roster-staff-picker-choice small { color: #766b64; font-weight: 400; }
+.roster-staff-picker-choice .roster-picker-status-available { color: #9a2525; font-weight: 700; }
+.roster-staff-picker-choice .roster-picker-status-standby { color: #9a6800; font-weight: 700; }
 
 .roster-print-preview {
   padding: 28px;
@@ -1139,6 +1202,22 @@ a {
   .roster-slot-row { grid-template-columns: 1fr 1fr; }
   .roster-column-tool { grid-template-columns: 1fr 1fr; }
   .roster-assignment-row select { width: 100%; }
+  .roster-admin-shift-heading { align-items: stretch; }
+  .roster-admin-shift-bulk { width: 100%; }
+  .roster-admin-shift-bulk select { flex: 1; }
+  .roster-admin-staff-grid { grid-template-columns: 1fr; }
+  .roster-draft-actions { width: 100%; align-items: stretch; }
+  .roster-draft-actions { flex-wrap: wrap; }
+  .roster-draft-actions > * { width: 100%; }
+  .roster-draft-role { flex-direction: column; gap: 8px; }
+  .roster-draft-role-heading { flex-basis: auto; padding-top: 0; }
+  .roster-draft-people { width: 100%; }
+  .roster-draft-shift-heading { align-items: stretch; flex-direction: column; }
+  .roster-draft-shift-heading .admin-button { width: 100%; }
+  .roster-draft-shift-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .roster-draft-add-role { align-items: stretch; flex-direction: column; }
+  .roster-draft-add-role select { min-width: 0; width: 100%; }
+  .roster-staff-picker-list { grid-template-columns: 1fr; }
 }
 
 .dashboard-main {
