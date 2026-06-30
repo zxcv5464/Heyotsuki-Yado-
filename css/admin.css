@@ -320,6 +320,49 @@
   gap: 10px 16px;
 }
 
+.admin-option-staff-limit-row {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 96px;
+  padding: 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.admin-option-staff-limit-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-weight: 700;
+}
+
+.admin-option-staff-limit-main input {
+  width: 18px;
+  height: 18px;
+  min-height: auto;
+  flex: 0 0 auto;
+}
+
+.admin-option-staff-limit-field {
+  display: grid;
+  gap: 4px;
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+
+.admin-option-staff-limit-field input {
+  width: 100%;
+  height: auto;
+  min-height: 36px;
+  padding: 6px 8px;
+  font-size: 14px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+}
+
 .payroll-summary {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

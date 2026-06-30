@@ -66,6 +66,31 @@
     button.textContent = busy ? busyText : button.dataset.defaultText;
   };
 
+  const parseOptionalLimit = (value) => {
+    const text = String(value ?? "").trim();
+    return text === "" ? null : Number(text);
+  };
+
+  const formatLimit = (value) =>
+    value == null ? "不限量" : `${Number(value).toLocaleString("en-US")} 份`;
+
+  const formatLimitError = (message) => {
+    const text = String(message || "");
+    if (text.includes("Option daily limit cannot exceed menu item daily limit")) {
+      return "加購選項限量不可大於品項本日限量。";
+    }
+    if (text.includes("Staff option daily limit cannot exceed option daily limit")) {
+      return "人員個人限量不可大於加購選項本日限量。";
+    }
+    if (text.includes("Staff option daily limit cannot exceed menu item daily limit")) {
+      return "人員個人限量不可大於品項本日限量。";
+    }
+    if (text.includes("Menu item daily limit cannot be lower than option limits")) {
+      return "品項本日限量不可低於既有加購或人員個人限量。";
+    }
+    return text;
+  };
+
   const statusBadge = (visible) =>
     visible
       ? '<span class="status-badge status-badge-visible">顯示中</span>'
@@ -388,19 +413,31 @@
     optionForm.reset();
     optionForm.elements.id.value = "";
     optionForm.elements.price_delta_amount.value = "0";
+    optionForm.elements.order_limit_quantity.value = "";
     optionForm.elements.is_visible.checked = true;
     optionForm.elements.requires_staff_capability.checked = false;
     syncOptionStaffFieldset();
     renderOptionStaff([]);
   };
 
-  const renderOptionStaff = (selectedIds) => {
-    const selected = new Set(selectedIds || []);
+  const renderOptionStaff = (selectedRows) => {
+    const selectedMap = new Map(
+      (selectedRows || []).map((row) => [
+        row.staff_id || row,
+        row
+      ])
+    );
     optionStaffList.innerHTML = staffMembers.map((staff) => `
-      <label class="checkbox-field">
-        <input type="checkbox" value="${escapeHtml(staff.id)}" data-option-staff-id${selected.has(staff.id) ? " checked" : ""}>
-        <span>${escapeHtml(staff.name)}${staff.is_visible ? "" : "（員工已隱藏）"}</span>
-      </label>
+      <div class="admin-option-staff-limit-row">
+        <label class="admin-option-staff-limit-main">
+          <input type="checkbox" value="${escapeHtml(staff.id)}" data-option-staff-id${selectedMap.has(staff.id) ? " checked" : ""}>
+          <span>${escapeHtml(staff.name)}${staff.is_visible ? "" : "（員工已隱藏）"}</span>
+        </label>
+        <label class="admin-option-staff-limit-field">
+          <span>個人限量</span>
+          <input type="number" min="0" step="1" inputmode="numeric" data-option-staff-limit="${escapeHtml(staff.id)}" value="${escapeHtml(selectedMap.get(staff.id)?.order_limit_quantity ?? "")}" placeholder="不限量">
+        </label>
+      </div>
     `).join("");
   };
 
@@ -420,7 +457,9 @@
           <div class="menu-admin-row-title">
             <strong>${escapeHtml(option.label)}</strong>
             ${statusBadge(option.is_visible)}
+            ${option.order_limit_quantity == null ? "" : `<span class="status-badge ${Number(option.order_limit_quantity) === 0 ? "status-badge-hidden" : "status-badge-featured"}">本日限量 ${escapeHtml(option.order_limit_quantity)}</span>`}
             ${option.requires_staff_capability ? '<span class="status-badge status-badge-featured">限定員工</span>' : ""}
+            ${optionStaffRows.some((row) => row.option_id === option.id && row.is_visible && row.order_limit_quantity != null) ? '<span class="status-badge status-badge-featured">人員限量</span>' : ""}
           </div>
           <p>${escapeHtml(option.description || "")}</p>
           <small>${escapeHtml(formatOptionPrice(option))} ・ 排序 ${escapeHtml(option.sort_order)}</small>
@@ -442,7 +481,7 @@
     ] = await Promise.all([
       client
         .from("menu_item_order_options")
-        .select("id, menu_item_id, label, description, price_delta_amount, price_delta_text, requires_staff_capability, is_visible, sort_order")
+        .select("id, menu_item_id, label, description, price_delta_amount, price_delta_text, requires_staff_capability, is_visible, sort_order, order_limit_quantity")
         .eq("menu_item_id", optionItemId)
         .order("sort_order", { ascending: true }),
       client
@@ -456,7 +495,7 @@
         .eq("is_visible", true),
       client
         .from("menu_item_order_option_staff")
-        .select("id, option_id, staff_id, is_visible, sort_order")
+        .select("id, option_id, staff_id, is_visible, sort_order, order_limit_quantity")
     ]);
     const error =
       optionsResult.error ||
@@ -499,6 +538,8 @@
       option.price_delta_amount ?? 0;
     optionForm.elements.price_delta_text.value =
       option.price_delta_text || "";
+    optionForm.elements.order_limit_quantity.value =
+      option.order_limit_quantity ?? "";
     optionForm.elements.requires_staff_capability.checked = Boolean(
       option.requires_staff_capability
     );
@@ -508,7 +549,6 @@
     renderOptionStaff(
       optionStaffRows
         .filter((row) => row.option_id === option.id && row.is_visible)
-        .map((row) => row.staff_id)
     );
   };
 
@@ -517,6 +557,10 @@
     const button = optionForm.querySelector('button[type="submit"]');
     setBusy(button, true);
     const id = optionForm.elements.id.value;
+    const optionLimitValue =
+      optionForm.elements.order_limit_quantity.value.trim();
+    const item = items.find((entry) => entry.id === optionItemId);
+    const itemLimit = parseOptionalLimit(item?.order_limit_quantity);
     const payload = {
       menu_item_id: optionItemId,
       label: optionForm.elements.label.value.trim(),
@@ -528,8 +572,65 @@
       requires_staff_capability:
         optionForm.elements.requires_staff_capability.checked,
       is_visible: optionForm.elements.is_visible.checked,
-      sort_order: Number(optionForm.elements.sort_order.value) || 0
+      sort_order: Number(optionForm.elements.sort_order.value) || 0,
+      order_limit_quantity: parseOptionalLimit(optionLimitValue)
     };
+    if (
+      payload.order_limit_quantity != null &&
+      itemLimit != null &&
+      payload.order_limit_quantity > itemLimit
+    ) {
+      setBusy(button, false);
+      setMessage(
+        `加購選項限量不可大於品項本日限量。目前品項限量為 ${formatLimit(itemLimit)}。`
+      );
+      return;
+    }
+    const selectedIds = new Set(
+      payload.requires_staff_capability
+        ? [
+            ...optionStaffList.querySelectorAll("[data-option-staff-id]:checked")
+          ].map((input) => input.value)
+        : []
+    );
+    const staffLimitRows = staffMembers.map((staff, index) => {
+      const value = [
+        ...optionStaffList.querySelectorAll("[data-option-staff-limit]")
+      ].find((input) => input.dataset.optionStaffLimit === staff.id)
+        ?.value.trim();
+      return {
+        staff_id: staff.id,
+        staff_name: staff.name,
+        is_visible: selectedIds.has(staff.id),
+        sort_order: index * 10,
+        order_limit_quantity: parseOptionalLimit(value)
+      };
+    });
+    const invalidStaffLimit = staffLimitRows.find((row) =>
+      row.is_visible &&
+      row.order_limit_quantity != null &&
+      (
+        (
+          payload.order_limit_quantity != null &&
+          row.order_limit_quantity > payload.order_limit_quantity
+        ) ||
+        (
+          itemLimit != null &&
+          row.order_limit_quantity > itemLimit
+        )
+      )
+    );
+    if (invalidStaffLimit) {
+      setBusy(button, false);
+      const caps = [
+        payload.order_limit_quantity == null ? null : `加購限量 ${formatLimit(payload.order_limit_quantity)}`,
+        itemLimit == null ? null : `品項限量 ${formatLimit(itemLimit)}`
+      ].filter(Boolean).join("、");
+      setMessage(
+        `${invalidStaffLimit.staff_name} 的個人限量不可大於 ${caps}。`
+      );
+      return;
+    }
     let optionId = id;
     const result = id
       ? await client
@@ -545,19 +646,17 @@
           .single();
     if (result.error) {
       setBusy(button, false);
-      setMessage(`加購選項儲存失敗：${result.error.message}`);
+      setMessage(`加購選項儲存失敗：${formatLimitError(result.error.message)}`);
       return;
     }
     optionId = result.data.id;
     if (payload.requires_staff_capability) {
-      const selectedIds = [
-        ...optionStaffList.querySelectorAll("[data-option-staff-id]:checked")
-      ].map((input) => input.value);
-      const allRows = staffMembers.map((staff, index) => ({
+      const allRows = staffLimitRows.map((row) => ({
         option_id: optionId,
-        staff_id: staff.id,
-        is_visible: selectedIds.includes(staff.id),
-        sort_order: index * 10
+        staff_id: row.staff_id,
+        is_visible: row.is_visible,
+        sort_order: row.sort_order,
+        order_limit_quantity: row.order_limit_quantity
       }));
       if (allRows.length) {
         const { error } = await client
@@ -565,7 +664,7 @@
           .upsert(allRows, { onConflict: "option_id,staff_id" });
         if (error) {
           setBusy(button, false);
-          setMessage(`加購員工能力儲存失敗：${error.message}`);
+          setMessage(`加購員工能力儲存失敗：${formatLimitError(error.message)}`);
           return;
         }
       }
@@ -776,7 +875,7 @@
     const { error } = saveResult;
     if (error) {
       setBusy(button, false);
-      setMessage(`品項儲存失敗：${error.message}`);
+      setMessage(`品項儲存失敗：${formatLimitError(error.message)}`);
       return;
     }
     const ruleResult = await client.rpc("upsert_menu_item_payroll_rule", {

@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
   "use strict";
   const state = { client: null, snapshot: null, periodId: null, roleId: null, roleFormMode: null, slotDraft: [], tab: "setup", accountRole: null, periodFormMode: null, editingPeriodId: null, availabilityMode: "manage", pickingAssignmentRow: null, pickingAssignmentRole: null, expandedDraftDays: new Set(), expandedDraftRoles: new Set() };
   const $ = (selector) => document.querySelector(selector);
@@ -762,27 +762,101 @@
     const daySlots = slots().filter((slot) => slot.businessDate === businessDate).sort((a, b) => a.sortOrder - b.sortOrder);
     const roleRows = requirements().filter((requirement) => requirement.isRequired);
     const canvas = document.createElement("canvas");
-    const width = 1600; const margin = 70; const gap = 34; const cardWidth = (width - margin * 2 - gap) / 2;
-    const cardHeight = 108 + roleRows.length * 54;
-    const rows = Math.ceil(daySlots.length / 2); const height = Math.max(760, 260 + rows * (cardHeight + gap) + 100);
+    const width = 1600;
+    const margin = 70;
+    const gap = 34;
+    const cardWidth = (width - margin * 2 - gap) / 2;
+    const memberWidth = cardWidth - 56;
+    const rowLineHeight = 30;
+    const pendingText = "待定";
+    canvas.width = width;
+    let ctx = canvas.getContext("2d");
+
+    const wrapText = (text, maxWidth) => {
+      const source = String(text || "").trim();
+      if (!source) return [""];
+      const chunks = source.includes("、")
+        ? source.split("、").map((chunk, index, list) => `${chunk}${index < list.length - 1 ? "、" : ""}`)
+        : [...source];
+      const lines = [];
+      let line = "";
+      chunks.forEach((chunk) => {
+        const candidate = `${line}${chunk}`;
+        if (line && ctx.measureText(candidate).width > maxWidth) {
+          lines.push(line.replace(/[、，,\s]+$/u, ""));
+          line = chunk.replace(/^[、，,\s]+/u, "");
+        } else {
+          line = candidate;
+        }
+        while (ctx.measureText(line).width > maxWidth) {
+          let clipped = "";
+          for (const char of [...line]) {
+            if (clipped && ctx.measureText(`${clipped}${char}`).width > maxWidth) break;
+            clipped += char;
+          }
+          lines.push(clipped);
+          line = line.slice(clipped.length);
+        }
+      });
+      if (line) lines.push(line.replace(/[、，,\s]+$/u, ""));
+      return lines.length ? lines : [source];
+    };
+
+    ctx.font = "bold 24px serif";
+    const slotLayouts = daySlots.map((slot) => {
+      const rows = roleRows.map((requirement) => {
+        const members = assignments()
+          .filter((item) => item.shiftSlotId === slot.id && item.roleRequirementId === requirement.id && item.status === "assigned")
+          .map((item) => staffName(item.staffId))
+          .join("、") || pendingText;
+        const memberLines = wrapText(members, memberWidth);
+        return {
+          requirement,
+          members,
+          memberLines,
+          height: Math.max(54, memberLines.length * rowLineHeight + 22),
+        };
+      });
+      return {
+        slot,
+        rows,
+        height: 108 + rows.reduce((total, row) => total + row.height, 0) + 22,
+      };
+    });
+    const rowHeights = [];
+    for (let index = 0; index < slotLayouts.length; index += 2) {
+      rowHeights.push(Math.max(slotLayouts[index]?.height || 0, slotLayouts[index + 1]?.height || 0));
+    }
+    const height = Math.max(
+      760,
+      260 + rowHeights.reduce((total, rowHeight) => total + rowHeight, 0) + Math.max(0, rowHeights.length - 1) * gap + 100,
+    );
     canvas.width = width; canvas.height = height;
-    const ctx = canvas.getContext("2d");
+    ctx = canvas.getContext("2d");
     ctx.fillStyle = "#fffaf0"; ctx.fillRect(0, 0, width, height);
     ctx.strokeStyle = "#d8c5a4"; ctx.lineWidth = 2; ctx.strokeRect(24, 24, width - 48, height - 48);
     ctx.fillStyle = "#6f5140"; ctx.font = "600 20px sans-serif"; ctx.textAlign = "center"; ctx.fillText("HEYOTSUKI YADO", width / 2, 72);
     ctx.fillStyle = "#3f3028"; ctx.font = "bold 52px serif"; ctx.fillText("嘿月湯宿", width / 2, 132);
     ctx.fillStyle = "#876a53"; ctx.font = "28px serif"; ctx.fillText(`～ ${formatDate(businessDate)} 營業班表 ～`, width / 2, 178);
-    daySlots.forEach((slot, index) => {
-      const column = index % 2; const row = Math.floor(index / 2); const x = margin + column * (cardWidth + gap); const y = 230 + row * (cardHeight + gap);
-      ctx.fillStyle = "#fffefd"; ctx.strokeStyle = "#d8c5a4"; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(x, y, cardWidth, cardHeight, 20); ctx.fill(); ctx.stroke();
+    const rowYs = [];
+    rowHeights.reduce((y, rowHeight) => {
+      rowYs.push(y);
+      return y + rowHeight + gap;
+    }, 230);
+    slotLayouts.forEach((layout, index) => {
+      const { slot } = layout;
+      const column = index % 2; const row = Math.floor(index / 2); const x = margin + column * (cardWidth + gap); const y = rowYs[row];
+      ctx.fillStyle = "#fffefd"; ctx.strokeStyle = "#d8c5a4"; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(x, y, cardWidth, layout.height, 20); ctx.fill(); ctx.stroke();
       ctx.fillStyle = "#4a382f"; ctx.font = "bold 29px serif"; ctx.textAlign = "left"; ctx.fillText(`${slot.label}｜${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}`, x + 28, y + 48);
       ctx.strokeStyle = "#e4d8ca"; ctx.beginPath(); ctx.moveTo(x + 28, y + 70); ctx.lineTo(x + cardWidth - 28, y + 70); ctx.stroke();
-      roleRows.forEach((requirement, rowIndex) => {
-        const members = assignments().filter((item) => item.shiftSlotId === slot.id && item.roleRequirementId === requirement.id && item.status === "assigned").map((item) => staffName(item.staffId)).join("、") || "待定";
-        const lineY = y + 108 + rowIndex * 54;
-        ctx.fillStyle = "#6a5548"; ctx.font = "24px serif"; ctx.textAlign = "left"; ctx.fillText(`・ ${requirement.roleName}`, x + 28, lineY);
-        ctx.fillStyle = members === "待定" ? "#a87520" : "#3f3028"; ctx.font = "bold 24px serif"; ctx.textAlign = "right"; ctx.fillText(members, x + cardWidth - 28, lineY);
-        if (rowIndex < roleRows.length - 1) { ctx.strokeStyle = "#eee5db"; ctx.beginPath(); ctx.moveTo(x + 28, lineY + 18); ctx.lineTo(x + cardWidth - 28, lineY + 18); ctx.stroke(); }
+      let lineY = y + 108;
+      layout.rows.forEach((rowLayout, rowIndex) => {
+        ctx.fillStyle = "#6a5548"; ctx.font = "24px serif"; ctx.textAlign = "left"; ctx.fillText(`・ ${rowLayout.requirement.roleName}`, x + 28, lineY);
+        ctx.fillStyle = rowLayout.members === pendingText ? "#a87520" : "#3f3028"; ctx.font = "bold 24px serif"; ctx.textAlign = "right";
+        rowLayout.memberLines.forEach((line, lineIndex) => {
+          ctx.fillText(line, x + cardWidth - 28, lineY + lineIndex * rowLineHeight);
+        });
+        lineY += rowLayout.height;
       });
     });
     ctx.fillStyle = "#806b5c"; ctx.font = "22px serif"; ctx.textAlign = "center"; ctx.fillText("一湯入月　靜人心宿", width / 2, height - 62);

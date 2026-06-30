@@ -607,6 +607,16 @@ body.page-index { overflow-x: hidden; }
     grid-row: 1;
 }
 
+.order-staff-limit-note {
+    grid-column: 2 / 4;
+    grid-row: 2;
+    margin: -4px 0 0;
+    color: #8a2424;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.6;
+}
+
 .order-option-list {
     grid-column: 3;
     grid-row: 1;
@@ -659,7 +669,7 @@ body.page-index { overflow-x: hidden; }
 
 .order-special-line .order-item-note {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 3;
 }
 
 .order-item-card.is-special-item .order-item-heading {
@@ -668,7 +678,7 @@ body.page-index { overflow-x: hidden; }
 
 .order-line-remove {
     grid-column: 3;
-    grid-row: 2;
+    grid-row: 3;
     min-height: 44px;
     padding: 0 14px;
 }

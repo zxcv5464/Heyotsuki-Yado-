@@ -101,6 +101,121 @@
     );
   };
 
+  const getOptionQuantity = (optionId) =>
+    cartLines.reduce(
+      (total, line) =>
+        (line.selectedOptionIds || []).includes(optionId)
+          ? total + Number(line.quantity || 0)
+          : total,
+      0
+    );
+
+  const remainingForOptionCart = (option, line = null) => {
+    if (option.remaining_quantity == null) return null;
+    const lineQuantity =
+      line && (line.selectedOptionIds || []).includes(option.id)
+        ? Number(line.quantity || 0)
+        : 0;
+    return Math.max(
+      Number(option.remaining_quantity) -
+        (getOptionQuantity(option.id) - lineQuantity),
+      0
+    );
+  };
+
+  const getOptionStaffLimit = (option, staffId) =>
+    (option.eligible_staff_limits || []).find(
+      (entry) => entry.staff_id === staffId
+    ) || null;
+
+  const getOptionStaffQuantity = (optionId, staffId) =>
+    cartLines.reduce(
+      (total, line) =>
+        line.selectedStaffId === staffId &&
+        (line.selectedOptionIds || []).includes(optionId)
+          ? total + Number(line.quantity || 0)
+          : total,
+      0
+    );
+
+  const remainingForOptionStaffCart = (option, staffId, line = null) => {
+    const limit = getOptionStaffLimit(option, staffId);
+    if (!limit || limit.remaining_quantity == null) return null;
+    const lineQuantity =
+      line &&
+      line.selectedStaffId === staffId &&
+      (line.selectedOptionIds || []).includes(option.id)
+        ? Number(line.quantity || 0)
+        : 0;
+    return Math.max(
+      Number(limit.remaining_quantity) -
+        (getOptionStaffQuantity(option.id, staffId) - lineQuantity),
+      0
+    );
+  };
+
+  const remainingForSelectedStaffOptions = (
+    item,
+    selectedOptionIds,
+    staffId,
+    line = null
+  ) => {
+    const remainders = getOrderOptions(item)
+      .filter(
+        (option) =>
+          selectedOptionIds.includes(option.id) &&
+          option.requires_staff_capability
+      )
+      .map((option) => remainingForOptionStaffCart(option, staffId, line))
+      .filter((remaining) => remaining != null);
+    if (!remainders.length) return null;
+    return Math.min(...remainders);
+  };
+
+  const staffCanProvideSelectedOptions = (
+    item,
+    selectedOptionIds,
+    staffId,
+    line = null
+  ) => {
+    if (!staffId) return false;
+    const eligible = new Set(
+      getEligibleStaffOptions(item, selectedOptionIds).map(
+        (entry) => entry.staff_id
+      )
+    );
+    if (!eligible.has(staffId)) return false;
+    const remaining = remainingForSelectedStaffOptions(
+      item,
+      selectedOptionIds,
+      staffId,
+      line
+    );
+    return remaining == null || remaining > 0;
+  };
+
+  const getSelectedStaffLimitMessages = (item, line) => {
+    if (!line.selectedStaffId) return [];
+    return getOrderOptions(item)
+      .filter(
+        (option) =>
+          (line.selectedOptionIds || []).includes(option.id) &&
+          option.requires_staff_capability
+      )
+      .map((option) => {
+        const remaining = remainingForOptionStaffCart(
+          option,
+          line.selectedStaffId,
+          line
+        );
+        if (remaining == null) return null;
+        return remaining === 0
+          ? `${option.label}：此人員今日已滿`
+          : `${option.label}：此人員今日剩餘 ${remaining}`;
+      })
+      .filter(Boolean);
+  };
+
   const notifyOrderDiscord = async (orderId) => {
     if (!orderId || !client?.functions) {
       console.warn(
@@ -135,6 +250,14 @@
     if (typeof row === "string") return row;
     return row?.order_id || row?.id || null;
   };
+
+  const getErrorText = (error) =>
+    [
+      error?.message,
+      error?.details,
+      error?.hint,
+      error?.code
+    ].filter(Boolean).join(" ");
 
   const applyShopFields = () => {
     const shop = menuData.shop;
@@ -241,17 +364,38 @@
       const label = element("label", "order-option");
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
-      checkbox.checked = (line.selectedOptionIds || []).includes(option.id);
-      checkbox.disabled = !line.lineId || !isAcceptingOrders();
+      const checked = (line.selectedOptionIds || []).includes(option.id);
+      const remaining = remainingForOptionCart(option, line);
+      checkbox.checked = checked;
+      checkbox.disabled =
+        !line.lineId ||
+        !isAcceptingOrders() ||
+        (!checked && remaining === 0);
       const text = element(
         "span",
         "",
         `${option.label} ${formatDelta(option)}`
       );
+      if (option.remaining_quantity != null) {
+        text.append(
+          element(
+            "small",
+            "",
+            remaining === 0 && !checked
+              ? "售完"
+              : `本日剩餘：${remaining}`
+          )
+        );
+      }
       if (option.description) {
         text.append(element("small", "", option.description));
       }
       checkbox.addEventListener("change", () => {
+        if (checkbox.checked && remainingForOptionCart(option, line) === 0) {
+          checkbox.checked = false;
+          setMessage("此加購選項已售完或剩餘數量不足。");
+          return;
+        }
         const selected = new Set(line.selectedOptionIds || []);
         if (checkbox.checked) selected.add(option.id);
         else selected.delete(option.id);
@@ -310,26 +454,40 @@
     select.disabled = !isAcceptingOrders();
     eligibleStaff.forEach((special) => {
       const option = document.createElement("option");
+      const staffRemaining = remainingForSelectedStaffOptions(
+        item,
+        line.selectedOptionIds || [],
+        special.staff_id,
+        line
+      );
+      const isCurrentStaff = line.selectedStaffId === special.staff_id;
       option.value = special.staff_id;
-      option.textContent = getStaffDisplayName(special);
-      option.selected = line.selectedStaffId === special.staff_id;
+      option.textContent =
+        staffRemaining == null
+          ? getStaffDisplayName(special)
+          : staffRemaining === 0
+            ? `${getStaffDisplayName(special)}（已滿）`
+            : `${getStaffDisplayName(special)}（剩 ${staffRemaining}）`;
+      option.selected = isCurrentStaff;
+      option.disabled = !isCurrentStaff && staffRemaining === 0;
       select.append(option);
     });
     select.addEventListener("change", () => {
       updateLine(line.lineId, { selectedStaffId: select.value || null });
-      renderSummary();
+      renderMenu();
     });
     selectLabel.append(select);
     row.append(selectLabel);
 
     const optionControls = createOptionControls(item, line, (selectedIds) => {
-      const eligibleIds = new Set(
-        getEligibleStaffOptions(item, selectedIds).map(
-          (entry) => entry.staff_id
-        )
-      );
       const selectedStaffId =
-        line.selectedStaffId && eligibleIds.has(line.selectedStaffId)
+        line.selectedStaffId &&
+        staffCanProvideSelectedOptions(
+          item,
+          selectedIds,
+          line.selectedStaffId,
+          line
+        )
           ? line.selectedStaffId
           : null;
       updateLine(line.lineId, {
@@ -339,6 +497,16 @@
       renderMenu();
     });
     if (optionControls) row.append(optionControls);
+
+    const staffLimitMessages = getSelectedStaffLimitMessages(item, line);
+    if (staffLimitMessages.length) {
+      const staffLimitNote = element(
+        "p",
+        "order-staff-limit-note",
+        staffLimitMessages.join("；")
+      );
+      row.append(staffLimitNote);
+    }
 
     if (allowsItemNote(item)) {
       const noteLabel = element("label", "order-item-note", "品項備註");
@@ -666,6 +834,29 @@
       }
     }
 
+    for (const line of cartLines) {
+      for (const option of getSelectedOptions(line)) {
+        if (
+          option.remaining_quantity != null &&
+          getOptionQuantity(option.id) > Number(option.remaining_quantity)
+        ) {
+          setMessage("此加購選項已售完或剩餘數量不足。");
+          return;
+        }
+        const staffLimit = line.selectedStaffId
+          ? getOptionStaffLimit(option, line.selectedStaffId)
+          : null;
+        if (
+          staffLimit?.remaining_quantity != null &&
+          getOptionStaffQuantity(option.id, line.selectedStaffId) >
+            Number(staffLimit.remaining_quantity)
+        ) {
+          setMessage("此人員的加購選項已售完或剩餘數量不足。");
+          return;
+        }
+      }
+    }
+
     const formData = new FormData(form);
     setBusy(true);
     const { data, error } = await client.rpc("submit_order", {
@@ -687,12 +878,33 @@
     setBusy(false);
     if (error) {
       console.error("Order submission failed.", error);
+      const errorText = getErrorText(error);
       if (
-        String(error.message || "").includes("目前非營業時間") ||
-        String(error.message || "").includes("Requested time")
+        errorText.includes(
+          "Selected order option is sold out or insufficient."
+        )
+      ) {
+        setMessage("此加購選項已售完或剩餘數量不足。");
+        cartLines = [];
+        await loadMenu().catch(console.error);
+        return;
+      }
+      if (
+        errorText.includes(
+          "Selected staff order option is sold out or insufficient."
+        )
+      ) {
+        setMessage("此人員的加購選項已售完或剩餘數量不足。");
+        cartLines = [];
+        await loadMenu().catch(console.error);
+        return;
+      }
+      if (
+        errorText.includes("目前非營業時間") ||
+        errorText.includes("Requested time")
       ) {
         setMessage(
-          String(error.message || "").includes("Requested time")
+          errorText.includes("Requested time")
             ? "請重新選擇可用的用餐時間。"
             : "目前非營業時間，暫不開放點餐。"
         );
@@ -701,7 +913,7 @@
         return;
       }
       if (
-        String(error.message || "").includes(
+        errorText.includes(
           "此品項已售完或剩餘數量不足"
         )
       ) {

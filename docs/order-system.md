@@ -112,6 +112,28 @@ on conflict (menu_item_id, staff_id) do nothing;
 
 加購內容會保存於 `selected_options_snapshot`，加購合計保存於 `options_amount_snapshot`，每筆小計保存於 `line_total_amount_snapshot`。舊訂單沒有加購快照時仍可正常顯示。
 
+### 加購選項本日限量
+
+`menu_item_order_options.order_limit_quantity` 可針對單一加購選項設定每日限量：
+
+- `null`：不限量。
+- `0`：售完。
+- 正整數：該加購選項當日可被選取的總份數。
+
+前台公開菜單會回傳每個加購選項的 `remaining_quantity`。送出訂單時，`submit_order()` 會以營業日與加購選項 ID 加交易鎖，並重新計算有效訂單中已使用的數量，避免同時送單造成超賣。
+
+計算占用量時只包含未刪除且狀態為 `pending`、`accepted`、`preparing`、`served` 的訂單；已取消或軟刪除訂單不占用加購限量。
+
+### 加購選項個人限量
+
+若加購選項勾選 `requires_staff_capability`，可在可提供人員清單中針對每位人員設定個人每日限量，資料存於 `menu_item_order_option_staff.order_limit_quantity`：
+
+- `null`：該人員不限量。
+- `0`：該人員今日不可再提供此加購。
+- 正整數：該加購選項底下，該人員當日可被選取的份數。
+
+個人限量只在該加購選項需要選擇合格人員時生效。前台選取加購後，指定人員下拉會顯示該人員剩餘數；送出時 `submit_order()` 會再次依營業日、加購選項與 `selected_staff_id` 檢查，避免超賣。若同時設定加購選項總量與個人限量，兩者都必須有足夠剩餘量。
+
 ## 本日限量
 
 在 `admin/menu.html` 的品項編輯區設定 `order_limit_quantity`：

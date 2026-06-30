@@ -365,6 +365,11 @@
                   <input id="order-option-price-text" name="price_delta_text" type="text" placeholder="+20,000 Gil">
                 </div>
                 <div class="field">
+                  <label for="order-option-limit">本日限量</label>
+                  <input id="order-option-limit" name="order_limit_quantity" type="number" step="1" min="0" placeholder="留空代表不限量">
+                  <p class="field-help">加購選項自己的每日限量；不可大於品項本日限量。0 代表售完。</p>
+                </div>
+                <div class="field">
                   <label class="checkbox-field">
                     <input name="requires_staff_capability" type="checkbox">
                     <span>需要員工具備此加購能力</span>
@@ -378,6 +383,7 @@
                 </div>
                 <fieldset class="weekday-fieldset settings-grid-full" data-option-staff-fieldset hidden>
                   <legend>可提供此加購的員工</legend>
+                  <p class="field-help">個人限量不可大於加購選項或品項本日限量；留空代表該人員不限量。</p>
                   <div class="admin-option-staff-grid" data-option-staff-list></div>
                 </fieldset>
               </div>
@@ -395,6 +401,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabase-client.js"></script>
   <script src="../js/admin-auth.js"></script>
-  <script src="../js/admin-menu.js"></script>
+  <script src="../js/admin-menu.js?v=20260626-option-limits"></script>
 </body>
 </html>

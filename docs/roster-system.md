@@ -99,3 +99,13 @@
 ## 已知限制
 
 第一版不處理跨店、換班、請假、出勤、通知與薪資自動串接。`published`／`locked` 只作未來擴充保留，非目前排班流程。
+
+## Hotfix：保留已填寫可上班狀態
+
+Migration：`20260623016000_roster_preserve_availability_on_slot_toggle.sql`
+
+管理員修改既有排班期間時，系統會以 `period_id + business_date + sort_order` 保留相同班別的資料列，只更新班別名稱、時間與啟用狀態。這可避免停用 6/27 後再啟用時，因刪除重建班別而 cascade 清除 6/26、6/28 或同期間其他已填寫的 `roster_availability`。
+
+若管理員真的移除某個日期或班別，該班別對應的可上班狀態仍會跟著移除，這屬於結構刪除。
+
+前端在儲存員工或管理員可上班狀態後，會重新讀取 `roster_snapshot()`，確保「我的填寫」與管理員可上班矩陣同步顯示同一份資料。
