@@ -196,9 +196,28 @@ create table if not exists public.menu_item_order_options (
   requires_staff_capability boolean not null default false,
   is_visible boolean not null default true,
   sort_order integer not null default 0,
+  order_limit_quantity integer,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.menu_item_order_options
+  add column if not exists order_limit_quantity integer;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'menu_item_order_options_order_limit_quantity_check'
+      and conrelid = 'public.menu_item_order_options'::regclass
+  ) then
+    alter table public.menu_item_order_options
+      add constraint menu_item_order_options_order_limit_quantity_check
+      check (order_limit_quantity is null or order_limit_quantity >= 0);
+  end if;
+end;
+$$;
 
 create table if not exists public.menu_item_order_option_staff (
   id uuid primary key default gen_random_uuid(),
@@ -207,10 +226,156 @@ create table if not exists public.menu_item_order_option_staff (
   staff_id uuid not null references public.staff_members(id) on delete cascade,
   is_visible boolean not null default true,
   sort_order integer not null default 0,
+  order_limit_quantity integer,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (option_id, staff_id)
 );
+
+alter table public.menu_item_order_option_staff
+  add column if not exists order_limit_quantity integer;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'menu_item_order_option_staff_order_limit_quantity_check'
+      and conrelid = 'public.menu_item_order_option_staff'::regclass
+  ) then
+    alter table public.menu_item_order_option_staff
+      add constraint menu_item_order_option_staff_order_limit_quantity_check
+      check (order_limit_quantity is null or order_limit_quantity >= 0);
+  end if;
+end;
+$$;
+
+create or replace function public.validate_menu_item_order_limit_consistency()
+returns trigger
+language plpgsql
+security invoker
+set search_path = pg_catalog, public
+as $$
+begin
+  if new.order_limit_quantity is null then
+    return new;
+  end if;
+
+  if exists (
+    select 1
+    from public.menu_item_order_options
+    where menu_item_order_options.menu_item_id = new.id
+      and menu_item_order_options.order_limit_quantity is not null
+      and menu_item_order_options.order_limit_quantity > new.order_limit_quantity
+  ) or exists (
+    select 1
+    from public.menu_item_order_options
+    join public.menu_item_order_option_staff
+      on menu_item_order_option_staff.option_id = menu_item_order_options.id
+    where menu_item_order_options.menu_item_id = new.id
+      and menu_item_order_option_staff.order_limit_quantity is not null
+      and menu_item_order_option_staff.order_limit_quantity > new.order_limit_quantity
+  ) then
+    raise exception 'Menu item daily limit cannot be lower than option limits.';
+  end if;
+
+  return new;
+end;
+$$;
+
+create or replace function public.validate_menu_item_order_option_limit_consistency()
+returns trigger
+language plpgsql
+security invoker
+set search_path = pg_catalog, public
+as $$
+declare
+  item_limit integer;
+begin
+  select menu_items.order_limit_quantity
+  into item_limit
+  from public.menu_items
+  where menu_items.id = new.menu_item_id;
+
+  if new.order_limit_quantity is not null
+    and item_limit is not null
+    and new.order_limit_quantity > item_limit
+  then
+    raise exception 'Option daily limit cannot exceed menu item daily limit.';
+  end if;
+
+  if new.order_limit_quantity is not null and exists (
+    select 1
+    from public.menu_item_order_option_staff
+    where menu_item_order_option_staff.option_id = new.id
+      and menu_item_order_option_staff.order_limit_quantity is not null
+      and menu_item_order_option_staff.order_limit_quantity > new.order_limit_quantity
+  ) then
+    raise exception 'Staff option daily limit cannot exceed option daily limit.';
+  end if;
+
+  return new;
+end;
+$$;
+
+create or replace function public.validate_menu_item_order_option_staff_limit_consistency()
+returns trigger
+language plpgsql
+security invoker
+set search_path = pg_catalog, public
+as $$
+declare
+  option_limit integer;
+  item_limit integer;
+begin
+  if new.order_limit_quantity is null then
+    return new;
+  end if;
+
+  select
+    menu_item_order_options.order_limit_quantity,
+    menu_items.order_limit_quantity
+  into option_limit, item_limit
+  from public.menu_item_order_options
+  join public.menu_items
+    on menu_items.id = menu_item_order_options.menu_item_id
+  where menu_item_order_options.id = new.option_id;
+
+  if option_limit is not null and new.order_limit_quantity > option_limit then
+    raise exception 'Staff option daily limit cannot exceed option daily limit.';
+  end if;
+
+  if item_limit is not null and new.order_limit_quantity > item_limit then
+    raise exception 'Staff option daily limit cannot exceed menu item daily limit.';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists menu_items_order_limit_consistency_guard
+  on public.menu_items;
+create trigger menu_items_order_limit_consistency_guard
+before insert or update of order_limit_quantity
+on public.menu_items
+for each row
+execute function public.validate_menu_item_order_limit_consistency();
+
+drop trigger if exists menu_item_order_options_limit_consistency_guard
+  on public.menu_item_order_options;
+create trigger menu_item_order_options_limit_consistency_guard
+before insert or update of menu_item_id, order_limit_quantity
+on public.menu_item_order_options
+for each row
+execute function public.validate_menu_item_order_option_limit_consistency();
+
+drop trigger if exists menu_item_order_option_staff_limit_consistency_guard
+  on public.menu_item_order_option_staff;
+create trigger menu_item_order_option_staff_limit_consistency_guard
+before insert or update of option_id, order_limit_quantity
+on public.menu_item_order_option_staff
+for each row
+execute function public.validate_menu_item_order_option_staff_limit_consistency();
 
 alter table public.order_items
   add column if not exists selected_options_snapshot jsonb
@@ -790,6 +955,36 @@ begin
                       ),
                       'requires_staff_capability',
                         menu_item_order_options.requires_staff_capability,
+                      'order_limit_quantity',
+                        menu_item_order_options.order_limit_quantity,
+                      'remaining_quantity',
+                        case
+                          when menu_item_order_options.order_limit_quantity is null
+                            then null
+                          else greatest(
+                            menu_item_order_options.order_limit_quantity - coalesce((
+                              select sum(order_items.quantity)::integer
+                              from public.order_items
+                              join public.orders
+                                on orders.id = order_items.order_id
+                              where orders.deleted_at is null
+                                and orders.status in ('pending', 'accepted', 'preparing', 'served')
+                                and coalesce(
+                                  orders.business_date,
+                                  (orders.created_at at time zone 'Asia/Taipei')::date
+                                ) = (open_state->>'business_date')::date
+                                and exists (
+                                  select 1
+                                  from jsonb_array_elements(
+                                    coalesce(order_items.selected_options_snapshot, '[]'::jsonb)
+                                  ) as selected_option(value)
+                                  where selected_option.value->>'option_id' =
+                                    menu_item_order_options.id::text
+                                )
+                            ), 0),
+                            0
+                          )
+                        end,
                       'eligible_staff_ids',
                         case
                           when
@@ -797,6 +992,65 @@ begin
                           then coalesce((
                             select jsonb_agg(
                               menu_item_order_option_staff.staff_id
+                              order by
+                                menu_item_order_option_staff.sort_order,
+                                staff_members.name
+                            )
+                            from public.menu_item_order_option_staff
+                            join public.staff_members
+                              on staff_members.id =
+                                menu_item_order_option_staff.staff_id
+                            where
+                              menu_item_order_option_staff.option_id =
+                                menu_item_order_options.id
+                              and
+                                menu_item_order_option_staff.is_visible = true
+                              and staff_members.is_visible = true
+                          ), '[]'::jsonb)
+                          else '[]'::jsonb
+                        end,
+                      'eligible_staff_limits',
+                        case
+                          when
+                            menu_item_order_options.requires_staff_capability
+                          then coalesce((
+                            select jsonb_agg(
+                              jsonb_build_object(
+                                'staff_id',
+                                  menu_item_order_option_staff.staff_id,
+                                'order_limit_quantity',
+                                  menu_item_order_option_staff.order_limit_quantity,
+                                'remaining_quantity',
+                                  case
+                                    when menu_item_order_option_staff.order_limit_quantity is null
+                                      then null
+                                    else greatest(
+                                      menu_item_order_option_staff.order_limit_quantity - coalesce((
+                                        select sum(order_items.quantity)::integer
+                                        from public.order_items
+                                        join public.orders
+                                          on orders.id = order_items.order_id
+                                        where orders.deleted_at is null
+                                          and orders.status in ('pending', 'accepted', 'preparing', 'served')
+                                          and order_items.selected_staff_id =
+                                            menu_item_order_option_staff.staff_id
+                                          and coalesce(
+                                            orders.business_date,
+                                            (orders.created_at at time zone 'Asia/Taipei')::date
+                                          ) = (open_state->>'business_date')::date
+                                          and exists (
+                                            select 1
+                                            from jsonb_array_elements(
+                                              coalesce(order_items.selected_options_snapshot, '[]'::jsonb)
+                                            ) as selected_option(value)
+                                            where selected_option.value->>'option_id' =
+                                              menu_item_order_options.id::text
+                                          )
+                                      ), 0),
+                                      0
+                                    )
+                                  end
+                              )
                               order by
                                 menu_item_order_option_staff.sort_order,
                                 staff_members.name
@@ -894,6 +1148,10 @@ declare
   item_quantity integer;
   item_price_amount integer;
   item_used_quantity integer;
+  option_used_quantity integer;
+  option_staff_limit_quantity integer;
+  option_staff_used_quantity integer;
+  locked_option_id uuid;
   shop_settings record;
   open_state jsonb;
   order_business_date date;
@@ -980,6 +1238,27 @@ begin
     perform pg_advisory_xact_lock(
       hashtextextended(
         locked_item_id::text || ':' || order_business_date::text,
+        0
+      )
+    );
+  end loop;
+
+  for locked_option_id in
+    select distinct option_value.value::uuid as option_id
+    from jsonb_array_elements(p_items) as item_outer(item_value)
+    cross join lateral jsonb_array_elements_text(
+      case
+        when jsonb_typeof(item_outer.item_value->'selected_option_ids') = 'array'
+          then item_outer.item_value->'selected_option_ids'
+        else '[]'::jsonb
+      end
+    ) as option_value(value)
+    order by option_id
+  loop
+    perform pg_advisory_xact_lock(
+      hashtextextended(
+        'order-option:' || locked_option_id::text || ':' ||
+          order_business_date::text,
         0
       )
     );
@@ -1153,7 +1432,8 @@ begin
             'FM999,999,999,990'
           ) || ' Gil'
         ) as price_delta_text,
-        menu_item_order_options.requires_staff_capability
+        menu_item_order_options.requires_staff_capability,
+        menu_item_order_options.order_limit_quantity
       into option_row
       from public.menu_item_order_options
       where menu_item_order_options.id = selected_option_id
@@ -1164,21 +1444,73 @@ begin
         raise exception 'Selected order option is invalid for this item.';
       end if;
 
+      if option_row.order_limit_quantity is not null then
+        select coalesce(sum(order_items.quantity), 0)::integer
+        into option_used_quantity
+        from public.order_items
+        join public.orders
+          on orders.id = order_items.order_id
+        where orders.deleted_at is null
+          and orders.status in ('pending', 'accepted', 'preparing', 'served')
+          and coalesce(
+            orders.business_date,
+            (orders.created_at at time zone 'Asia/Taipei')::date
+          ) = order_business_date
+          and exists (
+            select 1
+            from jsonb_array_elements(
+              coalesce(order_items.selected_options_snapshot, '[]'::jsonb)
+            ) as selected_option(value)
+            where selected_option.value->>'option_id' = option_row.id::text
+          );
+
+        if option_row.order_limit_quantity - option_used_quantity < item_quantity then
+          raise exception 'Selected order option is sold out or insufficient.';
+        end if;
+      end if;
+
       if option_row.requires_staff_capability then
         if special_staff_id is null then
           raise exception 'This order option requires a staff selection.';
         end if;
-        if not exists (
-          select 1
-          from public.menu_item_order_option_staff
-          join public.staff_members
-            on staff_members.id = menu_item_order_option_staff.staff_id
-          where menu_item_order_option_staff.option_id = option_row.id
-            and menu_item_order_option_staff.staff_id = special_staff_id
-            and menu_item_order_option_staff.is_visible = true
-            and staff_members.is_visible = true
-        ) then
+        select menu_item_order_option_staff.order_limit_quantity
+        into option_staff_limit_quantity
+        from public.menu_item_order_option_staff
+        join public.staff_members
+          on staff_members.id = menu_item_order_option_staff.staff_id
+        where menu_item_order_option_staff.option_id = option_row.id
+          and menu_item_order_option_staff.staff_id = special_staff_id
+          and menu_item_order_option_staff.is_visible = true
+          and staff_members.is_visible = true;
+
+        if not found then
           raise exception 'Selected staff cannot provide this order option.';
+        end if;
+
+        if option_staff_limit_quantity is not null then
+          select coalesce(sum(order_items.quantity), 0)::integer
+          into option_staff_used_quantity
+          from public.order_items
+          join public.orders
+            on orders.id = order_items.order_id
+          where orders.deleted_at is null
+            and orders.status in ('pending', 'accepted', 'preparing', 'served')
+            and order_items.selected_staff_id = special_staff_id
+            and coalesce(
+              orders.business_date,
+              (orders.created_at at time zone 'Asia/Taipei')::date
+            ) = order_business_date
+            and exists (
+              select 1
+              from jsonb_array_elements(
+                coalesce(order_items.selected_options_snapshot, '[]'::jsonb)
+              ) as selected_option(value)
+              where selected_option.value->>'option_id' = option_row.id::text
+            );
+
+          if option_staff_limit_quantity - option_staff_used_quantity < item_quantity then
+            raise exception 'Selected staff order option is sold out or insufficient.';
+          end if;
         end if;
       end if;
 
